@@ -18,10 +18,16 @@
  *    are included in all such copies.  Other copyrights may also apply.
  */
 #include "z-virt.h"
+#include "z-util.h"
 #include "z-quark.h"
 #include "init.h"
 
-static char **quarks;
+typedef struct {
+	char *str;
+	u32b hash;
+}quark;
+
+static quark *quarks;
 static size_t nr_quarks = 1;
 static size_t alloc_quarks = 0;
 
@@ -29,33 +35,37 @@ static size_t alloc_quarks = 0;
 
 quark_t quark_add(const char *str)
 {
+	u32b hash = djb2_hash(str);
+
 	quark_t q;
 
 	for (q = 1; q < nr_quarks; q++) {
-		if (!strcmp(quarks[q], str))
-			return q;
+		if (quarks[q].hash == hash)
+			if (!strcmp(quarks[q].str, str))
+				return q;
 	}
 
 	if (nr_quarks == alloc_quarks) {
 		alloc_quarks *= 2;
-		quarks = mem_realloc(quarks, alloc_quarks * sizeof(char *));
+		quarks = mem_realloc(quarks, alloc_quarks * sizeof(quark));
 	}
 
 	q = nr_quarks++;
-	quarks[q] = string_make(str);
+	quarks[q].hash = hash;
+	quarks[q].str = string_make(str);
 
 	return q;
 }
 
 const char *quark_str(quark_t q)
 {
-	return (q >= nr_quarks ? NULL : quarks[q]);
+	return (q >= nr_quarks ? NULL : quarks[q].str);
 }
 
 void quarks_init(void)
 {
 	alloc_quarks = QUARKS_INIT;
-	quarks = mem_zalloc(alloc_quarks * sizeof(char*));
+	quarks = mem_zalloc(alloc_quarks * sizeof(quark));
 }
 
 void quarks_free(void)
@@ -64,7 +74,7 @@ void quarks_free(void)
 
 	/* quarks[0] is special */
 	for (i = 1; i < nr_quarks; i++)
-		string_free(quarks[i]);
+		string_free(quarks[i].str);
 
 	mem_free(quarks);
 }
