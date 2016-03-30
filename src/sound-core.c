@@ -25,6 +25,10 @@
 #include "snd-sdl.h"
 #endif
 
+#if (defined(WINDOWS) && !defined(USE_SDL))
+#include "snd-win.h"
+#endif
+
 #define MAX_SOUNDS_PER_MESSAGE	16
 
 struct sound_module
@@ -55,6 +59,9 @@ static const struct sound_module sound_modules[] =
 #ifdef SOUND_SDL
 	{ "sdl", "SDL_mixer sound module", init_sound_sdl },
 #endif /* SOUND_SDL */
+#if (defined(WINDOWS) && !defined(USE_SDL))
+	{ "win", "Windows sound module", init_sound_win },
+#endif
 	{ "", "", NULL },
 };
 
