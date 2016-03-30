@@ -21,6 +21,10 @@
 #include "main.h"
 #include "ui-prefs.h"
 
+#ifdef SOUND_SDL
+#include "snd-sdl.h"
+#endif
+
 #define MAX_SOUNDS_PER_MESSAGE	16
 
 struct sound_module
@@ -48,6 +52,9 @@ static struct msg_snd_data message_sounds[MSG_MAX];
  */
 static const struct sound_module sound_modules[] =
 {
+#ifdef SOUND_SDL
+	{ "sdl", "SDL_mixer sound module", init_sound_sdl },
+#endif /* SOUND_SDL */
 	{ "", "", NULL },
 };
 
