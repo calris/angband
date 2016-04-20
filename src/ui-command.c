@@ -424,7 +424,7 @@ static void write_html_escape_char(ang_file *fp, wchar_t c)
 			char *mbseq = (char*) mem_alloc(sizeof(char)*(MB_CUR_MAX+1));
 			byte len;
 			len = wctomb(mbseq, c);
-			if (len > MB_CUR_MAX) 
+			if (len > MB_CUR_MAX)
 				len = MB_CUR_MAX;
 			mbseq[len] = '\0';
 			file_putf(fp, "%s", mbseq);
@@ -451,7 +451,7 @@ void html_screenshot(const char *path, int mode)
 
 	const char *new_color_fmt = (mode == 0) ?
 					"<font color=\"#%02X%02X%02X\" style=\"background-color: #%02X%02X%02X\">"
-				 	: "[COLOR=\"#%02X%02X%02X\"]";
+					: "[COLOR=\"#%02X%02X%02X\"]";
 	const char *change_color_fmt = (mode == 0) ?
 					"</font><font color=\"#%02X%02X%02X\" style=\"background-color: #%02X%02X%02X\">"
 					: "[/COLOR][COLOR=\"#%02X%02X%02X\"]";

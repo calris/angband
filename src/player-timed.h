@@ -22,7 +22,7 @@
 /**
  * Player food values
  */
-#define PY_FOOD_MAX 	17000	/* Food value (Bloated) */
+#define PY_FOOD_MAX	17000	/* Food value (Bloated) */
 #define PY_FOOD_FULL	10000	/* Food value (Normal) */
 #define PY_FOOD_ALERT	2000	/* Food value (Hungry) */
 #define PY_FOOD_WEAK	1000	/* Food value (Weak) */
@@ -70,4 +70,3 @@ bool player_inc_timed(struct player *p, int idx, int v, bool notify,
 bool player_dec_timed(struct player *p, int idx, int v, bool notify);
 bool player_clear_timed(struct player *p, int idx, bool notify);
 bool player_set_food(struct player *p, int v);
-

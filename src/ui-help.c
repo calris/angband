@@ -98,7 +98,7 @@ bool show_file(const char *name, const char *what, int line, int mode)
 	char hook[26][32];
 
 	int wid, hgt;
-	
+
 	/* true if we are inside a RST block that should be skipped */
 	bool skip_lines = false;
 
@@ -178,7 +178,7 @@ bool show_file(const char *name, const char *what, int line, int mode)
 		/* TODO: should be more flexible */
 		if (prefix(buf, ".. ")) {
 			/* parse ".. menu:: [x] filename.txt" (with exact spacing)*/
-			if (prefix(buf+strlen(".. "), "menu:: [") && 
+			if (prefix(buf+strlen(".. "), "menu:: [") &&
                            buf[strlen(".. menu:: [x")]==']') {
 				/* This is a menu file */
 				menu = true;
@@ -483,5 +483,3 @@ void do_cmd_help(void)
 	/* Load screen */
 	screen_load();
 }
-
-

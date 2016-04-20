@@ -2,9 +2,9 @@
  * \file mon-move.c
  * \brief Monster movement
  *
- * Monster AI affecting movement and spells, process a monster 
- * (with spells and actions of all kinds, reproduction, effects of any 
- * terrain on monster movement, picking up and destroying objects), 
+ * Monster AI affecting movement and spells, process a monster
+ * (with spells and actions of all kinds, reproduction, effects of any
+ * terrain on monster movement, picking up and destroying objects),
  * process all monsters.
  *
  * Copyright (c) 1997 Ben Harrison, David Reeve Sward, Keldon Jones.
@@ -209,7 +209,7 @@ bool multiply_monster(const struct monster *mon)
 
 /* From Will Asher in DJA:
  * Find whether a monster is near a permanent wall
- * this decides whether PASS_WALL & KILL_WALL monsters 
+ * this decides whether PASS_WALL & KILL_WALL monsters
  * use the monster flow code
  */
 static bool near_permwall(const struct monster *mon, struct chunk *c)
@@ -217,14 +217,14 @@ static bool near_permwall(const struct monster *mon, struct chunk *c)
 	int y, x;
 	int my = mon->fy;
 	int mx = mon->fx;
-	
+
 	/* if PC is in LOS, there's no need to go around walls */
-    if (projectable(cave, my, mx, player->py, player->px, PROJECT_NONE)) 
+    if (projectable(cave, my, mx, player->py, player->px, PROJECT_NONE))
 		return false;
-    
+
     /* PASS_WALL & KILL_WALL monsters occasionally flow for a turn anyway */
     if (randint0(99) < 5) return true;
-    
+
 	/* Search the nearby grids, which are always in bounds */
 	for (y = (my - 2); y <= (my + 2); y++)
 	{
@@ -249,7 +249,7 @@ static bool near_permwall(const struct monster *mon, struct chunk *c)
  * ('when') which is just old cost information.
  *
  * Tracking by 'scent' means that monsters end up near enough the player to
- * switch to 'sound' (cost), or they end up somewhere the player left via 
+ * switch to 'sound' (cost), or they end up somewhere the player left via
  * teleport.  Teleporting away from a location will cause the monsters who
  * were chasing the player to converge on that location as long as the player
  * is still near enough to "annoy" them without being close enough to chase
@@ -320,7 +320,7 @@ static bool get_moves_flow(struct chunk *c, struct monster *mon)
 	if (found_direction) {
 		int dy = 0, dx = 0;
 
-		/* Ridiculous - actually multiply by whatever doesn't underflow the 
+		/* Ridiculous - actually multiply by whatever doesn't underflow the
 		 * byte for ty and tx.  Really should do a better solution - NRM */
 		for (i = 0; i < 16; i++)
 			if ((py + dy > 0) && (px + dx > 0)) {
@@ -378,7 +378,7 @@ static bool get_moves_fear(struct chunk *c, struct monster *mon)
 		/* Calculate distance of this grid from our target */
 		dis = distance(y, x, mon->ty, mon->tx);
 
-		/* Score this grid 
+		/* Score this grid
 		 * First half of calculation is inversely proportional to distance
 		 * Second half is inversely proportional to grid's distance from player
 		 */
@@ -1107,7 +1107,7 @@ static bool process_monster_should_stagger(struct monster *mon)
 
 
 /**
- * Work out if a monster can move through the grid, if necessary bashing 
+ * Work out if a monster can move through the grid, if necessary bashing
  * down doors in the way.
  *
  * Returns true if the monster is able to move through the grid.
@@ -1135,7 +1135,7 @@ static bool process_monster_can_move(struct chunk *c, struct monster *mon,
 	}
 
 	/* Monster moves through walls (and doors) */
-	if (rf_has(mon->race->flags, RF_PASS_WALL)) 
+	if (rf_has(mon->race->flags, RF_PASS_WALL))
 		return true;
 
 	/* Monster destroys walls (and doors) */
@@ -1295,7 +1295,7 @@ static bool process_monster_try_push(struct chunk *c, struct monster *mon, const
 
 			monster_swap(mon->fy, mon->fx, ny, nx);
 			return true;
-		} 
+		}
 	}
 
 	return false;
@@ -1304,7 +1304,7 @@ static bool process_monster_try_push(struct chunk *c, struct monster *mon, const
 /**
  * Grab all objects from the grid.
  */
-void process_monster_grab_objects(struct chunk *c, struct monster *mon, 
+void process_monster_grab_objects(struct chunk *c, struct monster *mon,
 		const char *m_name, int nx, int ny)
 {
 	struct monster_lore *lore = get_lore(mon->race);
@@ -1513,7 +1513,7 @@ static void process_monster(struct chunk *c, struct monster *mon)
 		/* Possible disturb */
 		if (mflag_has(mon->mflag, MFLAG_VISIBLE) &&
 			mflag_has(mon->mflag, MFLAG_VIEW) && OPT(disturb_near))
-			disturb(player, 0);		
+			disturb(player, 0);
 	}
 
 	/* Hack -- get "bold" if out of options */

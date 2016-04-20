@@ -5,11 +5,11 @@
  *
  * Fields:
  * name - type name
- * force_obv - true to force obvious if seen in project_m(), false to let the 
+ * force_obv - true to force obvious if seen in project_m(), false to let the
  *             handler decide
  */
 
-/* name  				force_obv */
+/* name					force_obv */
 PROJ_MON(AWAY_UNDEAD,	false,	"teleports undead away")
 PROJ_MON(AWAY_EVIL,		false,	"teleports evil monsters away")
 PROJ_MON(AWAY_ALL,		true,	"teleports monsters away")

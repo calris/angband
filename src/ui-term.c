@@ -565,7 +565,7 @@ void Term_big_queue_char(term *t, int x, int y, int a, wchar_t c, int a1,
 
 				/* Now vertical */
 				for (vert = 1; vert <= tile_height; vert++){
-			
+
 					/* Leave space on bottom for status */
 					if (y + vert + 1 < t-> hgt) {
 						/* Queue dummy character */
@@ -578,8 +578,8 @@ void Term_big_queue_char(term *t, int x, int y, int a, wchar_t c, int a1,
 			}
 	} else {
 		/* Only vertical */
-		for (vert = 1; vert <= tile_height; vert++) {	
-			
+		for (vert = 1; vert <= tile_height; vert++) {
+
 			/* Leave space on bottom for status */
 			if (y + vert + 1 < t->hgt) {
 				/* Queue dummy character */
@@ -932,7 +932,7 @@ static void Term_fresh_row_text(int y, int x1, int x2)
 		/* Handle unchanged grids */
 		if ((na == oa) && (nc == oc)) {
 			/* Flush */
-			if (fn) 	{
+			if (fn)		{
 				/* Draw pending chars (normal or black) */
 				if (fa || always_text)
 					(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
@@ -999,7 +999,7 @@ errr Term_mark(int x, int y)
 	 * functions, but ideally there should be a test to use the blank text
 	 * attr/char pair
 	 */
-	old_aa[x] = 0x80; 
+	old_aa[x] = 0x80;
 	old_cc[x] = 0;
 	old_taa[x] = 0x80;
 	old_tcc[x] = 0;
@@ -1478,7 +1478,7 @@ errr Term_addstr(int n, int a, const char *buf)
 	wchar_t s[1024];
 
 	/* Copy to a rewriteable string */
- 	text_mbstowcs(s, buf, 1024);
+	text_mbstowcs(s, buf, 1024);
 
 	/* Handle "unusable" cursor */
 	if (Term->scr->cu) return (-1);
@@ -1907,17 +1907,17 @@ errr Term_keypress(keycode_t k, byte mods)
 		{
 			case '\r':
 			case '\n':
-			  	k = KC_ENTER;
-			  	break;
+				k = KC_ENTER;
+				break;
 			case 8:
-			  	k = KC_BACKSPACE;
-			  	break;
+				k = KC_BACKSPACE;
+				break;
 			case 9:
-			  	k = KC_TAB;
-			  	break;
+				k = KC_TAB;
+				break;
 			case 27:
-			  	k = ESCAPE;
-			  	break;
+				k = ESCAPE;
+				break;
 		}
 	}
 
@@ -1962,7 +1962,7 @@ errr Term_mousepress(int x, int y, char button)/*, byte mods);*/
 
 	/* Success (unless overflow) */
 	if (Term->key_head != Term->key_tail) return (0);
-  
+
 	/* Problem */
 	return (1);
 }

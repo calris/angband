@@ -176,7 +176,7 @@ void monster_list_collect(monster_list_t *list)
 			continue;
 
 		/* Always collect the latest monster attribute so that flicker
-		 * animation works. If this is 0, it needs to be replaced by 
+		 * animation works. If this is 0, it needs to be replaced by
 		 * the standard glyph in the UI */
 		entry->attr = mon->attr;
 
@@ -291,4 +291,3 @@ byte monster_list_entry_line_color(const monster_list_entry_t *entry)
 	else
 		return COLOUR_WHITE;
 }
-

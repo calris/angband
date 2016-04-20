@@ -302,7 +302,7 @@ int context_menu_player(int mx, int my)
 			menu_row_validity_t valid;
 
 			/* 'f' isn't in rogue keymap, so we can use it here. */
-  			menu_dynamic_add_label(m, "Floor", 'f', MENU_VALUE_FLOOR, labels);
+			menu_dynamic_add_label(m, "Floor", 'f', MENU_VALUE_FLOOR, labels);
 			valid = (inven_carry_okay(obj)) ? MN_ROW_VALID : MN_ROW_INVALID;
 			ADD_LABEL("Pick up", CMD_PICKUP, valid);
 	}
@@ -1031,7 +1031,7 @@ void textui_process_click(ui_event e)
 			/* alt-click - Search  or show char screen */
 			/* XXX call a platform specific hook */
 			if (e.mouse.button == 1) {
- 				cmdq_push(CMD_SEARCH);
+				cmdq_push(CMD_SEARCH);
 			} else
 			if (e.mouse.button == 2) {
 				Term_keypress('C',0);

@@ -44,7 +44,7 @@ struct monster_race *lookup_monster(const char *name)
 {
 	int i;
 	struct monster_race *closest = NULL;
-	
+
 	/* Look for it */
 	for (i = 0; i < z_info->r_max; i++) {
 		struct monster_race *race = &r_info[i];
@@ -58,7 +58,7 @@ struct monster_race *lookup_monster(const char *name)
 		/* Test for close matches */
 		if (!closest && my_stristr(race->name, name))
 			closest = race;
-	} 
+	}
 
 	/* Return our best match */
 	return closest;
@@ -198,7 +198,7 @@ void update_mon(struct monster *mon, struct chunk *c, bool full)
 	assert(mon != NULL);
 
 	lore = get_lore(mon->race);
-	
+
 	fy = mon->fy;
 	fx = mon->fx;
 

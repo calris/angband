@@ -379,7 +379,7 @@ static void Term_nuke_gcu(term *t) {
  *     top row is 0
  *   term_group_count: the number of groups in this dimension (2 or 3)
  *   window_size:      the number of grids the window has in this dimension
- *   min_term0_size:   the minimum main term size in this dimension 
+ *   min_term0_size:   the minimum main term size in this dimension
  *     (80 or 24), also the maximum subterm size
  *   comfy_subterm_size: in balancing among three groups, we first give the
  *     main term its minimum, and then allocate evenly between the other
@@ -395,13 +395,13 @@ static void balance_dimension(int *size, int *start, int term_group_index,
 	 * Note that it is also the number of separator rows/columns */
 	int subterm_group_count = term_group_count - 1;
 
-	if (term_group_index == 0) { 
+	if (term_group_index == 0) {
 		/* main term */
-		*size = MAX(min_term0_size, window_size - subterm_group_count*(min_term0_size + 1)); 
+		*size = MAX(min_term0_size, window_size - subterm_group_count*(min_term0_size + 1));
 		*start = 0;
-	} else if (term_group_index == term_group_count - 1) { 
+	} else if (term_group_index == term_group_count - 1) {
 		/* outer or only subterm */
-		if (window_size <= min_term0_size + subterm_group_count*(comfy_subterm_size + 1)) { 
+		if (window_size <= min_term0_size + subterm_group_count*(comfy_subterm_size + 1)) {
 			/* Not enough room for min term0 and all subterms comfy.
 			 * Note that we round up here and down for the middle subterm*/
 			*size = (window_size - min_term0_size - subterm_group_count) / subterm_group_count;
@@ -439,7 +439,7 @@ static void get_gcu_term_size(int i, int *rows, int *cols, int *y, int *x) {
 
 	/* For sufficiently small windows, we can only use one term.
 	 * Each additional row/column of terms requires at least two lines
-	 * for the separators. If everything is as square as possible, 
+	 * for the separators. If everything is as square as possible,
 	 * the 3rd, 7th, 13th, etc. terms add to the short dimension, while
 	 * the 2nd, 5th, 10th, etc. terms add to the long dimension.
 	 * However, three terms are the special case of 1x3 or 3x1.
@@ -453,7 +453,7 @@ static void get_gcu_term_size(int i, int *rows, int *cols, int *y, int *x) {
 		}
 		term_col_index = i % term_cols;
 		term_row_index = (int)(i / term_cols);
-	} else { /* !is_wide */ 
+	} else { /* !is_wide */
 		while (term_rows*term_rows < term_count) term_rows++;
 		while (term_cols*(term_cols + 1) < term_count) term_cols++;
 		if (term_count == 3) {
@@ -472,7 +472,7 @@ static void get_gcu_term_size(int i, int *rows, int *cols, int *y, int *x) {
 		}
 		term_col_index = term_row_index = 0;
 	}
-		
+
 	balance_dimension(cols, x, term_col_index, term_cols, COLS, MIN_TERM0_COLS, COMFY_SUBTERM_COLS);
 	balance_dimension(rows, y, term_row_index, term_rows, LINES, MIN_TERM0_LINES, COMFY_SUBTERM_LINES);
 }
@@ -484,7 +484,7 @@ static void get_gcu_term_size(int i, int *rows, int *cols, int *y, int *x) {
 static void do_gcu_resize(void) {
 	int i, rows, cols, y, x;
 	term *old_t = Term;
-	
+
 	for (i = 0; i < term_count; i++) {
 		/* Activate the current Term */
 		Term_activate(&data[i].t);
@@ -941,7 +941,7 @@ errr init_gcu(int argc, char **argv) {
 	quit_aux = hook_quit;
 
 	/* Require standard size screen */
-	if (LINES < MIN_TERM0_LINES || COLS < MIN_TERM0_COLS) 
+	if (LINES < MIN_TERM0_LINES || COLS < MIN_TERM0_COLS)
 		quit("Angband needs at least an 80x24 'curses' screen");
 
 #ifdef A_COLOR
@@ -1019,16 +1019,16 @@ errr init_gcu(int argc, char **argv) {
 		 * then we'll put the whole screen in term 0; otherwise we'll divide
 		 * it amongst the available terms */
 		get_gcu_term_size(i, &rows, &cols, &y, &x);
-		
+
 		/* Skip non-existant windows */
 		if (rows <= 0 || cols <= 0) continue;
-		
+
 		/* Create a term */
 		term_data_init_gcu(&data[next_win], rows, cols, y, x);
-		
+
 		/* Remember the term */
 		angband_term[next_win] = &data[next_win].t;
-		
+
 		/* One more window */
 		next_win++;
 	}

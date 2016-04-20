@@ -775,7 +775,7 @@ static enum parser_error parse_monster_drop(struct parser *p) {
 	k = lookup_kind(tval, sval);
 	if (!k)
 		return PARSE_ERROR_UNRECOGNISED_SVAL;
-		
+
 	d = mem_zalloc(sizeof *d);
 	d->kind = k;
 	d->percent_chance = parser_getuint(p, "chance");
@@ -813,7 +813,7 @@ static enum parser_error parse_monster_friends(struct parser *p) {
 	struct monster_race *r = parser_priv(p);
 	struct monster_friends *f;
 	struct random number;
-	
+
 	if (!r)
 		return PARSE_ERROR_MISSING_RECORD_HEADER;
 	f = mem_zalloc(sizeof *f);
@@ -824,15 +824,15 @@ static enum parser_error parse_monster_friends(struct parser *p) {
 	f->name = string_make(parser_getstr(p, "name"));
 	f->next = r->friends;
 	r->friends = f;
-	
+
 	return PARSE_ERROR_NONE;
-}			
+}
 
 static enum parser_error parse_monster_friends_base(struct parser *p) {
 	struct monster_race *r = parser_priv(p);
 	struct monster_friends_base *f;
 	struct random number;
-	
+
 	if (!r)
 		return PARSE_ERROR_MISSING_RECORD_HEADER;
 	f = mem_zalloc(sizeof *f);
@@ -845,9 +845,9 @@ static enum parser_error parse_monster_friends_base(struct parser *p) {
 
 	f->next = r->friends_base;
 	r->friends_base = f;
-	
+
 	return PARSE_ERROR_NONE;
-}		
+}
 
 static enum parser_error parse_monster_mimic(struct parser *p) {
 	struct monster_race *r = parser_priv(p);
@@ -1051,7 +1051,7 @@ static void cleanup_monster(void)
 			struct monster_friends_base *fbn = fb->next;
 			mem_free(fb);
 			fb = fbn;
-		}		
+		}
 		m = r->mimic_kinds;
 		while (m) {
 			struct monster_mimic *mn = m->next;
@@ -1449,4 +1449,3 @@ struct file_parser lore_parser = {
 	finish_parse_lore,
 	cleanup_lore
 };
-

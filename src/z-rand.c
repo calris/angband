@@ -3,7 +3,7 @@
  * \brief A Random Number Generator for Angband
  *
  * Copyright (c) 1997 Ben Harrison, Randy Hutson
- * 
+ *
  * See below for copyright on the WELL random number generator.
  *
  * This work is free software; you can redistribute it and/or modify it
@@ -38,9 +38,9 @@
 /* begin WELL RNG
  * *************************************************************************
  * Copyright:  Francois Panneton and Pierre L'Ecuyer, University of Montreal
- *             Makoto Matsumoto, Hiroshima University                       
+ *             Makoto Matsumoto, Hiroshima University
  * *************************************************************************
- * Code was modified slightly by Erik Osheim to work on unsigned integers.  
+ * Code was modified slightly by Erik Osheim to work on unsigned integers.
  */
 #define M1 3
 #define M2 24
@@ -69,7 +69,7 @@ static u32b WELLRNG1024a (void){
 	z0      = VRm1;
 	z1      = Identity(V0) ^ MAT0POS (8, VM1);
 	z2      = MAT0NEG (-19, VM2) ^ MAT0NEG(-14,VM3);
-	newV1   = z1 ^ z2; 
+	newV1   = z1 ^ z2;
 	newV0   = MAT0NEG (-11,z0) ^ MAT0NEG(-7,z1) ^ MAT0NEG(-13,z2);
 	state_i = (state_i + 31) & 0x0000001fU;
 	return STATE[state_i];

@@ -22,7 +22,7 @@
  * Details of the different object flags in the game.
  * See src/obj-properties.h for structure
  *
- * Note that sustain stat flags are included first, so that the index into 
+ * Note that sustain stat flags are included first, so that the index into
  * the flag table for a sustain is the stat index + 1
  *
  * Note that any strings in the last position must have exactly one %s
@@ -211,7 +211,7 @@ int obj_flag_type(int flag)
  * Print a message when an object flag is identified by use.
  *
  * \param flag is the flag being noticed
- * \param name is the object name 
+ * \param name is the object name
  */
 void flag_message(int flag, char *name)
 {
@@ -304,4 +304,3 @@ s16b mod_slot_mult(int mod, int slot)
 	/* Others are all easy */
 	return 1;
 }
-

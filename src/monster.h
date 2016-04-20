@@ -150,7 +150,7 @@ struct monster_blow {
 struct monster_pain {
 	const char *messages[7];
 	int pain_idx;
-	
+
 	struct monster_pain *next;
 };
 
@@ -185,7 +185,7 @@ struct monster_base {
 
 	bitflag flags[RF_SIZE];         /* Flags */
 	bitflag spell_flags[RSF_SIZE];  /* Spell flags */
-	
+
 	wchar_t d_char;					/* Default monster character */
 
 	struct monster_pain *pain;				/* Pain messages */
@@ -260,7 +260,7 @@ struct monster_race {
 	char *plural;			/* Optional pluralized name */
 
 	struct monster_base *base;
-	
+
 	int avg_hp;				/* Average HP for this creature */
 
 	int ac;					/* Armour Class */
@@ -292,11 +292,11 @@ struct monster_race {
 	int cur_num;			/* Monster population on current level */
 
 	struct monster_drop *drops;
-    
+
     struct monster_friends *friends;
-	
+
     struct monster_friends_base *friends_base;
-    
+
 	struct monster_mimic *mimic_kinds;
 };
 
@@ -331,7 +331,7 @@ struct monster {
 	struct object *mimicked_obj; /* Object this monster is mimicking */
 	struct object *held_obj;	/* Object being held (if any) */
 
-	byte attr;  		/* attr last used for drawing monster */
+	byte attr;		/* attr last used for drawing monster */
 
 	struct player_state known_pstate; /* Known player state */
 

@@ -167,7 +167,7 @@ bool player_stat_inc(struct player *p, int stat)
 
 	if (p->stat_cur[stat] > p->stat_max[stat])
 		p->stat_max[stat] = p->stat_cur[stat];
-	
+
 	p->upkeep->update |= PU_BONUS;
 	return true;
 }
@@ -305,28 +305,28 @@ void player_flags(struct player *p, bitflag f[OF_SIZE])
 byte player_hp_attr(struct player *p)
 {
 	byte attr;
-	
+
 	if (p->chp >= p->mhp)
 		attr = COLOUR_L_GREEN;
 	else if (p->chp > (p->mhp * op_ptr->hitpoint_warn) / 10)
 		attr = COLOUR_YELLOW;
 	else
 		attr = COLOUR_RED;
-	
+
 	return attr;
 }
 
 byte player_sp_attr(struct player *p)
 {
 	byte attr;
-	
+
 	if (p->csp >= p->msp)
 		attr = COLOUR_L_GREEN;
 	else if (p->csp > (p->msp * op_ptr->hitpoint_warn) / 10)
 		attr = COLOUR_YELLOW;
 	else
 		attr = COLOUR_RED;
-	
+
 	return attr;
 }
 

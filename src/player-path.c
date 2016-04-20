@@ -108,8 +108,8 @@ bool findpath(int y, int x)
 		return (false);
 	}
 
-	/* 
-	 * And now starts the very naive and very 
+	/*
+	 * And now starts the very naive and very
 	 * inefficient pathfinding algorithm
 	 */
 	do {
@@ -612,14 +612,14 @@ static bool run_test(void)
 
 
 	/* Look at every soon to be newly adjacent square. */
-	for (i = -max; i <= max; i++) {		
+	for (i = -max; i <= max; i++) {
 		/* New direction */
 		new_dir = cycle[chome[prev_dir] + i];
-		
+
 		/* New location */
 		row = py + ddy[prev_dir] + ddy[new_dir];
 		col = px + ddx[prev_dir] + ddx[new_dir];
-		
+
 		/* HACK: Ugh. Sometimes we come up with illegal bounds. This will
 		 * treat the symptom but not the disease. */
 		if (row >= cave->height || col >= cave->width) continue;
@@ -628,7 +628,7 @@ static bool run_test(void)
 		/* Visible monsters abort running */
 		if (cave->squares[row][col].mon > 0) {
 			struct monster *mon = square_monster(cave, row, col);
-			
+
 			/* Visible monster */
 			if (mflag_has(mon->mflag, MFLAG_VISIBLE) && !is_mimicking(mon))
 				return (true);
@@ -834,4 +834,3 @@ void run_step(int dir)
 		cmd_set_arg_direction(cmdq_peek(), "direction", 0);
 	}
 }
-

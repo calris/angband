@@ -25,8 +25,8 @@
 #include "ui-term.h"
 
 /**
- * Holds a generic command - if cmd is set to other than CMD_NULL 
- * it simply pushes that command to the game, otherwise the hook 
+ * Holds a generic command - if cmd is set to other than CMD_NULL
+ * it simply pushes that command to the game, otherwise the hook
  * function will be called.
  */
 struct cmd_info

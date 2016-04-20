@@ -68,10 +68,10 @@ void flush(game_event_type unused, game_event_data *data, void *user)
  */
 static ui_event inkey_aux(int scan_cutoff)
 {
-	int w = 0;	
+	int w = 0;
 
 	ui_event ke;
-	
+
 	/* Wait for a keypress */
 	if (scan_cutoff == SCAN_OFF) {
 		(void)(Term_inkey(&ke, true, true));
@@ -282,7 +282,7 @@ ui_event inkey_ex(void)
 void anykey(void)
 {
 	ui_event ke = EVENT_EMPTY;
-  
+
 	/* Only accept a keypress or mouse click */
 	while (ke.type != EVT_MOUSE && ke.type != EVT_KBRD)
 		ke = inkey_ex();
@@ -564,27 +564,27 @@ bool askfor_aux_keypress(char *buf, size_t buflen, size_t *curs, size_t *len,
 			*curs = 0;
 			return true;
 		}
-		
+
 		case KC_ENTER:
 		{
 			*curs = *len;
 			return true;
 		}
-		
+
 		case ARROW_LEFT:
 		{
 			if (firsttime) *curs = 0;
 			if (*curs > 0) (*curs)--;
 			break;
 		}
-		
+
 		case ARROW_RIGHT:
 		{
 			if (firsttime) *curs = *len - 1;
 			if (*curs < *len) (*curs)++;
 			break;
 		}
-		
+
 		case KC_BACKSPACE:
 		case KC_DELETE:
 		{
@@ -618,7 +618,7 @@ bool askfor_aux_keypress(char *buf, size_t buflen, size_t *curs, size_t *len,
 
 			break;
 		}
-		
+
 		default:
 		{
 			bool atnull = (buf[*curs] == 0);
@@ -1288,10 +1288,10 @@ bool textui_get_aim_dir(int *dp)
 
 	/* No direction */
 	if (!dir) return (false);
-	
+
 	/* Save direction */
 	(*dp) = dir;
-	
+
 	/* A "valid" direction was entered */
 	return (true);
 }

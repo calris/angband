@@ -25,7 +25,7 @@
  * Define a value for minima which will be ignored (a replacement for 0,
  * because 0 and some small negatives are valid values).
  */
-#define NO_MINIMUM 	255
+#define NO_MINIMUM	255
 
 void ego_apply_magic(struct object *obj, int level);
 void copy_artifact_data(struct object *obj, const struct artifact *art);

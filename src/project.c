@@ -323,7 +323,7 @@ static const struct gf_type {
 	int num;			/* numerator for resistance */
 	random_value denom;	/* denominator for resistance */
 	bool force_obvious; /* */
- 	byte color;			/* */
+	byte color;			/* */
 } gf_table[] = {
 	#define ELEM(a, b, c, d, e, f, g, h, i, col) { c, d, e, f, true, col },
 	#define RV(b, x, y, m) {b, x, y, m}
@@ -336,7 +336,7 @@ static const struct gf_type {
 	#undef PROJ_ENV
 
 	#define PROJ_MON(a, obv, desc) \
-		{ desc, NULL, 0, {0, 0, 0, 0}, obv, COLOUR_WHITE }, 
+		{ desc, NULL, 0, {0, 0, 0, 0}, obv, COLOUR_WHITE },
 	#include "list-project-monsters.h"
 	#undef PROJ_MON
 	{ NULL, NULL, 0, {0, 0, 0, 0}, false, COLOUR_WHITE }
@@ -434,7 +434,7 @@ const char *gf_idx_to_name(int type)
  * ------------------------------------------------------------------------ */
 
 /**
- * Generic "beam"/"bolt"/"ball" projection routine.  
+ * Generic "beam"/"bolt"/"ball" projection routine.
  *   -BEN-, some changes by -LM-
  *
  *   \param who: Index of "source" monster (negative for the character)
@@ -454,46 +454,46 @@ const char *gf_idx_to_name(int type)
  *
  * At present, there are five major types of projections:
  *
- * Point-effect projection:  (no PROJECT_BEAM flag, radius of zero, and either 
+ * Point-effect projection:  (no PROJECT_BEAM flag, radius of zero, and either
  *   jumps directly to target or has a single source and target grid)
- * A point-effect projection has no line of projection, and only affects one 
- *   grid.  It is used for most area-effect spells (like dispel evil) and 
+ * A point-effect projection has no line of projection, and only affects one
+ *   grid.  It is used for most area-effect spells (like dispel evil) and
  *   pinpoint strikes like the monster Holding prayer.
- * 
- * Bolt:  (no PROJECT_BEAM flag, radius of zero, has to travel from source to 
+ *
+ * Bolt:  (no PROJECT_BEAM flag, radius of zero, has to travel from source to
  *   target)
- * A bolt travels from source to target and affects only the final grid in its 
- *   projection path.  If given the PROJECT_STOP flag, it is stopped by any 
+ * A bolt travels from source to target and affects only the final grid in its
+ *   projection path.  If given the PROJECT_STOP flag, it is stopped by any
  *   monster or character in its path (at present, all bolts use this flag).
  *
  * Beam:  (PROJECT_BEAM)
- * A beam travels from source to target, affecting all grids passed through 
- *   with full damage.  It is never stopped by monsters in its path.  Beams 
+ * A beam travels from source to target, affecting all grids passed through
+ *   with full damage.  It is never stopped by monsters in its path.  Beams
  *   may never be combined with any other projection type.
  *
  * Ball:  (positive radius, unless the PROJECT_ARC flag is set)
- * A ball travels from source towards the target, and always explodes.  Unless 
- *   specified, it does not affect wall grids, but otherwise affects any grids 
+ * A ball travels from source towards the target, and always explodes.  Unless
+ *   specified, it does not affect wall grids, but otherwise affects any grids
  *   in LOS from the center of the explosion.
- * If used with a direction, a ball will explode on the first occupied grid in 
- *   its path.  If given a target, it will explode on that target.  If a 
- *   wall is in the way, it will explode against the wall.  If a ball reaches 
- *   z_info->max_range without hitting anything or reaching its target, it will 
+ * If used with a direction, a ball will explode on the first occupied grid in
+ *   its path.  If given a target, it will explode on that target.  If a
+ *   wall is in the way, it will explode against the wall.  If a ball reaches
+ *   z_info->max_range without hitting anything or reaching its target, it will
  *   explode at that point.
  *
  * Arc:  (positive radius, with the PROJECT_ARC flag set)
- * An arc is a portion of a source-centered ball that explodes outwards 
- *   towards the target grid.  Like a ball, it affects all non-wall grids in 
+ * An arc is a portion of a source-centered ball that explodes outwards
+ *   towards the target grid.  Like a ball, it affects all non-wall grids in
  *   LOS of the source in the explosion area.  The width of arc spells is con-
  *   trolled by degrees_of_arc.
- * An arc is created by rejecting all grids that form the endpoints of lines 
- *   whose angular difference (in degrees) from the centerline of the arc is 
+ * An arc is created by rejecting all grids that form the endpoints of lines
+ *   whose angular difference (in degrees) from the centerline of the arc is
  *   greater than one-half the input "degrees_of_arc".  See the table "get_
  *   angle_to_grid" in "util.c" for more information.
  * Note:  An arc with a value for degrees_of_arc of zero is actually a beam of
  *   defined length.
  *
- * Projections that effect all monsters in LOS are handled through the use 
+ * Projections that effect all monsters in LOS are handled through the use
  *   of the PROJECT_LOS effect, which applies a single-grid projection to
  *   individual monsters.  Projections that light up rooms or affect all
  *   monsters on the level are more efficiently handled through special
@@ -502,18 +502,18 @@ const char *gf_idx_to_name(int type)
  *
  * Variations:
  *
- * PROJECT_STOP forces a path of projection to stop at the first occupied grid 
- *   it hits.  This is used with bolts, and also by ball spells travelling in 
+ * PROJECT_STOP forces a path of projection to stop at the first occupied grid
+ *   it hits.  This is used with bolts, and also by ball spells travelling in
  *   a specific direction rather than towards a target.
  *
- * PROJECT_THRU allows a path of projection towards a target to continue 
- *   past that target.  It also allows a spell to affect wall grids adjacent 
+ * PROJECT_THRU allows a path of projection towards a target to continue
+ *   past that target.  It also allows a spell to affect wall grids adjacent
  *   to a grid in LOS of the center of the explosion.
- * 
+ *
  * PROJECT_JUMP allows a projection to immediately set the source of the pro-
- *   jection to the target.  This is used for all area effect spells (like 
+ *   jection to the target.  This is used for all area effect spells (like
  *   dispel evil), and can also be used for bombardments.
- * 
+ *
  * PROJECT_HIDE erases all graphical effects, making the projection invisible.
  *
  * PROJECT_GRID allows projections to affect terrain features.
@@ -524,7 +524,7 @@ const char *gf_idx_to_name(int type)
  *
  * PROJECT_PLAY allows projections to affect the player.
  *
- * degrees_of_arc controls the width of arc spells.  With a value for 
+ * degrees_of_arc controls the width of arc spells.  With a value for
  *   degrees_of_arc of zero, arcs act like beams of defined length.
  *
  * diameter_of_source controls how quickly explosions lose strength with dis-
@@ -538,32 +538,32 @@ const char *gf_idx_to_name(int type)
  *
  * Implementation notes:
  *
- * If the source grid is not the same as the target, we project along the path 
- *   between them.  Bolts stop if they hit anything, beams stop if they hit a 
- *   wall, and balls and arcs may exhibit either bahavior.  When they reach 
- *   the final grid in the path, balls and arcs explode.  We do not allow 
+ * If the source grid is not the same as the target, we project along the path
+ *   between them.  Bolts stop if they hit anything, beams stop if they hit a
+ *   wall, and balls and arcs may exhibit either bahavior.  When they reach
+ *   the final grid in the path, balls and arcs explode.  We do not allow
  *   beams to be combined with explosions.
- * Balls affect all floor grids in LOS (optionally, also wall grids adjacent 
- *   to a grid in LOS) within their radius.  Arcs do the same, but only within 
+ * Balls affect all floor grids in LOS (optionally, also wall grids adjacent
+ *   to a grid in LOS) within their radius.  Arcs do the same, but only within
  *   their cone of projection.
- * Because affected grids are only scanned once, and it is really helpful to 
- *   have explosions that travel outwards from the source, they are sorted by 
+ * Because affected grids are only scanned once, and it is really helpful to
+ *   have explosions that travel outwards from the source, they are sorted by
  *   distance.  For each distance, an adjusted damage is calculated.
- * In successive passes, the code then displays explosion graphics, erases 
- *   these graphics, marks terrain for possible later changes, affects 
- *   objects, monsters, the character, and finally changes features and 
+ * In successive passes, the code then displays explosion graphics, erases
+ *   these graphics, marks terrain for possible later changes, affects
+ *   objects, monsters, the character, and finally changes features and
  *   teleports monsters and characters in marked grids.
- * 
+ *
  *
  * Usage and graphics notes:
  *
- * Only 256 grids can be affected per projection, limiting the effective 
- * radius of standard ball attacks to nine units (diameter nineteen).  Arcs 
- * can have larger radii; an arc capable of going out to range 20 should not 
+ * Only 256 grids can be affected per projection, limiting the effective
+ * radius of standard ball attacks to nine units (diameter nineteen).  Arcs
+ * can have larger radii; an arc capable of going out to range 20 should not
  * be wider than 70 degrees.
  *
- * Balls must explode BEFORE hitting walls, or they would affect monsters on 
- * both sides of a wall. 
+ * Balls must explode BEFORE hitting walls, or they would affect monsters on
+ * both sides of a wall.
  *
  * Note that for consistency, we pretend that the bolt actually takes time
  * to move from point A to point B, even if the player cannot see part of the
@@ -653,8 +653,8 @@ bool project(int who, int rad, int y, int x, int dam, int typ, int flg,
 	/* Default center of explosion (if any) */
 	centre = loc(source.x, source.y);
 
-	/* 
-	 * An arc spell with no width and a non-zero radius is actually a 
+	/*
+	 * An arc spell with no width and a non-zero radius is actually a
 	 * beam of defined length.  Mark it as such.
 	 */
 	if ((flg & (PROJECT_ARC)) && (degrees_of_arc == 0) && (rad != 0)) {
@@ -752,7 +752,7 @@ bool project(int who, int rad, int y, int x, int dam, int typ, int flg,
 		/* No special actions */
 	}
 
-	/* 
+	/*
 	 * All non-beam projections with a positive radius explode in some way.
 	 */
 	else if (rad > 0) {
@@ -857,8 +857,8 @@ bool project(int who, int rad, int y, int x, int dam, int typ, int flg,
 					n2y = y - source.y + 20;
 					n2x = x - source.x + 20;
 
-					/* 
-					 * Find the angular difference (/2) between 
+					/*
+					 * Find the angular difference (/2) between
 					 * the lines to the end of the arc's center-
 					 * line and to the current grid.
 					 */
@@ -866,8 +866,8 @@ bool project(int who, int rad, int y, int x, int dam, int typ, int flg,
 					tmp = ABS(get_angle_to_grid[n2y][n2x] + rotate) % 180;
 					diff = ABS(90 - tmp);
 
-					/* 
-					 * If difference is not greater then that 
+					/*
+					 * If difference is not greater then that
 					 * allowed, and the grid is in LOS, accept it.
 					 */
 					if (diff < (degrees_of_arc + 6) / 4) {
@@ -895,7 +895,7 @@ bool project(int who, int rad, int y, int x, int dam, int typ, int flg,
 			dam_temp = (dam + i) / (i + 1);
 		}
 
-		/* If a particular diameter for the source of the explosion's energy is 
+		/* If a particular diameter for the source of the explosion's energy is
 		 * given, it is full strength to that diameter and then reduces. */
 		else {
 			dam_temp = (diameter_of_source * dam) / ((i + 1) * 10);
@@ -977,7 +977,7 @@ bool project(int who, int rad, int y, int x, int dam, int typ, int flg,
 			/* Get the grid location */
 			y = blast_grid[i].y;
 			x = blast_grid[i].x;
-			
+
 			/* Check this monster hasn't been processed already */
 			if (!square_isproject(cave, y, x))
 				continue;

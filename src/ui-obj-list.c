@@ -243,15 +243,15 @@ static void object_list_format_textblock(const object_list_t *list,
 
 	los_lines_to_display = list->total_entries[OBJECT_LIST_SECTION_LOS];
 	no_los_lines_to_display = list->total_entries[OBJECT_LIST_SECTION_NO_LOS];
-                                                          
+
 	if (list->total_entries[OBJECT_LIST_SECTION_NO_LOS] > 0)
 		header_lines += 2;
 
- 	if (max_height_result != NULL)
-		*max_height_result = header_lines + los_lines_to_display + 
+	if (max_height_result != NULL)
+		*max_height_result = header_lines + los_lines_to_display +
 			no_los_lines_to_display;
 
-	lines_remaining = max_lines - header_lines - 
+	lines_remaining = max_lines - header_lines -
 		list->total_entries[OBJECT_LIST_SECTION_LOS];
 
 	/* Remove non-los lines as needed */
@@ -269,7 +269,7 @@ static void object_list_format_textblock(const object_list_t *list,
 		los_lines_to_display = 0;
 		no_los_lines_to_display = 0;
 	}
-        
+
 	object_list_format_section(list, tb, OBJECT_LIST_SECTION_LOS,
 							   los_lines_to_display, max_width,
 							   "You can see", false, &max_los_line);
@@ -286,7 +286,7 @@ static void object_list_format_textblock(const object_list_t *list,
 									&max_no_los_line);
 	}
 
-                                                                        
+
 	if (max_width_result != NULL)
 		*max_width_result = MAX(max_los_line, max_no_los_line);
 }

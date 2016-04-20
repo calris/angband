@@ -95,7 +95,7 @@ void message_pain(struct monster *mon, int dam)
 
 #define SINGULAR_MON   1
 #define PLURAL_MON     2
-           
+
 /**
  * Returns a pointer to a statically allocatted string containing a formatted
  * message based on the given message code and the quantity flag.
@@ -114,7 +114,7 @@ static char *get_mon_msg_action(byte msg_code, bool do_plural,
 
 	assert(msg_code < MON_MSG_MAX);
 	action = msg_repository[msg_code];
-	
+
 	assert(race->base && race->base->pain);
 
 	if (race->base && race->base->pain) {
@@ -251,7 +251,7 @@ bool add_monster_message(const char *mon_name, struct monster *mon,
 			if (mon_msg[i].mon_count < UCHAR_MAX)
 				/* Stack the message */
 				++(mon_msg[i].mon_count);
-   
+
 			/* Record which monster had this message stored */
 			if (size_mon_hist >= MAX_STORED_MON_CODES) return (true);
 			mon_message_hist[size_mon_hist].mon = mon;
@@ -262,7 +262,7 @@ bool add_monster_message(const char *mon_name, struct monster *mon,
 			return (true);
 		}
 	}
-   
+
 	/* The message isn't stored. Check free space */
 	if (size_mon_msg >= MAX_STORED_MON_MSG) return (false);
 
@@ -284,7 +284,7 @@ bool add_monster_message(const char *mon_name, struct monster *mon,
 
 	/* One more entry */
 	++size_mon_msg;
- 
+
 	player->upkeep->notice |= PN_MON_MESSAGE;
 
 	/* Record which monster had this message stored */
@@ -319,7 +319,7 @@ static void flush_monster_messages(bool delay, byte delay_tag)
 
 		/* Skip if we are delaying and the tags don't match */
 		if (mon_msg[i].delay && mon_msg[i].delay_tag != delay_tag) continue;
-   
+
 		/* Cache the monster count */
 		count = mon_msg[i].mon_count;
 
@@ -331,7 +331,7 @@ static void flush_monster_messages(bool delay, byte delay_tag)
 
 		/* Cache the race index */
 		race = mon_msg[i].race;
-		   
+
 		/* Get the proper message action */
 		action = get_mon_msg_action(mon_msg[i].msg_code, (count > 1), race);
 
@@ -384,7 +384,7 @@ static void flush_monster_messages(bool delay, byte delay_tag)
 			/* Add special mark. Monster is offscreen */
 			if (mon_msg[i].mon_flags & MON_MSG_FLAG_OFFSCREEN)
 				my_strcat(buf, " (offscreen)", sizeof(buf));
-        
+
 			/* Add the separator */
 			my_strcat(buf, " ", sizeof(buf));
 		}

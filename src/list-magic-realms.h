@@ -6,5 +6,3 @@
 REALM(NONE,		STAT_STR,	"",			"",			"",				"")
 REALM(ARCANE,	STAT_INT,	"cast",		"spell",	"magic book",	"arcane")
 REALM(PIOUS,	STAT_WIS,	"recite",	"prayer",	"prayer book",	"divine")
-
-

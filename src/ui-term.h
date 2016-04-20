@@ -253,7 +253,7 @@ struct term
 /**
  * Number of text rows in each map screen, regardless of tile size
  */
-#define SCREEN_ROWS	(Term->hgt - ROW_MAP - 1) 
+#define SCREEN_ROWS	(Term->hgt - ROW_MAP - 1)
 
 /**
  * Number of grids in each screen (vertically)

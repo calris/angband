@@ -51,7 +51,7 @@
  * At the end of the "level-clearing" log file, extra post-processing is done
  * to find the mean and standard deviation for the level you are likely to
  * first gain an item with a key resistance or item.
- * 
+ *
  * In addition to these sims there is a shorter sim that tests for dungeon
  * connectivity.
 */
@@ -69,7 +69,7 @@ static ang_file *stats_log = NULL;
   */
  #define TRIES_SIZE 100
  #define MAX_LVL 101
- 
+
  /* default for number of tries */
 int tries=50;
 /* the simulation number that we are on */
@@ -107,7 +107,7 @@ typedef enum stat_code
 	ST_ARMORS,
 	ST_BAD_ARMOR,
 	ST_AVERAGE_ARMOR,
-	ST_GOOD_ARMOR,	
+	ST_GOOD_ARMOR,
 	ST_STR_ARMOR,
 	ST_INT_ARMOR,
 	ST_WIS_ARMOR,
@@ -196,7 +196,7 @@ typedef enum stat_code
 	ST_8TH_BOOKS,
 	ST_9TH_BOOKS,
 	ST_END
-}	
+}
 stat_code;
 
 
@@ -216,14 +216,14 @@ static const struct stat_data stat_message[] =
 	{ST_RBASE_EQUIPMENT, " Resist Base "},
 	{ST_RPOIS_EQUIPMENT, " Resist Pois "},
 	{ST_RNEXUS_EQUIPMENT, " Res. Nexus  "},
-	{ST_RBLIND_EQUIPMENT, " Res. Blind  "},	
+	{ST_RBLIND_EQUIPMENT, " Res. Blind  "},
 	{ST_RCONF_EQUIPMENT, " Res. Conf.  "},
 	{ST_SPEED_EQUIPMENT, " Speed       "},
 	{ST_TELEP_EQUIPMENT, " Telepathy   "},
 	{ST_ARMORS,  "\n ***ARMOR***      \n All:      "},
 	{ST_BAD_ARMOR, " Bad         "},
 	{ST_AVERAGE_ARMOR, " Average     "},
-	{ST_GOOD_ARMOR, " Good        "},	
+	{ST_GOOD_ARMOR, " Good        "},
 	{ST_STR_ARMOR, " +Strength   "},
 	{ST_INT_ARMOR, " +Intel.     "},
 	{ST_WIS_ARMOR, " +Wisdom     "},
@@ -310,11 +310,11 @@ static const struct stat_data stat_message[] =
 	{ST_6TH_BOOKS, " Book 6      "},
 	{ST_7TH_BOOKS, " Book 7      "},
 	{ST_8TH_BOOKS, " Book 8      "},
-	{ST_9TH_BOOKS, " Book 9      "},	
-};	
+	{ST_9TH_BOOKS, " Book 9      "},
+};
 
 double stat_all[ST_END][3][MAX_LVL];
-	
+
 /* Values for things we want to find the level where it's
  * most likely to be first found */
 typedef enum stat_first_find
@@ -337,7 +337,7 @@ typedef enum stat_first_find
 	ST_FF_BOOK8,
 	ST_FF_BOOK9,
 	ST_FF_END
-}	
+}
 stat_first_find;
 
 struct stat_ff_data
@@ -358,7 +358,7 @@ static const struct stat_ff_data stat_ff_message[] =
 	{ST_FF_RBLIND,	ST_RBLIND_EQUIPMENT,	"Rblind \t"},
 	{ST_FF_TELEP,	ST_TELEP_EQUIPMENT,	"Telep  \t"},
 	{ST_FF_BOOK1,	ST_1ST_BOOKS,	"Book1  \t"},
-	{ST_FF_BOOK2,	ST_2ND_BOOKS, 	"Book2  \t"},
+	{ST_FF_BOOK2,	ST_2ND_BOOKS,	"Book2  \t"},
 	{ST_FF_BOOK3,	ST_3RD_BOOKS,	"Book3  \t"},
 	{ST_FF_BOOK4,	ST_4TH_BOOKS,	"Book4  \t"},
 	{ST_FF_BOOK5,	ST_5TH_BOOKS,	"Book5  \t"},
@@ -399,10 +399,10 @@ static void init_stat_vals()
 		for (j = 0; j < 3; k = j++)
 			for (k = 0; k < MAX_LVL; k++)
 				stat_all[i][j][k] = 0.0;
-				
+
 	for (i = 1; i < TRIES_SIZE; i++)
 		art_it[i] = 0;
-	
+
 	for (i = 0; i < ST_FF_END; i++)
 		for (j = 0; j < TRIES_SIZE; j++)
 			stat_ff_all[i][j] = 0.0;
@@ -432,31 +432,31 @@ static bool first_find(stat_first_find st)
 static void add_stats(stat_code st, bool vault, bool mon, int number)
 {
 	int lvl;
-	
+
 	/* get player level */
 	lvl=player->depth;
-	
+
 	/* be careful about bounds */
 	if ((lvl > MAX_LVL) || (lvl < 0)) return;
-	
+
 	/* add to the total */
 	stat_all[st][0][lvl] += addval * number;
-	
+
 	/* add to the total from vaults */
 	if ((!mon) && (vault)) stat_all[st][2][lvl] += addval * number;
-	
+
 	/* add to the total from monsters */
 	if (mon) stat_all[st][1][lvl] += addval * number;
 
-}	
-	
+}
+
 /*
  * This will get data on an object
  * It gets a lot of stuff, pretty much everything that I
  * thought was reasonable to get.  However, you might have
  * a much different opinion.  Luckily, I tried to make it
  * trivial to add new items to log.
-*/ 
+*/
 static void get_obj_data(const struct object *obj, int y, int x, bool mon,
 						 bool uniq)
 {
@@ -477,7 +477,7 @@ static void get_obj_data(const struct object *obj, int y, int x, bool mon,
 	/* originally this was armor, but I decided to generalize it */
 
 	/* has free action (hack: don't include Inertia)*/
-	if (of_has(obj->flags, OF_FREE_ACT) && 
+	if (of_has(obj->flags, OF_FREE_ACT) &&
 		!((obj->tval == TV_AMULET) &&
 		  (!strstr(obj->kind->name, "Inertia")))) {
 
@@ -496,7 +496,7 @@ static void get_obj_data(const struct object *obj, int y, int x, bool mon,
 		first_find(ST_FF_SI);
 	}
 	/* has at least one basic resist */
- 	if ((obj->el_info[ELEM_ACID].res_level == 1) ||
+	if ((obj->el_info[ELEM_ACID].res_level == 1) ||
 		(obj->el_info[ELEM_ELEC].res_level == 1) ||
 		(obj->el_info[ELEM_COLD].res_level == 1) ||
 		(obj->el_info[ELEM_FIRE].res_level == 1)){
@@ -516,7 +516,7 @@ static void get_obj_data(const struct object *obj, int y, int x, bool mon,
 
 		add_stats(ST_RPOIS_EQUIPMENT, vault, mon, number);
 		first_find(ST_FF_RPOIS);
-		
+
 	}
 	/* has resist nexus */
 	if (obj->el_info[ELEM_NEXUS].res_level == 1){
@@ -877,7 +877,7 @@ static void get_obj_data(const struct object *obj, int y, int x, bool mon,
 
 			if (strstr(obj->kind->name, "Wisdom")) {
 				add_stats(ST_WIS_AMULETS, vault, mon, number);
-			} else if ((strstr(obj->kind->name, "Magi")) || 
+			} else if ((strstr(obj->kind->name, "Magi")) ||
 					   (strstr(obj->kind->name, "Trickery")) ||
 					   (strstr(obj->kind->name, "Weaponmastery"))) {
 				add_stats(ST_ENDGAME_AMULETS, vault, mon, number);
@@ -929,7 +929,7 @@ static void get_obj_data(const struct object *obj, int y, int x, bool mon,
 			break;
 		}
 
-		/* prayer books and magic books have the same probability 
+		/* prayer books and magic books have the same probability
 		   only track one of them */
 		case TV_MAGIC_BOOK:{
 
@@ -1076,12 +1076,12 @@ static void get_obj_data(const struct object *obj, int y, int x, bool mon,
 
 
 
-/* 
+/*
  * A rewrite of monster death that gets rid of some features
  * That we don't want to deal with.  Namely, no notifying the
  * player and no generation of Morgoth artifacts
- * 
- * It also replaces drop near with a new function that drops all 
+ *
+ * It also replaces drop near with a new function that drops all
  * the items on the exact square that the monster was on.
  */
 void monster_death_stats(int m_idx)
@@ -1153,7 +1153,7 @@ static bool stats_monster(struct monster *mon, int i)
 	}
 
 	/* Is it mostly dangerous (10 levels ood or less?)*/
-	if ((mon->race->level > player->depth) && 
+	if ((mon->race->level > player->depth) &&
 		(mon->race->level <= player->depth + 10)) {
 
 			mon_ood[lvl] += addval;
@@ -1207,11 +1207,11 @@ static void print_heading(void)
 	file_putf(stats_log," Potions:   Aug counts as 5 potions, *enlight* as 2.  Healing potions are \n");
 	file_putf(stats_log,"			 only *Healing* and Life\n");
 	file_putf(stats_log," Scrolls:   Endgame scrolls include *Dest*, Rune, MBan and Ban \n");
-	file_putf(stats_log,"    		 *Acq* counts as two Acq scrolls");
-	file_putf(stats_log," Rods: 	 Utility rods: d-obj, d-stairs, d-traps, light, illum \n");
-	file_putf(stats_log,"    		 Endgame rods: Speed, Healing \n");
-	file_putf(stats_log," Staves: 	 Kill staves: dispel evil, power, holiness. \n");
-	file_putf(stats_log,"    		 Power staves: healing, magi, banishment \n");
+	file_putf(stats_log,"			 *Acq* counts as two Acq scrolls");
+	file_putf(stats_log," Rods:	 Utility rods: d-obj, d-stairs, d-traps, light, illum \n");
+	file_putf(stats_log,"			 Endgame rods: Speed, Healing \n");
+	file_putf(stats_log," Staves:	 Kill staves: dispel evil, power, holiness. \n");
+	file_putf(stats_log,"			 Power staves: healing, magi, banishment \n");
 }
 
 /**
@@ -1221,7 +1221,7 @@ static void print_stats(int lvl)
 {
 
 	int i;
-	
+
 	/* check bounds on lvl */
 	if ((lvl < 0) || (lvl > 100)) return;
 
@@ -1238,7 +1238,7 @@ static void print_stats(int lvl)
 				uniq_total[lvl], uniq_ood[lvl], uniq_deadly[lvl]);
 	/* print artifact heading */
 
-	
+
 
 	file_putf(stats_log,"\n ARTIFACT INFO \n");
 
@@ -1249,17 +1249,17 @@ static void print_stats(int lvl)
 	/* artifact depth info */
 	file_putf(stats_log,"Shallow: %f  Average: %f  Ood: %f \n",
 		art_shal[lvl],art_ave[lvl],art_ood[lvl]);
-		
+
 	/* more advanced info */
 	file_putf(stats_log,"From vaults: %f  From floor (no vault): %f \n",
 		art_vault[lvl],art_floor[lvl]);
 	file_putf(stats_log,"Uniques: %f  Monsters: %f  Vault denizens: %f \n",
 		art_uniq[lvl], art_mon[lvl], art_mon_vault[lvl]);
 
-		
-	for (i=ST_BEGIN; i<ST_END; i++){	
+
+	for (i=ST_BEGIN; i<ST_END; i++){
 		file_putf(stats_log, "%s%f From Monsters: %f In Vaults: %f \n",	stat_message[i].name, stat_all[i][0][lvl], stat_all[i][1][lvl], stat_all[i][2][lvl]);
-	}	
+	}
 
 
 }
@@ -1273,7 +1273,7 @@ static void mean_and_stdv(int array[TRIES_SIZE])
 	double tot = 0, mean, stdev, temp = 0;
 
 	/* Get the maximum iteration value */
-	maxiter = MIN(tries, TRIES_SIZE); 
+	maxiter = MIN(tries, TRIES_SIZE);
 
 	/* Sum the array */
 	for (k = 0; k < maxiter; k++)
@@ -1330,7 +1330,7 @@ static void prob_of_find(double stat[MAX_LVL])
 	}
 
 	/* Put a new line in prep of next entry */
-	file_putf(stats_log,"\n"); 
+	file_putf(stats_log,"\n");
  }
 
 #if 0
@@ -1346,7 +1346,7 @@ static double total(double stat[MAX_LVL])
 		out += stat[k];
 
 	return out;
-} 
+}
 #endif
 
 /**
@@ -1365,7 +1365,7 @@ static void post_process_stats(void)
 	file_putf(stats_log,"30\t\t\t35\t\t\t40\t\t\t45\t\t\t50\t\t\t");
 	file_putf(stats_log,"55\t\t\t60\t\t\t65\t\t\t70\t\t\t75\t\t\t");
 	file_putf(stats_log,"80\t\t\t85\t\t\t90\t\t\t95\t\t\t100\n");
-	
+
 	for (i = 1; i < ST_FF_END; i++) {
 			file_putf(stats_log, stat_ff_message[i].name);
 			prob_of_find(stat_all[stat_ff_message[i].st][0]);
@@ -1398,7 +1398,7 @@ static void post_process_stats(void)
  * Scans the dungeon for objects
  */
 static void scan_for_objects(void)
-{ 
+{
 	int y, x;
 
 	for (y = 1; y < cave->height - 1; y++) {
@@ -1423,7 +1423,7 @@ static void scan_for_objects(void)
  * and every last one.
  */
 static void scan_for_monsters(void)
-{ 
+{
 	int i;
 
 	/* Go through the monster list */
@@ -1490,7 +1490,7 @@ static void revive_uniques(void)
 /**
  * This function loops through the level and does N iterations of
  * the stat calling function, assuming diving style.
- */ 
+ */
 static void diving_stats(void)
 {
 	int depth;
@@ -1515,7 +1515,7 @@ static void diving_stats(void)
 /**
  * This function loops through the level and does N iterations of
  * the stat calling function, assuming clearing style.
- */ 
+ */
 static void clearing_stats(void)
 {
 	int depth;
@@ -1539,7 +1539,7 @@ static void clearing_stats(void)
 
 		/* Do game iterations */
 		for (depth = 1 ; depth < MAX_LVL; depth++) {
-			/* Debug 
+			/* Debug
 			msg_format("Attempting level %d",depth); */
 
 			/* Move player to that depth */
@@ -1563,7 +1563,7 @@ static void clearing_stats(void)
 	post_process_stats();
 
 	/* Display the current level */
-	do_cmd_redraw(); 
+	do_cmd_redraw();
 }
 
 /**
@@ -1638,7 +1638,7 @@ void stats_collect(void)
 
 	/* Make sure the results are good! */
 	if (!((simtype == 1) || (simtype == 2)))
-		return; 
+		return;
 
 	/* Are we in diving or clearing mode */
 	if (simtype == 2)
@@ -1657,13 +1657,13 @@ void stats_collect(void)
 	}
 
 	/* Turn on auto-more.  This will clear prompts for items
-	 * that drop under the player, or that can't fit on the 
+	 * that drop under the player, or that can't fit on the
 	 * floor due to too many items.  This is a very small amount
 	 * of items, even on deeper levels, so it's not worth worrying
 	 * too much about.
 	 */
 	 auto_flag = false;
-	 
+
 	 if (!OPT(auto_more)) {
 		/* Remember that we turned off auto_more */
 		auto_flag = true;
@@ -1944,7 +1944,7 @@ void disconnect_stats(void)
 
 		if (has_dsc) dsc_area++;
 
-		msg("Iteration: %d",i); 
+		msg("Iteration: %d",i);
 
 		/* Free arrays */
 		for (y = 0; x < cave->height; x++)

@@ -171,7 +171,7 @@ static bool project_touch(int dam, int typ, bool aware,
 }
 
 /**
- * Dummy effect, to tell the effect code to pick one of the next 
+ * Dummy effect, to tell the effect code to pick one of the next
  * context->value.base effects at random.
  */
 bool effect_handler_RANDOM(effect_handler_context_t *context)
@@ -798,7 +798,7 @@ bool effect_handler_REMOVE_ALL_CURSE(effect_handler_context_t *context)
 bool effect_handler_RECALL(effect_handler_context_t *context)
 {
 	int target_depth;
-	context->ident = true;	
+	context->ident = true;
 
 	/* No recall */
 	if (OPT(birth_no_recall) && !player->total_winner) {
@@ -1751,7 +1751,7 @@ static bool enchant_score(s16b *score, bool is_artifact)
 static bool enchant_curse(struct object *obj, bool is_artifact)
 {
 	/* If the item isn't cursed (or is perma-cursed) this doesn't work */
-	if (!cursed_p(obj->flags) || of_has(obj->flags, OF_PERMA_CURSE)) 
+	if (!cursed_p(obj->flags) || of_has(obj->flags, OF_PERMA_CURSE))
 		return false;
 
 	/* Artifacts resist enchanting curses away half the time */
@@ -1861,7 +1861,7 @@ bool enchant_spell(int num_hit, int num_dam, int num_ac)
 	/* Get an item */
 	q = "Enchant which item? ";
 	s = "You have nothing to enchant.";
-	if (!get_item(&obj, q, s, 0, 
+	if (!get_item(&obj, q, s, 0,
 		num_ac ? item_tester_hook_armour : item_tester_hook_weapon,
 		(USE_EQUIP | USE_INVEN | USE_QUIVER | USE_FLOOR)))
 		return false;
@@ -2482,9 +2482,9 @@ bool effect_handler_PROBE(effect_handler_context_t *context)
 }
 
 /**
- * Thrust the player or a monster away from the source of a projection.   
+ * Thrust the player or a monster away from the source of a projection.
  *
- * Monsters and players can be pushed past monsters or players weaker than 
+ * Monsters and players can be pushed past monsters or players weaker than
  * they are.
  * If set, context->p1 and context->p2 act as y and x coordinates
  */
@@ -4588,7 +4588,7 @@ bool effect_do(struct effect *effect, struct object *obj, bool *ident,
 		}
 
 		/* Get the next effect, if there is one */
-		if (leftover) 
+		if (leftover)
 			/* Skip the remaining non-chosen effects */
 			while (leftover--)
 				effect = effect->next;
@@ -4602,7 +4602,7 @@ bool effect_do(struct effect *effect, struct object *obj, bool *ident,
 /**
  * Perform a single effect with a simple dice string and parameters
  * Calling with ident a valid pointer will (depending on effect) give success
- * information; ident = NULL will ignore this 
+ * information; ident = NULL will ignore this
  */
 void effect_simple(int index, const char* dice_string, int p1, int p2, int p3, bool *ident)
 {

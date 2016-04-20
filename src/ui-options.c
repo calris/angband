@@ -54,7 +54,7 @@ static bool get_pref_path(const char *what, int row, char *buf, size_t max)
 
 	/* Default filename */
 	strnfmt(ftmp, sizeof ftmp, "%s.prf", player_safe_name(player, true));
-	
+
 	/* Get a filename */
 	ok = askfor_aux(ftmp, sizeof ftmp, NULL);
 	screen_load();
@@ -173,7 +173,7 @@ static const menu_iter option_toggle_iter = {
 static void option_toggle_menu(const char *name, int page)
 {
 	int i;
-	
+
 	struct menu *m = menu_new(MN_SKIN_SCROLL, &option_toggle_iter);
 
 	/* for all menus */
@@ -433,11 +433,11 @@ static void ui_keymap_query(const char *title, int row)
 
 	prt(title, 13, 0);
 	prt("Key: ", 14, 0);
-	
+
 	/* Get a keymap trigger & mapping */
 	c = keymap_get_trigger();
 	act = keymap_find(mode, c);
-	
+
 	/* Keymap found? */
 	if (!act) {
 		/* Prompt */
@@ -446,7 +446,7 @@ static void ui_keymap_query(const char *title, int row)
 	} else {
 		/* Analyze the current action */
 		keypress_to_text(tmp, sizeof(tmp), act, false);
-	
+
 		/* Display the current action */
 		prt("Found: ", 15, 0);
 		Term_addstr(-1, COLOUR_WHITE, tmp);
@@ -590,7 +590,7 @@ static void do_cmd_keymaps(const char *title, int row)
 	if (!keymap_menu) {
 		keymap_menu = menu_new_action(keymap_actions,
 				N_ELEMENTS(keymap_actions));
-	
+
 		keymap_menu->title = title;
 		keymap_menu->selections = lower_case;
 		keymap_menu->browse_hook = keymap_browse_hook;
@@ -700,7 +700,7 @@ static void colors_pref_load(const char *title, int row)
 {
 	/* Ask for and load a user pref file */
 	do_cmd_pref_file_hack(8);
-	
+
 	/* XXX should probably be a cleaner way to tell UI about
 	 * colour changes - how about doing this in the pref file
 	 * loading code too? */
@@ -930,7 +930,7 @@ static void do_cmd_hp_warn(const char *name, int row)
 	/* Process input */
 	if (res) {
 		warn = (byte) strtoul(tmp, NULL, 0);
-		
+
 		/* Reset nonsensical warnings */
 		if (warn > 9)
 			warn = 0;
@@ -1013,8 +1013,8 @@ static void do_cmd_pref_file_hack(long row)
 	screen_load();
 }
 
- 
- 
+
+
 /**
  * Write options to a file.
  */
@@ -1547,11 +1547,11 @@ static int ignore_collect_kind(int tval, ignore_choice **ch)
 			choice[num++].aware = false;
 		}
 
-		if ((kind->everseen && !kf_has(kind->kind_flags, KF_INSTA_ART)) || 
+		if ((kind->everseen && !kf_has(kind->kind_flags, KF_INSTA_ART)) ||
 			tval_is_money_k(kind)) {
-			/* Do not display the artifact base kinds in this list 
-			 * aware ignore requires everseen 
-			 * do not require awareness for aware ignore, so people can set 
+			/* Do not display the artifact base kinds in this list
+			 * aware ignore requires everseen
+			 * do not require awareness for aware ignore, so people can set
 			 * at game start */
 			choice[num].kind = kind;
 			choice[num++].aware = true;
@@ -1780,7 +1780,7 @@ void do_cmd_options_item(const char *title, int row)
  * ------------------------------------------------------------------------ */
 
 static struct menu *option_menu;
-static menu_action option_actions[] = 
+static menu_action option_actions[] =
 {
 	{ 0, 'a', "User interface options", option_toggle_menu },
 	{ 0, 'b', "Birth (difficulty) options", option_toggle_menu },

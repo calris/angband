@@ -55,7 +55,7 @@ static void build_prob(name_probs probs, const char **learn)
 
 			probs[c_prev][c_cur][c_next]++;
 			probs[c_prev][c_cur][TOTAL]++;
-                        
+
 			/* Step on */
 			c_prev = c_cur;
 			c_cur = c_next;
@@ -69,9 +69,9 @@ static void build_prob(name_probs probs, const char **learn)
 
 /**
  * Use W. Sheldon Simms' random name generator algorithm (Markov Chain stylee).
- * 
- * Generate a random word using the probability tables we built earlier.  
- * Relies on the A2I and I2A macros (and so the ASCII character set) and 
+ *
+ * Generate a random word using the probability tables we built earlier.
+ * Relies on the A2I and I2A macros (and so the ASCII character set) and
  * is_a_vowel (so the basic 5 English vowels).
  */
 size_t randname_make(randname_type name_type, size_t min, size_t max,
@@ -101,7 +101,7 @@ size_t randname_make(randname_type name_type, size_t min, size_t max,
 
 		cached_type = name_type;
 	}
-        
+
 	/* Generate the actual word wanted. */
 	while (!found_word) {
 		char *cp = word_buf;
@@ -132,7 +132,7 @@ size_t randname_make(randname_type name_type, size_t min, size_t max,
 
 			assert(c_next <= E_WORD);
 			assert(c_next >= 0);
-            
+
 			if (c_next == E_WORD) {
 				/* If we've reached the end, we check if we've
 				   met the simple conditions, otherwise have
@@ -167,7 +167,7 @@ size_t randname_make(randname_type name_type, size_t min, size_t max,
 
 /**
  * To run standalone tests, #define RANDNAME_TESTING and link with
- *  with just z-rand.c from Angband. 
+ *  with just z-rand.c from Angband.
  */
 #ifdef RANDNAME_TESTING
 

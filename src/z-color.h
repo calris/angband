@@ -70,7 +70,7 @@
 
 /**
  * Maximum number of colours, and number of "basic" Angband colours
- */ 
+ */
 #define MAX_COLORS        256
 #define BASIC_COLORS    29
 #define BG_BLACK 0	/* The set number for the black-background glyphs */
@@ -100,4 +100,3 @@ extern void build_gamma_table(int gamma);
 extern byte gamma_table[256];
 
 #endif /* INCLUDED_Z_COLOR_H */
-

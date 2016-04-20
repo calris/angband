@@ -8,7 +8,7 @@
  * description - description of the effect
  */
 
-/* name  				color	 		description*/
+/* name					color			description*/
 PROJ_ENV(LIGHT_WEAK,	COLOUR_ORANGE,	"light")
 PROJ_ENV(DARK_WEAK,		COLOUR_L_DARK,	"darkness")
 PROJ_ENV(KILL_WALL,		COLOUR_WHITE,	"rock remover")

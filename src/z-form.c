@@ -102,11 +102,11 @@
  *   Do not use the "+" or "0" flags.
  *   Note that a "NULL" value of "s" is converted to the empty string.
  *
- * Format("%y", type_union *y). Use any of the above patterns; 
+ * Format("%y", type_union *y). Use any of the above patterns;
  * z is interpreted as one of c, d, f, or s in the patterns above,
  * as appropriate for the type of the corresponding argument.
  * (There is currently no way to render a typeunion in octal or hex.)
- * 
+ *
  * For examples below, assume "int n = 0; int m = 100; char buf[100];",
  * plus "char *s = NULL;", and unknown values "char *txt; int i;".
  *

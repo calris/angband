@@ -48,19 +48,19 @@ int dungeon_get_next_level(int dlev, int added)
 
 	/* Get target level */
 	target_level = dlev + added * z_info->stair_skip;
-	
+
 	/* Don't allow levels below max */
 	if (target_level > z_info->max_depth - 1)
 		target_level = z_info->max_depth - 1;
 
 	/* Don't allow levels above the town */
 	if (target_level < 0) target_level = 0;
-	
+
 	/* Check intermediate levels for quests */
 	for (i = dlev; i <= target_level; i++) {
 		if (is_quest(i)) return i;
 	}
-	
+
 	return target_level;
 }
 
@@ -885,7 +885,7 @@ void player_place(struct chunk *c, struct player *p, int y, int x)
  * The second arg is currently unused, but could induce output flush.
  *
  * All disturbance cancels repeated commands, resting, and running.
- * 
+ *
  * XXX-AS: Make callers either pass in a command
  * or call cmd_cancel_repeat inside the function calling this
  */

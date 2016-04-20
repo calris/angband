@@ -1,5 +1,5 @@
 /**
- * \file trap.h 
+ * \file trap.h
  * \brief trap predicates, structs and functions
  */
 

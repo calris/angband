@@ -165,7 +165,7 @@ static void activation_message(struct object *obj)
 	next = strchr(in_cursor, '{');
 	while (next) {
 		/* Copy the text leading up to this { */
-		strnfcat(buf, 1024, &end, "%.*s", next - in_cursor, in_cursor); 
+		strnfcat(buf, 1024, &end, "%.*s", next - in_cursor, in_cursor);
 
 		s = next + 1;
 		while (*s && isalpha((unsigned char) *s)) s++;
@@ -178,7 +178,7 @@ static void activation_message(struct object *obj)
 
 			switch(art_tag_lookup(tag)) {
 			case ART_TAG_NAME:
-				end += object_desc(buf, 1024, obj, ODESC_PREFIX | ODESC_BASE); 
+				end += object_desc(buf, 1024, obj, ODESC_PREFIX | ODESC_BASE);
 				break;
 			case ART_TAG_KIND:
 				object_kind_name(&buf[end], 1024-end, obj->kind, true);
@@ -407,7 +407,7 @@ void do_cmd_wield(struct command *cmd)
 		/* Prompt */
 		object_desc(o_name, sizeof(o_name), equip_obj,
 					ODESC_PREFIX | ODESC_FULL);
-		
+
 		/* Forget it */
 		if (!get_check(format("Really take off %s? ", o_name))) return;
 	}
@@ -631,7 +631,7 @@ void do_cmd_read_scroll(struct command *cmd)
 }
 
 /**
- * Use a staff 
+ * Use a staff
  */
 void do_cmd_use_staff(struct command *cmd)
 {
@@ -653,7 +653,7 @@ void do_cmd_use_staff(struct command *cmd)
 }
 
 /**
- * Aim a wand 
+ * Aim a wand
  */
 void do_cmd_aim_wand(struct command *cmd)
 {
@@ -675,7 +675,7 @@ void do_cmd_aim_wand(struct command *cmd)
 }
 
 /**
- * Zap a rod 
+ * Zap a rod
  */
 void do_cmd_zap_rod(struct command *cmd)
 {
@@ -697,7 +697,7 @@ void do_cmd_zap_rod(struct command *cmd)
 }
 
 /**
- * Activate an object 
+ * Activate an object
  */
 void do_cmd_activate(struct command *cmd)
 {
@@ -719,7 +719,7 @@ void do_cmd_activate(struct command *cmd)
 }
 
 /**
- * Eat some food 
+ * Eat some food
  */
 void do_cmd_eat_food(struct command *cmd)
 {
@@ -736,7 +736,7 @@ void do_cmd_eat_food(struct command *cmd)
 }
 
 /**
- * Quaff a potion 
+ * Quaff a potion
  */
 void do_cmd_quaff_potion(struct command *cmd)
 {

@@ -218,7 +218,7 @@ static int ammo_damage_power(const struct object *obj, int p)
 		if (kf_has(obj->kind->kind_flags, KF_SHOOTS_SHOTS))
 			launcher = 0;
 		else if (kf_has(obj->kind->kind_flags, KF_SHOOTS_ARROWS))
-			launcher = 1; 
+			launcher = 1;
 		else if (kf_has(obj->kind->kind_flags, KF_SHOOTS_BOLTS))
 			launcher = 2;
 
@@ -270,7 +270,7 @@ static int extra_blows_power(const struct object *obj, int p, bool known)
 			/* Add boost for assumed off-weapon damage */
 			p += (NONWEAP_DAMAGE * obj->modifiers[OBJ_MOD_BLOWS]
 				  * DAMAGE_POWER / 2);
-			log_obj(format("Add %d power for extra blows, total is %d\n", 
+			log_obj(format("Add %d power for extra blows, total is %d\n",
 								p - q, p));
 		}
 	}
@@ -490,7 +490,7 @@ static int to_hit_power(const struct object *obj, int p)
 {
 	int q = (obj->to_h * TO_HIT_POWER / 2);
 	p += q;
-	if (p) 
+	if (p)
 		log_obj(format("Add %d power for to hit, total is %d\n", q, p));
 	return p;
 }
@@ -538,7 +538,7 @@ static int to_ac_power(const struct object *obj, int p)
 
 	q = (obj->to_a * TO_AC_POWER / 2);
 	p += q;
-	log_obj(format("Add %d power for to_ac of %d, total is %d\n", 
+	log_obj(format("Add %d power for to_ac of %d, total is %d\n",
 				   q, obj->to_a, p));
 	if (obj->to_a > HIGH_TO_AC) {
 		q = ((obj->to_a - (HIGH_TO_AC - 1)) * TO_AC_POWER);
@@ -565,7 +565,7 @@ static int jewelry_power(const struct object *obj, int p)
 {
 	if (tval_is_jewelry(obj)) {
 		p += BASE_JEWELRY_POWER;
-		log_obj(format("Adding %d power for jewelry, total is %d\n", 
+		log_obj(format("Adding %d power for jewelry, total is %d\n",
 					   BASE_JEWELRY_POWER, p));
 	}
 	return p;
@@ -588,21 +588,21 @@ static int modifier_power(const struct object *obj, int p, bool known)
 		if (mod_power(i)) {
 			q = (k * mod_power(i) * mod_slot_mult(i, wield_slot(obj)));
 			p += q;
-			if (q) log_obj(format("Add %d power for %d %s, total is %d\n", 
+			if (q) log_obj(format("Add %d power for %d %s, total is %d\n",
 								  q, k, mod_name(i), p));
 		}
 	}
 
 	/* Add extra power term if there are a lot of ability bonuses */
 	if (extra_stat_bonus > 249) {
-		log_obj(format("Inhibiting - Total ability bonus of %d is too high\n", 
+		log_obj(format("Inhibiting - Total ability bonus of %d is too high\n",
 					   extra_stat_bonus));
 		p += INHIBIT_POWER;
 	} else if (extra_stat_bonus > 0) {
 		q = ability_power[extra_stat_bonus / 10];
 		if (!q) return p;
 		p += q;
-		log_obj(format("Add %d power for modifier total of %d, total is %d\n", 
+		log_obj(format("Add %d power for modifier total of %d, total is %d\n",
 					   q, extra_stat_bonus, p));
 	}
 	return p;
@@ -632,12 +632,12 @@ static int flags_power(const struct object *obj, int p, int verbose,
 	for (i = 0; i < N_ELEMENTS(flag_sets); i++)
 		flag_sets[i].count = 0;
 
-	for (i = of_next(flags, FLAG_START); i != FLAG_END; 
+	for (i = of_next(flags, FLAG_START); i != FLAG_END;
 		 i = of_next(flags, i + 1)) {
 		if (flag_power(i)) {
 			q = (flag_power(i) * flag_slot_mult(i, wield_slot(obj)));
 			p += q;
-			log_obj(format("Add %d power for %s, total is %d\n", 
+			log_obj(format("Add %d power for %s, total is %d\n",
 						   q, flag_name(i), p));
 		}
 
@@ -660,7 +660,7 @@ static int flags_power(const struct object *obj, int p, int verbose,
 		if (flag_sets[i].count == flag_sets[i].size) {
 			q = flag_sets[i].bonus;
 			p += q;
-			log_obj(format("Add %d power for full set of %s, total is %d\n", 
+			log_obj(format("Add %d power for full set of %s, total is %d\n",
 						   q, flag_sets[i].desc, p));
 		}
 	}
@@ -734,7 +734,7 @@ static int element_power(const struct object *obj, int p, bool known)
 		if (element_sets[i].count == element_sets[i].size) {
 			q = element_sets[i].bonus;
 			p += q;
-			log_obj(format("Add %d power for full set of %s, total is %d\n", 
+			log_obj(format("Add %d power for full set of %s, total is %d\n",
 						   q, element_sets[i].desc, p));
 		}
 	}

@@ -56,8 +56,8 @@
 #include "wizard.h"
 
 /**
- * There are a few functions installed to be triggered by several 
- * of the basic player events.  For convenience, these have been grouped 
+ * There are a few functions installed to be triggered by several
+ * of the basic player events.  For convenience, these have been grouped
  * in this list.
  */
 static game_event_type player_events[] =
@@ -289,7 +289,7 @@ static void prt_ac(int row, int col)
 	char tmp[32];
 
 	put_str("Cur AC ", row, col);
-	strnfmt(tmp, sizeof(tmp), "%5d", 
+	strnfmt(tmp, sizeof(tmp), "%5d",
 			player->known_state.ac + player->known_state.to_a);
 	c_put_str(COLOUR_L_GREEN, tmp, row, col + 7);
 }
@@ -306,7 +306,7 @@ static void prt_hp(int row, int col)
 
 	strnfmt(max_hp, sizeof(max_hp), "%4d", player->mhp);
 	strnfmt(cur_hp, sizeof(cur_hp), "%4d", player->chp);
-	
+
 	c_put_str(color, cur_hp, row, col + 3);
 	c_put_str(COLOUR_WHITE, "/", row, col + 7);
 	c_put_str(COLOUR_L_GREEN, max_hp, row, col + 8);
@@ -321,7 +321,7 @@ static void prt_sp(int row, int col)
 	byte color = player_sp_attr(player);
 
 	/* Do not show mana unless we should have some */
-	if (player_has(player, PF_NO_MANA) || 
+	if (player_has(player, PF_NO_MANA) ||
 		(player->lev < player->class->magic.spell_first))
 		return;
 
@@ -386,7 +386,7 @@ byte monster_health_attr(void)
 		/* Asleep */
 		if (mon->m_timed[MON_TMD_SLEEP]) attr = COLOUR_BLUE;
 	}
-	
+
 	return attr;
 }
 
@@ -835,9 +835,9 @@ static size_t prt_state(int row, int col)
 	return strlen(text);
 }
 
-static const byte obj_feeling_color[] = 
+static const byte obj_feeling_color[] =
 {
-	/* Colors used to display each obj feeling 	*/
+	/* Colors used to display each obj feeling	*/
 	COLOUR_WHITE,  /* "Looks like any other level." */
 	COLOUR_L_PURPLE, /* "you sense an item of wondrous power!" */
 	COLOUR_L_RED, /* "there are superb treasures here." */
@@ -851,7 +851,7 @@ static const byte obj_feeling_color[] =
 	COLOUR_L_BLUE  /* "there are naught but cobwebs here. */
 };
 
-static const byte mon_feeling_color[] = 
+static const byte mon_feeling_color[] =
 {
 	/* Colors used to display each monster feeling */
 	COLOUR_WHITE, /* "You are still uncertain about this place" */
@@ -916,7 +916,7 @@ static size_t prt_level_feeling(int row, int col)
 			strnfmt(obj_feeling_str, 5, "%d", (unsigned int) (11-obj_feeling));
 	}
 
-	/* 
+	/*
 	 *   Convert monster feeling to a symbol easier to parse
 	 * for a human.
 	 *   0 -> ? . Monster feeling should never be 0, but we check
@@ -1023,7 +1023,7 @@ static size_t prt_unignore(int row, int col)
 typedef size_t status_f(int row, int col);
 
 static status_f *status_handlers[] =
-{ prt_level_feeling, prt_unignore, prt_recall, prt_descent, prt_state, prt_cut, 
+{ prt_level_feeling, prt_unignore, prt_recall, prt_descent, prt_state, prt_cut,
   prt_stun, prt_hunger, prt_study, prt_tmd, prt_dtrap };
 
 
@@ -1109,7 +1109,7 @@ static void update_maps(game_event_type type, game_event_data *data, void *user)
 			if (tile_height > 1)
 			        ky += (tile_height - 1) * ky;
 
-			
+
 			/* Verify location */
 			if ((ky < 0) || (ky >= t->hgt)) return;
 			if ((kx < 0) || (kx >= t->wid)) return;
@@ -1151,7 +1151,7 @@ static void update_maps(game_event_type type, game_event_data *data, void *user)
  * ------------------------------------------------------------------------ */
 
 static byte flicker = 0;
-static byte color_flicker[MAX_COLORS][3] = 
+static byte color_flicker[MAX_COLORS][3] =
 {
 	{COLOUR_DARK, COLOUR_L_DARK, COLOUR_L_RED},
 	{COLOUR_WHITE, COLOUR_L_WHITE, COLOUR_L_BLUE},
@@ -1459,7 +1459,7 @@ static void display_missile(game_event_type type, game_event_data *data,
  * ------------------------------------------------------------------------ */
 
 /**
- * true when we're supposed to display the equipment in the inventory 
+ * true when we're supposed to display the equipment in the inventory
  * window, or vice-versa.
  */
 static bool flip_inven;
@@ -1479,7 +1479,7 @@ static void update_inven_subwindow(game_event_type type, game_event_data *data,
 		show_equip(OLIST_WINDOW | OLIST_WEIGHT, NULL);
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1499,7 +1499,7 @@ static void update_equip_subwindow(game_event_type type, game_event_data *data,
 		show_inven(OLIST_WINDOW | OLIST_WEIGHT | OLIST_QUIVER, NULL);
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1517,21 +1517,21 @@ void toggle_inven_equip(void)
 
 	/* Redraw any subwindows showing the inventory/equipment lists */
 	for (i = 0; i < ANGBAND_TERM_MAX; i++) {
-		Term_activate(angband_term[i]); 
+		Term_activate(angband_term[i]);
 
 		if (window_flag[i] & PW_INVEN) {
 			if (!flip_inven)
 				show_inven(OLIST_WINDOW | OLIST_WEIGHT | OLIST_QUIVER, NULL);
 			else
 				show_equip(OLIST_WINDOW | OLIST_WEIGHT, NULL);
-			
+
 			Term_fresh();
 		} else if (window_flag[i] & PW_EQUIP) {
 			if (!flip_inven)
 				show_equip(OLIST_WINDOW | OLIST_WEIGHT, NULL);
 			else
 				show_inven(OLIST_WINDOW | OLIST_WEIGHT | OLIST_QUIVER, NULL);
-			
+
 			Term_fresh();
 		}
 	}
@@ -1551,7 +1551,7 @@ static void update_itemlist_subwindow(game_event_type type,
     clear_from(0);
     object_list_show_subwindow(Term->hgt, Term->wid);
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1568,7 +1568,7 @@ static void update_monlist_subwindow(game_event_type type,
 	clear_from(0);
 	monster_list_show_subwindow(Term->hgt, Term->wid);
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1585,11 +1585,11 @@ static void update_monster_subwindow(game_event_type type,
 
 	/* Display monster race info */
 	if (player->upkeep->monster_race)
-		lore_show_subwindow(player->upkeep->monster_race, 
+		lore_show_subwindow(player->upkeep->monster_race,
 							get_lore(player->upkeep->monster_race));
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1600,16 +1600,16 @@ static void update_object_subwindow(game_event_type type,
 {
 	term *old = Term;
 	term *inv_term = user;
-	
+
 	/* Activate */
 	Term_activate(inv_term);
-	
+
 	if (player->upkeep->object != NULL)
 		display_object_recall(player->upkeep->object);
 	else if (player->upkeep->object_kind)
 		display_object_kind_recall(player->upkeep->object_kind);
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1657,7 +1657,7 @@ static void update_messages_subwindow(game_event_type type,
 	}
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1678,7 +1678,7 @@ static void update_minimap_subwindow(game_event_type type,
 	if (type == EVENT_END) {
 		term *old = Term;
 		term *t = angband_term[flags->win_idx];
-		
+
 		/* Activate */
 		Term_activate(t);
 
@@ -1689,7 +1689,7 @@ static void update_minimap_subwindow(game_event_type type,
 		/* Redraw map */
 		display_map(NULL, NULL);
 		Term_fresh();
-		
+
 		/* Restore */
 		Term_activate(old);
 
@@ -1726,7 +1726,7 @@ static void update_player0_subwindow(game_event_type type,
 	display_player(0);
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1747,7 +1747,7 @@ static void update_player1_subwindow(game_event_type type,
 	display_player(1);
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1805,7 +1805,7 @@ static void update_player_compact_subwindow(game_event_type type,
 	prt_health(row++, col);
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1821,7 +1821,7 @@ static void flush_subwindow(game_event_type type, game_event_data *data,
 	Term_activate(t);
 
 	Term_fresh();
-	
+
 	/* Restore */
 	Term_activate(old);
 }
@@ -1906,7 +1906,7 @@ static void subwindow_flag_changed(int win_idx, u32b flag, bool new_state)
 
 		case PW_PLAYER_0:
 		{
-			set_register_or_deregister(player_events, 
+			set_register_or_deregister(player_events,
 						   N_ELEMENTS(player_events),
 						   update_player0_subwindow,
 						   angband_term[win_idx]);
@@ -1915,7 +1915,7 @@ static void subwindow_flag_changed(int win_idx, u32b flag, bool new_state)
 
 		case PW_PLAYER_1:
 		{
-			set_register_or_deregister(player_events, 
+			set_register_or_deregister(player_events,
 						   N_ELEMENTS(player_events),
 						   update_player1_subwindow,
 						   angband_term[win_idx]);
@@ -1924,7 +1924,7 @@ static void subwindow_flag_changed(int win_idx, u32b flag, bool new_state)
 
 		case PW_PLAYER_2:
 		{
-			set_register_or_deregister(player_events, 
+			set_register_or_deregister(player_events,
 						   N_ELEMENTS(player_events),
 						   update_player_compact_subwindow,
 						   angband_term[win_idx]);
@@ -2005,7 +2005,7 @@ static void subwindow_flag_changed(int win_idx, u32b flag, bool new_state)
 
 /**
  * Set the flags for one Term, calling "subwindow_flag_changed" with each flag
- * that has changed setting so that it can do any housekeeping to do with 
+ * that has changed setting so that it can do any housekeeping to do with
  * displaying the new thing or no longer displaying the old one.
  */
 static void subwindow_set_flags(int win_idx, u32b new_flags)
@@ -2023,16 +2023,16 @@ static void subwindow_set_flags(int win_idx, u32b new_flags)
 
 	/* Store the new flags */
 	window_flag[win_idx] = new_flags;
-	
+
 	/* Activate */
 	Term_activate(angband_term[win_idx]);
-	
+
 	/* Erase */
 	Term_clear();
-	
+
 	/* Refresh */
 	Term_fresh();
-			
+
 	/* Restore */
 	Term_activate(old);
 }

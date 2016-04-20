@@ -26,7 +26,7 @@
  *
  * It is recommended you call debug() with "DHERE" at the beginning of your
  * format string, like so:
- * 	debug(DHERE "important info");
+ *	debug(DHERE "important info");
  *
  * This gives you file and line number information.
  */

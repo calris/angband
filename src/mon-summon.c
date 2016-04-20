@@ -70,7 +70,7 @@ const char *summon_desc(int type)
  *
  * Compares the given monster to the monster type specified by
  * summon_specific_type. Returns true if the monster is eligible to
- * be summoned, false otherwise. 
+ * be summoned, false otherwise.
  */
 static bool summon_specific_okay(struct monster_race *race)
 {
@@ -161,7 +161,7 @@ int call_monster(int y, int x)
 	/* Now go through a second time and store the indices */
 	for (i = 1; i < cave_monster_max(cave); i++) {
 		mon = cave_monster(cave, i);
-		
+
 		/* Save the values of the good monster */
 		if (can_call_monster(y, x, mon)){
 			mon_indices[mon_count] = i;
@@ -283,4 +283,3 @@ int summon_specific(int y1, int x1, int lev, int type, bool delay, bool call)
 
 	return (mon->race->level);
 }
-

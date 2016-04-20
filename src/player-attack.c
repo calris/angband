@@ -128,7 +128,7 @@ static int melee_damage(struct object *obj, const struct brand *b,
  *
  * Factor in damage dice, to-dam, multiplier and any brand or slay.
  */
-static int ranged_damage(struct object *missile, struct object *launcher, 
+static int ranged_damage(struct object *missile, struct object *launcher,
 						 const struct brand *b, const struct slay *s, int mult)
 {
 	int dam;
@@ -308,7 +308,7 @@ static bool py_attack_real(int y, int x, bool *fear)
 	my_strcpy(verb, "punch", sizeof(verb));
 
 	/* Extract monster name (or "it") */
-	monster_desc(m_name, sizeof(m_name), mon, 
+	monster_desc(m_name, sizeof(m_name), mon,
 				 MDESC_OBJE | MDESC_IND_HID | MDESC_PRO_HID);
 
 	/* Auto-Recall if possible and visible */
@@ -428,7 +428,7 @@ void py_attack(int y, int x)
 	int blows = 0;
 	bool fear = false;
 	struct monster *mon = square_monster(cave, y, x);
-	
+
 	/* disturb the player */
 	disturb(player, 0);
 
@@ -444,7 +444,7 @@ void py_attack(int y, int x)
 			stop) break;
 		blows++;
 	}
-	
+
 	/* Hack - delay fear messages */
 	if (fear && mflag_has(mon->mflag, MFLAG_VISIBLE)) {
 		char m_name[80];
@@ -556,7 +556,7 @@ static void ranged_helper(struct object *obj, int dir, int range, int shots,
 			int visible = mflag_has(mon->mflag, MFLAG_VISIBLE);
 
 			bool fear = false;
-			const char *note_dies = monster_is_unusual(mon->race) ? 
+			const char *note_dies = monster_is_unusual(mon->race) ?
 				" is destroyed." : " dies.";
 
 			struct attack_result result = attack(obj, y, x);
@@ -598,14 +598,14 @@ static void ranged_helper(struct object *obj, int dir, int range, int shots,
 						monster_desc(m_name, sizeof(m_name), mon, MDESC_OBJE);
 
 						if (ranged_hit_types[j].text)
-							msgt(msg_type, "Your %s %s %s%s. %s", o_name, 
-								 hit_verb, m_name, dmg_text, 
+							msgt(msg_type, "Your %s %s %s%s. %s", o_name,
+								 hit_verb, m_name, dmg_text,
 								 ranged_hit_types[j].text);
 						else
 							msgt(msg_type, "Your %s %s %s%s.", o_name, hit_verb,
 								 m_name, dmg_text);
 					}
-					
+
 					/* Track this monster */
 					if (mflag_has(mon->mflag, MFLAG_VISIBLE)) {
 						monster_race_track(player->upkeep, mon->race);
@@ -618,9 +618,9 @@ static void ranged_helper(struct object *obj, int dir, int range, int shots,
 					message_pain(mon, dmg);
 					if (fear && mflag_has(mon->mflag, MFLAG_VISIBLE)) {
 						char m_name[80];
-						monster_desc(m_name, sizeof(m_name), mon, 
+						monster_desc(m_name, sizeof(m_name), mon,
 									 MDESC_DEFAULT);
-						add_monster_message(m_name, mon, 
+						add_monster_message(m_name, mon,
 											MON_MSG_FLEE_IN_TERROR, true);
 					}
 				}
@@ -630,7 +630,7 @@ static void ranged_helper(struct object *obj, int dir, int range, int shots,
 		}
 
 		/* Stop if non-projectable but passable */
-		if (!(square_isprojectable(cave, ny, nx))) 
+		if (!(square_isprojectable(cave, ny, nx)))
 			break;
 	}
 

@@ -124,7 +124,7 @@ static const menu_iter menu_iter_actions =
 /* ------------------------------------------------------------------------
  * MN_STRINGS HELPER FUNCTIONS
  *
- * MN_STRINGS is the type of menu iterator that displays a simple list of 
+ * MN_STRINGS is the type of menu iterator that displays a simple list of
  * strings - no action is associated, as selection will just return the index.
  * ------------------------------------------------------------------------ */
 static void display_string(struct menu *m, int oid, bool cursor,
@@ -137,11 +137,11 @@ static void display_string(struct menu *m, int oid, bool cursor,
 
 /* Virtual function table for displaying arrays of strings */
 static const menu_iter menu_iter_strings =
-{ 
+{
 	NULL,              /* get_tag() */
 	NULL,              /* valid_row() */
 	display_string,    /* display_row() */
-	NULL, 	           /* row_handler() */
+	NULL,	           /* row_handler() */
 	NULL
 };
 
@@ -461,7 +461,7 @@ static bool no_valid_row(struct menu *menu, int count)
 	return true;
 }
 
-/* 
+/*
  * Return a new position in the menu based on the key
  * pressed and the flags and various handler functions.
  */
@@ -609,7 +609,7 @@ void menu_refresh(struct menu *menu, bool reset_screen)
 
 /**
  * Handle mouse input in a menu.
- * 
+ *
  * Mouse output is either moving, selecting, escaping, or nothing.  Returns
  * true if something changes as a result of the click.
  */
@@ -630,7 +630,7 @@ bool menu_handle_mouse(struct menu *menu, const ui_event *in,
 
 		new_cursor = menu->skin->get_cursor(in->mouse.y, in->mouse.x,
 				count, menu->top, &menu->active);
-	
+
 		if (is_valid_row(menu, new_cursor)) {
 			if (new_cursor == menu->cursor || !(menu->flags & MN_DBL_TAP))
 				out->type = EVT_SELECT;
@@ -702,7 +702,7 @@ bool menu_handle_keypress(struct menu *menu, const ui_event *in,
 			menu->cursor += menu->active.page_rows;
 			if (menu->cursor >= total - 1) menu->cursor = 0;
 			menu->top = menu->cursor;
-	
+
 			out->type = EVT_MOVE;
 		} else {
 			eat = true;
@@ -726,7 +726,7 @@ bool menu_handle_keypress(struct menu *menu, const ui_event *in,
 					else
 						menu->cursor += ddy[dir];
 				}
-			
+
 				assert(menu->cursor >= 0);
 				assert(menu->cursor < count);
 			}
@@ -1134,7 +1134,7 @@ int menu_dynamic_select(struct menu *m)
 	for (entry = menu_priv(m); cursor; cursor--) {
 		entry = entry->next;
 		assert(entry);
-	}	
+	}
 
 	return entry->value;
 }
@@ -1150,4 +1150,3 @@ void menu_dynamic_free(struct menu *m)
 	}
 	mem_free(m);
 }
-

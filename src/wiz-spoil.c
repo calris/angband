@@ -398,7 +398,7 @@ static void spoil_artifact(const char *fname)
 			spoiler_underline(buf2, '-');
 
 			/* Cheat extra knowledge */
-			object_know_all_but_flavor(obj); 
+			object_know_all_but_flavor(obj);
 
 			/* Temporarily blank the artifact flavour text - spoilers
 			   spoil the mechanics, not the atmosphere. */

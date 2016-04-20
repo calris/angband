@@ -80,7 +80,7 @@ static quality_ignore_struct quality_mapping[] =
 	{ ITYPE_DIGGER,					TV_DIGGING,		"" },
 	{ ITYPE_RING,					TV_RING,		"" },
 	{ ITYPE_AMULET,					TV_AMULET,		"" },
-	{ ITYPE_LIGHT, 					TV_LIGHT, 		"" },
+	{ ITYPE_LIGHT,					TV_LIGHT,		"" },
 };
 
 
@@ -114,7 +114,7 @@ int num_ego_types;
 
 
 /**
- * Initialise the ignore package 
+ * Initialise the ignore package
  */
 void init_ignore(void)
 {
@@ -385,7 +385,7 @@ byte ignore_level_of(const struct object *obj)
 	if (tval_is_jewelry(obj)) {
 		/* CC: average jewelry has at least one known positive modifier */
 		for (i = 0; i < OBJ_MOD_MAX; i++)
-			if ((object_this_mod_is_visible(obj, i)) && 
+			if ((object_this_mod_is_visible(obj, i)) &&
 				(obj->modifiers[i] > 0))
 				return IGNORE_AVERAGE;
 
@@ -393,7 +393,7 @@ byte ignore_level_of(const struct object *obj)
 			return IGNORE_AVERAGE;
 		if ((object_attack_plusses_are_visible(obj) &&
 				((obj->to_h < 0) || (obj->to_d < 0))) ||
-		    	(object_defence_plusses_are_visible(obj) && obj->to_a < 0))
+			(object_defence_plusses_are_visible(obj) && obj->to_a < 0))
 			return IGNORE_BAD;
 
 		return IGNORE_AVERAGE;
@@ -412,7 +412,7 @@ byte ignore_level_of(const struct object *obj)
 		return IGNORE_AVERAGE;
 	}
 
-	/* We need to redefine "bad" 
+	/* We need to redefine "bad"
 	 * At the moment we use "all modifiers known and negative" */
 	for (i = 0; i < OBJ_MOD_MAX; i++) {
 		if (!object_this_mod_is_visible(obj, i) ||
@@ -464,7 +464,7 @@ byte ignore_level_of(const struct object *obj)
 				if ((object_attack_plusses_are_visible(obj) ||
 						randcalc_valid(obj->kind->to_h, obj->to_h) ||
 						randcalc_valid(obj->kind->to_d, obj->to_d)) &&
-				    	(object_defence_plusses_are_visible(obj) ||
+					(object_defence_plusses_are_visible(obj) ||
 						randcalc_valid(obj->kind->to_a, obj->to_a))) {
 					int isgood = is_object_good(obj);
 					if (isgood > 0) {

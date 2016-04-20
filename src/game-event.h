@@ -28,8 +28,8 @@ typedef enum game_event_type
 {
 	EVENT_MAP = 0,		/* Some part of the map has changed. */
 
-	EVENT_STATS,  		/* One or more of the stats. */
-	EVENT_HP,	   	/* HP or MaxHP. */
+	EVENT_STATS,		/* One or more of the stats. */
+	EVENT_HP,		/* HP or MaxHP. */
 	EVENT_MANA,		/* Mana or MaxMana. */
 	EVENT_AC,		/* Armour Class. */
 	EVENT_EXPERIENCE,	/* Experience or MaxExperience. */
@@ -120,7 +120,7 @@ typedef union
 		void *xtra;
 	} birthstage;
 
-  	struct
+	struct
 	{
 		int *stats;
 		int remaining;

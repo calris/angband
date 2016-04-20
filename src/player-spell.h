@@ -37,4 +37,3 @@ extern bool cast_spell(int tval, int index, int dir);
 extern bool spell_needs_aim(int spell_index);
 extern bool spell_is_identify(int spell_index);
 extern expression_base_value_f spell_value_base_by_name(const char *name);
-

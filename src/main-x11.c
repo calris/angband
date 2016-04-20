@@ -583,9 +583,9 @@ static const char *get_default_font(int term_num)
 static unsigned int xkb_mask_modifier( XkbDescPtr xkb, const char *name )
 {
 	unsigned int mask=0;
-	
+
 	if (strcmp(name, "Caps Lock") == 0) return 2;
-	
+
 	for (int i = 0; (!mask) && (i <= XkbNumVirtualMods); i++ ) {
 		char* modStr = XGetAtomName( xkb->dpy, xkb->names->vmods[i] );
 		if (modStr) {
@@ -623,7 +623,7 @@ static errr Metadpy_init_2(Display *dpy, const char *name)
 {
 	metadpy *m = Metadpy;
 	XkbDescPtr xkb;
-	
+
 	/* Attempt to create a display if none given, otherwise use the given one */
 	if (!dpy) {
 		/* Attempt to open the display */
@@ -2602,16 +2602,16 @@ errr init_x11(int argc, char **argv)
 			while (file_getl(fff, buf, sizeof(buf))) {
 				/* Count lines */
 				line++;
-	
+
 				/* Skip "empty" lines */
 				if (!buf[0]) continue;
-	
+
 				/* Skip "blank" lines */
 				if (isspace((unsigned char)buf[0])) continue;
-	
+
 				/* Skip comments */
 				if (buf[0] == '#') continue;
-	
+
 				/* Number of terminal windows */
 				if (prefix(buf, "TERM_WINS")) {
 					str = strstr(buf, "=");
@@ -2620,7 +2620,7 @@ errr init_x11(int argc, char **argv)
 					continue;
 				}
 			}
-	
+
 			/* Close */
 			(void)file_close(fff);
 		}
@@ -2660,7 +2660,7 @@ errr init_x11(int argc, char **argv)
 		/* Default to monochrome */
 		pixel = ((i == 0) ? Metadpy->bg : Metadpy->fg);
 
-		/* Handle color 
+		/* Handle color
 		   This block of code has added support for background colours
                    (from Sil) */
 		if (Metadpy->color) {
@@ -2727,5 +2727,3 @@ errr init_x11(int argc, char **argv)
 }
 
 #endif /* USE_X11 */
-
-

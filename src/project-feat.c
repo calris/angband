@@ -538,7 +538,7 @@ static const project_feature_handler_f feature_handlers[] = {
 	#define PROJ_ENV(a, col, desc) project_feature_handler_##a,
 	#include "list-project-environs.h"
 	#undef PROJ_ENV
-	#define PROJ_MON(a, obv, desc) NULL, 
+	#define PROJ_MON(a, obv, desc) NULL,
 	#include "list-project-monsters.h"
 	#undef PROJ_MON
 	NULL
@@ -584,4 +584,3 @@ bool project_f(int who, int r, int y, int x, int dam, int typ)
 	/* Return "Anything seen?" */
 	return context.obvious;
 }
-

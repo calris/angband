@@ -45,7 +45,7 @@ void object_base_name(char *buf, size_t max, int tval, bool plural)
 	struct object_base *kb = &kb_info[tval];
 	size_t end = 0;
 
-	if (kb->name && kb->name[0]) 
+	if (kb->name && kb->name[0])
 		end = obj_desc_name_format(buf, max, end, kb->name, NULL, plural);
 }
 
@@ -89,7 +89,7 @@ static const char *obj_desc_get_modstr(const struct object_kind *kind)
 /**
  * An object's basic name - a generic name for flavored objects (with the
  * actual name added later depending on awareness, the name from object.txt
- * for almost everything else, and a bit extra for books. 
+ * for almost everything else, and a bit extra for books.
  */
 static const char *obj_desc_get_basename(const struct object *obj, bool aware,
 										 bool terse, int mode)
@@ -207,7 +207,7 @@ static size_t obj_desc_name_prefix(char *buf, size_t max, size_t end,
 			if (an)
 				strnfcat(buf, max, &end, "an ");
 			else
-				strnfcat(buf, max, &end, "a ");			
+				strnfcat(buf, max, &end, "a ");
 		}
 	}
 
@@ -424,7 +424,7 @@ static size_t obj_desc_chest(const struct object *obj, char *buf, size_t max,
  * Describe combat properties of an item - damage dice, to-hit, to-dam, armor
  * class, missile multipler
  */
-static size_t obj_desc_combat(const struct object *obj, char *buf, size_t max, 
+static size_t obj_desc_combat(const struct object *obj, char *buf, size_t max,
 		size_t end, bool spoil)
 {
 	bitflag flags_known[OF_SIZE];

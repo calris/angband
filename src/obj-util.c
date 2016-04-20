@@ -91,7 +91,7 @@ static void flavor_assign_random(byte tval)
 			quit_fmt("Not enough flavors for tval %d.", tval);
 
 		choice = randint0(flavor_count);
-	
+
 		for (f = flavors; f; f = f->next) {
 			if (f->tval != tval || f->sval != SV_UNKNOWN)
 				continue;
@@ -280,7 +280,7 @@ bool is_unknown(const struct object *obj)
 	struct grid_data gd = { 0 };
 	map_info(obj->iy, obj->ix, &gd);
 	return gd.unseen_object;
-}	
+}
 
 
 /**
@@ -355,7 +355,7 @@ int lookup_artifact_name(const char *name)
 		/* Test for equality */
 		if (art->name && streq(name, art->name))
 			return i;
-		
+
 		/* Test for close matches */
 		if (strlen(name) >= 3 && art->name && my_stristr(art->name, name)
 			&& a_idx == -1)
@@ -425,8 +425,8 @@ static int compare_types(const struct object *o1, const struct object *o2)
 		return CMP(o1->sval, o2->sval);
 	else
 		return CMP(o1->tval, o2->tval);
-}	
-	
+}
+
 
 /**
  * Sort comparator for objects
@@ -527,7 +527,7 @@ bool obj_can_refill(const struct object *obj)
 		if (tval_is_fuel(obj))
 			return true;
 		else if (tval_is_light(obj) && of_has(obj->flags, OF_TAKES_FUEL) &&
-				 obj->timeout > 0) 
+				 obj->timeout > 0)
 			return true;
 	}
 
@@ -615,7 +615,7 @@ struct effect *object_effect(const struct object *obj)
 
 /**
  * Does the given object need to be aimed?
- */ 
+ */
 bool obj_needs_aim(struct object *obj)
 {
 	struct effect *effect = object_effect(obj);
@@ -756,7 +756,7 @@ bool recharge_timeout(struct object *obj)
 	/* Find the number of charging items */
 	charging_before = number_charging(obj);
 
-	/* Nothing to charge */	
+	/* Nothing to charge */
 	if (charging_before == 0)
 		return false;
 
@@ -793,5 +793,3 @@ bool verify_object(const char *prompt, struct object *obj)
 	/* Query */
 	return (get_check(out_val));
 }
-
-

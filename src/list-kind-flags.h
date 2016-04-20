@@ -5,7 +5,7 @@
  * These are flags that go on object kinds, egos and artifacts, but not on
  * individual objects.
  *
- * Changing flag order will break savefiles. Flags below start from 1 on 
+ * Changing flag order will break savefiles. Flags below start from 1 on
  * line 13, so a flag's sequence number is its line number minus 12.
  */
 /* symbol			message */

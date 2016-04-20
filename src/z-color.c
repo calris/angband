@@ -347,4 +347,3 @@ void build_gamma_table(int gamma)
 		gamma_table[i] = (byte)(((long)(value / 256) * i) / 256);
 	}
 }
-

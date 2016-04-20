@@ -10,10 +10,10 @@
  * flag    - allowed racial flag if any
  * description
  *
- * Note that if base1 and flag are both set, any allowed race must the flag 
+ * Note that if base1 and flag are both set, any allowed race must the flag
  * and a valid base
  */
-/*  name	message type		uniq	base1			base2	base3	flag 		description*/
+/*  name	message type		uniq	base1			base2	base3	flag		description*/
 S(ANY,		MSG_SUM_MONSTER,	true,	NULL,			NULL,	NULL,	0,			"a monster")
 S(KIN,		MSG_SUM_MONSTER,	false,	NULL,			NULL,	NULL,	0,			"similar monsters")
 S(MONSTER,	MSG_SUM_MONSTER,	false,	NULL,			NULL,	NULL,	0,			"a monster")

@@ -282,7 +282,7 @@ bool append_random_slay(struct slay **current, char **name)
 
 /**
  * Count the brands in a struct brand
- * \param brands 
+ * \param brands
  */
 int brand_count(struct brand *brands)
 {
@@ -298,7 +298,7 @@ int brand_count(struct brand *brands)
 
 /**
  * Count the slays in a struct slay
- * \param slays 
+ * \param slays
  */
 int slay_count(struct slay *slays)
 {
@@ -416,7 +416,7 @@ struct slay *slay_collect(struct slay *s, const struct object *obj)
 
 /**
  * React to slays which hurt a monster
- * 
+ *
  * \param slay is the slay we're testing for effectiveness
  * \param mon is the monster we're testing for being slain
  */
@@ -545,8 +545,8 @@ void object_notice_slays(struct object *obj, const struct monster *mon)
  * the ones we *already* know about
  */
 void improve_attack_modifier(struct object *obj, const struct monster *mon,
-							 const struct brand **brand_used, 
-							 const struct slay **slay_used, 
+							 const struct brand **brand_used,
+							 const struct slay **slay_used,
 							 char *verb, bool range, bool real)
 {
 	struct monster_lore *lore = get_lore(mon->race);
@@ -565,7 +565,7 @@ void improve_attack_modifier(struct object *obj, const struct monster *mon,
 				best_mult = b->multiplier;
 				*brand_used = b;
 				if (b->multiplier < 3)
-					my_strcpy(verb, brand_names[b->element].melee_verb_weak, 
+					my_strcpy(verb, brand_names[b->element].melee_verb_weak,
 							  20);
 				else
 					my_strcpy(verb, brand_names[b->element].melee_verb, 20);
@@ -620,7 +620,7 @@ void improve_attack_modifier(struct object *obj, const struct monster *mon,
 
 /**
  * React to slays which hurt a monster
- * 
+ *
  * \param obj is the object we're testing for slays
  * \param mon is the monster we're testing for being slain
  */
@@ -745,7 +745,7 @@ void wipe_slays(struct slay *slays)
 
 /**
  * Check the slay cache for a combination of slays and brands
- * 
+ *
  * \param obj is the object the combination is on
  * \return the power value of the combination
  */
@@ -755,7 +755,7 @@ s32b check_slay_cache(const struct object *obj)
 
 	while ((slay_cache[i].brands != NULL) || (slay_cache[i].slays != NULL)) {
 		if (brands_are_equal(obj->brands, slay_cache[i].brands) &&
-			slays_are_equal(obj->slays, slay_cache[i].slays)) 
+			slays_are_equal(obj->slays, slay_cache[i].slays))
 			break;
 		i++;
 	}

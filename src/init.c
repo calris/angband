@@ -310,13 +310,13 @@ static enum parser_error write_dummy_object_record(struct artifact *art, const c
  * Find the default paths to all of our important sub-directories.
  *
  * All of the sub-directories should, by default, be located inside
- * the main directory, whose location is very system dependant and is 
+ * the main directory, whose location is very system dependant and is
  * set by the ANGBAND_PATH environment variable, if it exists. (On multi-
  * user systems such as Linux this is not the default - see config.h for
  * more info.)
  *
  * This function takes a writable buffers, initially containing the
- * "path" to the "config", "lib" and "data" directories, for example, 
+ * "path" to the "config", "lib" and "data" directories, for example,
  * "/etc/angband/", "/usr/share/angband" and "/var/games/angband" -
  * or a system dependant string, for example, ":lib:".  The buffer
  * must be large enough to contain at least 32 more characters.
@@ -425,8 +425,8 @@ void init_file_paths(const char *configpath, const char *libpath, const char *da
 
 /**
  * Create any missing directories. We create only those dirs which may be
- * empty (user/, save/, scores/, info/, help/). The others are assumed 
- * to contain required files and therefore must exist at startup 
+ * empty (user/, save/, scores/, info/, help/). The others are assumed
+ * to contain required files and therefore must exist at startup
  * (edit/, pref/, file/, xtra/).
  *
  * ToDo: Only create the directories when actually writing files.
@@ -1774,7 +1774,7 @@ static enum parser_error parse_artifact_msg(struct parser *p) {
 
 static enum parser_error parse_artifact_values(struct parser *p) {
 	struct artifact *a = parser_priv(p);
-	char *s; 
+	char *s;
 	char *t;
 	assert(a);
 
@@ -2212,7 +2212,7 @@ static errr run_parse_trap(struct parser *p) {
 
 static errr finish_parse_trap(struct parser *p) {
 	struct trap_kind *t, *n;
-	
+
 	/* scan the list for the max id */
 	z_info->trap_max = 0;
 	t = parser_priv(p);
@@ -2660,7 +2660,7 @@ static enum parser_error parse_ego_flags_off(struct parser *p) {
 
 static enum parser_error parse_ego_values(struct parser *p) {
 	struct ego_item *e = parser_priv(p);
-	char *s; 
+	char *s;
 	char *t;
 
 	if (!e)
@@ -2722,7 +2722,7 @@ static enum parser_error parse_ego_values(struct parser *p) {
 
 static enum parser_error parse_ego_min_val(struct parser *p) {
 	struct ego_item *e = parser_priv(p);
-	char *s; 
+	char *s;
 	char *t;
 
 	if (!e)
@@ -3741,7 +3741,7 @@ static enum parser_error parse_history_chart(struct parser *p) {
 	struct history_chart *c;
 	struct history_entry *e = mem_zalloc(sizeof *e);
 	unsigned int idx = parser_getuint(p, "chart");
-	
+
 	if (!(c = findchart(oc, idx))) {
 		c = mem_zalloc(sizeof *c);
 		c->next = oc;
@@ -4030,7 +4030,7 @@ static errr run_parse_pain(struct parser *p) {
 
 static errr finish_parse_pain(struct parser *p) {
 	struct monster_pain *mp, *n;
-		
+
 	/* scan the list for the max id */
 	z_info->mp_max = 0;
 	mp = parser_priv(p);
@@ -4195,7 +4195,7 @@ static enum parser_error parse_pit_flags_req(struct parser *p) {
 		}
 		s = strtok(NULL, " |");
 	}
-	
+
 	mem_free(flags);
 	return PARSE_ERROR_NONE;
 }
@@ -4218,7 +4218,7 @@ static enum parser_error parse_pit_flags_ban(struct parser *p) {
 		}
 		s = strtok(NULL, " |");
 	}
-	
+
 	mem_free(flags);
 	return PARSE_ERROR_NONE;
 }
@@ -4241,7 +4241,7 @@ static enum parser_error parse_pit_spell_req(struct parser *p) {
 		}
 		s = strtok(NULL, " |");
 	}
-	
+
 	mem_free(flags);
 	return PARSE_ERROR_NONE;
 }
@@ -4264,7 +4264,7 @@ static enum parser_error parse_pit_spell_ban(struct parser *p) {
 		}
 		s = strtok(NULL, " |");
 	}
-	
+
 	mem_free(flags);
 	return PARSE_ERROR_NONE;
 }
@@ -4290,10 +4290,10 @@ struct parser *init_parse_pit(void) {
 static errr run_parse_pit(struct parser *p) {
 	return parse_file_quit_not_found(p, "pit");
 }
- 
+
 static errr finish_parse_pit(struct parser *p) {
 	struct pit_profile *pit, *n;
-		
+
 	/* scan the list for the max id */
 	z_info->pit_max = 0;
 	pit = parser_priv(p);
@@ -4324,13 +4324,13 @@ static errr finish_parse_pit(struct parser *p) {
 static void cleanup_pits(void)
 {
 	int idx;
-	
+
 	for (idx = 0; idx < z_info->pit_max; idx++) {
 		struct pit_profile *pit = &pit_info[idx];
 		struct pit_color_profile *c, *cn;
 		struct pit_forbidden_monster *m, *mn;
 		struct pit_monster_profile *b, *bn;
-		
+
 		c = pit->colors;
 		while (c) {
 			cn = c->next;
@@ -4350,7 +4350,7 @@ static void cleanup_pits(void)
 			b = bn;
 		}
 		string_free((char *)pit_info[idx].name);
-		
+
 	}
 	mem_free(pit_info);
 }
@@ -4467,7 +4467,7 @@ static struct init_module *modules[] = {
  * The only input/output in this file should be via event_signal_string().
  * We cannot rely on any particular UI as this part should be UI-agnostic.
  * We also cannot rely on anything else having being initialised into any
- * particlar state.  Which is why you'd be calling this function in the 
+ * particlar state.  Which is why you'd be calling this function in the
  * first place.
  *
  * Old comment, not sure if still accurate:

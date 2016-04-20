@@ -3,7 +3,7 @@
  * \brief Dungeon monster generation
  *
  * Copyright (c) 2013
- * Nick McConnell, Leon Marrick, Ben Harrison, James E. Wilson, 
+ * Nick McConnell, Leon Marrick, Ben Harrison, James E. Wilson,
  * Robert A. Koeneke
  *
  * This work is free software; you can redistribute it and/or modify it
@@ -18,7 +18,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  *
  * Code for selecting appropriate monsters for levels when generated.  The
- * intent is to enable easy theming of monsters in sections of the dungeon 
+ * intent is to enable easy theming of monsters in sections of the dungeon
  * level, or even whole levels.
  */
 
@@ -58,7 +58,7 @@ struct pit_profile *lookup_pit_profile(const char *name)
 }
 
 /**
- * This function selects monsters by monster base symbol 
+ * This function selects monsters by monster base symbol
  * (may be any of the characters allowed)
  * \param race the monster race being tested for suitability
  * \return true if the race is accepted
@@ -93,7 +93,7 @@ static bool mon_select(struct monster_race *race)
 }
 
 /**
- * Accept characters representing a race or group of monsters and 
+ * Accept characters representing a race or group of monsters and
  * an (adjusted) depth, and use these to set values for required
  * monster base symbol.
  *
@@ -104,12 +104,12 @@ static bool mon_select(struct monster_race *race)
  *
  * This code has been adapted from Oangband code to make use of monster bases.
  *
- * This function is called to set restrictions, point the monster 
- * allocation function to mon_select() or mon_pit_hook(), and remake monster 
- * allocation.  
+ * This function is called to set restrictions, point the monster
+ * allocation function to mon_select() or mon_pit_hook(), and remake monster
+ * allocation.
  * It undoes all of this things when called with monster_type NULL.
  * If called with a pit profile name, it will get monsters from that profile.
- * If called with monster_type "random", it will get a random monster base and 
+ * If called with monster_type "random", it will get a random monster base and
  * describe the monsters by its name (for use by cheat_room).
  */
 bool mon_restrict(const char *monster_type, int depth, bool unique_ok)
@@ -179,9 +179,9 @@ bool mon_restrict(const char *monster_type, int depth, bool unique_ok)
 
 
 /**
- * Place monsters, up to the number asked for, in a rectangle centered on 
- * y0, x0.  Accept values for monster depth, symbol, and maximum vertical 
- * and horizontal displacement.  Call monster restriction functions if 
+ * Place monsters, up to the number asked for, in a rectangle centered on
+ * y0, x0.  Accept values for monster depth, symbol, and maximum vertical
+ * and horizontal displacement.  Call monster restriction functions if
  * needed.
  * \param c the current chunk being generated
  * \param type the type of monster (see comments to mon_restrict())
@@ -193,10 +193,10 @@ bool mon_restrict(const char *monster_type, int depth, bool unique_ok)
  * \param dx the dimensions of the rectangle
  * \param origin the origin for monster drops
  *
- * Return prematurely if the code starts looping too much (this may happen 
+ * Return prematurely if the code starts looping too much (this may happen
  * if y0 or x0 are out of bounds, or the area is already occupied).
  */
-void spread_monsters(struct chunk *c, const char *type, int depth, int num, 
+void spread_monsters(struct chunk *c, const char *type, int depth, int num,
 					 int y0, int x0, int dy, int dx, byte origin)
 {
     int i, j;			/* Limits on loops */
@@ -256,7 +256,7 @@ void spread_monsters(struct chunk *c, const char *type, int depth, int num,
 
 
 /**
- * To avoid rebuilding the monster list too often (which can quickly 
+ * To avoid rebuilding the monster list too often (which can quickly
  * get expensive), we handle monsters of a specified race separately.
  *
  * \param c the current chunk being generated
@@ -325,7 +325,7 @@ void get_vault_monsters(struct chunk *c, char racial_symbol[], char *vault_type,
  * \param name the name of the monster type for use in mon_select()
  * \param area the total room area, used for scaling monster quantity
  */
-void get_chamber_monsters(struct chunk *c, int y1, int x1, int y2, int x2, 
+void get_chamber_monsters(struct chunk *c, int y1, int x1, int y2, int x2,
 						  char *name, int area)
 {
 	int i, y, x;
@@ -391,4 +391,3 @@ void get_chamber_monsters(struct chunk *c, int y1, int x1, int y2, int x2,
 	/* Remove our restrictions. */
 	(void) mon_restrict(NULL, depth, false);
 }
-

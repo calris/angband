@@ -5,10 +5,10 @@
  * index: the mod number
  * power: base power rating for the mod (0 means it is unused or derived)
  * mult: weight of this modifier relative to others
- * message: what is printed when the mod is IDd (but see also identify.c 
+ * message: what is printed when the mod is IDd (but see also identify.c
  * and list-slays.h)
  */
-/* index       		power	mult	name */
+/* index		power	mult	name */
 OBJ_MOD(STEALTH,    8,		12,		"stealth")
 OBJ_MOD(SEARCH,     2,		5,		"searching skill")
 OBJ_MOD(INFRA,      4,		8,		"infravision")

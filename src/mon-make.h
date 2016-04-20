@@ -31,9 +31,9 @@ struct monster_race *get_mon_num(int level);
 s16b place_monster(struct chunk *c, int y, int x, struct monster *mon,
 				   byte origin);
 int mon_hp(const struct monster_race *race, aspect hp_aspect);
-bool place_new_monster(struct chunk *, int y, int x, struct monster_race *race, 
+bool place_new_monster(struct chunk *, int y, int x, struct monster_race *race,
 					   bool sleep, bool group_okay, byte origin);
-bool pick_and_place_monster(struct chunk *c, int y, int x, int depth, 
+bool pick_and_place_monster(struct chunk *c, int y, int x, int depth,
 							bool sleep,	bool group_okay, byte origin);
 bool pick_and_place_distant_monster(struct chunk *c, struct loc loc, int dis,
 									bool sleep, int depth);

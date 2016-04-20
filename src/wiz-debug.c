@@ -763,7 +763,7 @@ static bool wiz_create_item_action(struct menu *m, const ui_event *e, int oid)
 
 	/* Add a flag for an "All <tval>" item to create all svals of that tval. The
 	 * tval is stored (in a super hacky way) beyond the end of the valid menu
-	 * items. The menu won't render it, but we can still get to it without 
+	 * items. The menu won't render it, but we can still get to it without
 	 * doing a bunch of work. */
 	choice[num++] = WIZ_CREATE_ALL_MENU_ITEM;
 	choice[num] = oid;
@@ -844,7 +844,7 @@ static void wiz_create_item(bool art)
 	menu_select(menu, 0, false);
 
 	screen_load();
-	
+
 	/* Redraw map */
 	player->upkeep->redraw |= (PR_MAP | PR_ITEMLIST);
 	handle_stuff(player);
@@ -1400,7 +1400,7 @@ static void do_cmd_wiz_cure_all(void)
 
 	/* Redraw everything */
 	do_cmd_redraw();
-	
+
 	/* Give the player some feedback */
 	msg("You feel *much* better!");
 }
@@ -1470,7 +1470,7 @@ static void do_cmd_wiz_learn(int lev)
 		if (kind->level <= lev)
 			kind->aware = true;
 	}
-	
+
 	msg("You now know about many items!");
 }
 
@@ -1817,7 +1817,7 @@ static void wiz_test_kind(int tval)
 /**
  * Display the debug commands help file.
  */
-static void do_cmd_wiz_help(void) 
+static void do_cmd_wiz_help(void)
 {
 	char buf[80];
 	strnfmt(buf, sizeof(buf), "debug.txt");
@@ -1853,7 +1853,7 @@ static void do_cmd_wiz_advance(void)
 
 	/* Get some awesome equipment */
 	/* Artifacts: 3, 5, 12, ...*/
-	
+
 	/* Update stuff */
 	player->upkeep->update |= (PU_BONUS | PU_HP | PU_SPELLS);
 
@@ -1976,7 +1976,7 @@ void get_debug_command(void)
 			do_cmd_wiz_advance();
 			break;
 		}
-		
+
 		/* Teleport to target */
 		case 'b':
 		{
@@ -2010,7 +2010,7 @@ void get_debug_command(void)
 			effect_simple(EF_DETECT_INVISIBLE_MONSTERS, "22d40", 0, 0, 0, NULL);
 			break;
 		}
-		
+
 		/* Test for disconnected dungeon */
 		case 'D':
 		{
@@ -2099,7 +2099,7 @@ void get_debug_command(void)
 		}
 
 		/* Work out what the kayer is typing */
-		case 'L': 
+		case 'L':
 		{
 			do_cmd_keylog();
 			break;
@@ -2133,8 +2133,8 @@ void get_debug_command(void)
 					r = &r_info[r_idx];
 				else
 					/* If not, find the monster with that name */
-					r = lookup_monster(name); 
-					
+					r = lookup_monster(name);
+
 				player->upkeep->redraw |= (PR_MAP | PR_MONLIST);
 			}
 
@@ -2145,7 +2145,7 @@ void get_debug_command(void)
 				do_cmd_wiz_named(r, true);
 			else
 				msg("No monster found.");
-			
+
 			break;
 		}
 
@@ -2170,7 +2170,7 @@ void get_debug_command(void)
 			pit_stats();
 			break;
 		}
-		
+
 		/* Query the dungeon */
 		case 'q':
 		{
@@ -2199,7 +2199,7 @@ void get_debug_command(void)
 			else if (sym == 's' || sym == 'S')
 			{
 				char name[80] = "";
-					
+
 				/* Avoid the prompt getting in the way */
 				screen_save();
 
@@ -2215,7 +2215,7 @@ void get_debug_command(void)
 						race = &r_info[r_idx];
 					else
 						/* If not, find the monster with that name */
-						race = lookup_monster(name); 
+						race = lookup_monster(name);
 				}
 
 				/* Reload the screen */
@@ -2242,7 +2242,7 @@ void get_debug_command(void)
 			do_cmd_wiz_summon(n);
 			break;
 		}
-		
+
 		/* Collect stats (S) */
 		case 'S':
 		{
@@ -2313,7 +2313,7 @@ void get_debug_command(void)
 		case 'W':
 		{
 			const struct monster_race *race = NULL;
-			s16b r_idx = 0; 
+			s16b r_idx = 0;
 
 			char sym;
 			const char *prompt =
@@ -2343,9 +2343,9 @@ void get_debug_command(void)
 						race = &r_info[r_idx];
 					else
 						/* If not, find the monster with that name */
-						race = lookup_monster(name); 
+						race = lookup_monster(name);
 				}
-					
+
 				/* Reload the screen */
 				screen_load();
 
@@ -2355,7 +2355,7 @@ void get_debug_command(void)
 				else
 					msg("No monster found.");
 			}
-	
+
 			break;
 		}
 

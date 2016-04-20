@@ -60,9 +60,9 @@ void do_cmd_go_up(struct command *cmd)
 		msg("Nothing happens!");
 		return;
 	}
-	
+
 	ascend_to = dungeon_get_next_level(player->depth, -1);
-	
+
 	if (ascend_to == player->depth) {
 		msg("You can't go up from here!");
 		return;
@@ -77,7 +77,7 @@ void do_cmd_go_up(struct command *cmd)
 	/* Create a way back */
 	player->upkeep->create_up_stair = false;
 	player->upkeep->create_down_stair = true;
-	
+
 	/* Change level */
 	dungeon_change_level(ascend_to);
 }
@@ -449,7 +449,7 @@ static bool do_cmd_close_test(int y, int x)
 		return (false);
 	}
 
- 	/* Require open/broken door */
+	/* Require open/broken door */
 	if (!square_isopendoor(cave, y, x) && !square_isbrokendoor(cave, y, x)) {
 		/* Message */
 		msg("You see nothing there to close.");
@@ -657,7 +657,7 @@ static bool do_cmd_tunnel_aux(int y, int x)
 				if (!ignore_item_ok(square_object(cave, y, x)) &&
 					square_isseen(cave, y, x))
 					msg("You have found something!");
-			} 
+			}
 		} else if (gold) {
 			/* Found treasure */
 			place_gold(cave, y, x, player->depth, ORIGIN_FLOOR);
@@ -1109,7 +1109,7 @@ void move_player(int dir, bool disarm)
 			player->upkeep->redraw |= (PR_DTRAP);
 
 		/* Disturb player if the player is about to leave the area */
-		if (player->upkeep->running && !player->upkeep->running_firststep && 
+		if (player->upkeep->running && !player->upkeep->running_firststep &&
 			old_dtrap && !new_dtrap) {
 			disturb(player, 0);
 			return;
@@ -1237,7 +1237,7 @@ void do_cmd_walk(struct command *cmd)
 	/* Confused movements use energy no matter what */
 	if (player_confuse_dir(player, &dir, false))
 		player->upkeep->energy_use = z_info->move_energy;
-	
+
 	/* Verify walkability */
 	y = player->py + ddy[dir];
 	x = player->px + ddx[dir];
@@ -1383,9 +1383,9 @@ void do_cmd_rest(struct command *cmd)
 	if (cmd_get_arg_choice(cmd, "choice", &n) != CMD_OK)
 		return;
 
-	/* 
-	 * A little sanity checking on the input - only the specified negative 
-	 * values are valid. 
+	/*
+	 * A little sanity checking on the input - only the specified negative
+	 * values are valid.
 	 */
     if (n < 0 && !player_resting_is_special(n))
         return;
@@ -1466,7 +1466,7 @@ static const char *obj_feeling_text[] =
  */
 static const char *mon_feeling_text[] =
 {
-	/* first string is just a place holder to 
+	/* first string is just a place holder to
 	 * maintain symmetry with obj_feeling.
 	 */
 	"You are still uncertain about this place",
@@ -1538,4 +1538,3 @@ void do_cmd_feeling(void)
 {
 	display_feeling(false);
 }
-

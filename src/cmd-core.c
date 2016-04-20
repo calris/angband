@@ -174,10 +174,10 @@ errr cmdq_push_copy(struct command *cmd)
 
 		if (!repeat_prev_allowed) return 1;
 
-		/* If we're repeating a command, we duplicate the previous command 
+		/* If we're repeating a command, we duplicate the previous command
 		   in the next command "slot". */
 		if (cmd_prev < 0) cmd_prev = CMD_QUEUE_SIZE - 1;
-		
+
 		if (cmd_queue[cmd_prev].code != CMD_NULL)
 			cmd_queue[cmd_head] = cmd_queue[cmd_prev];
 	}
@@ -186,7 +186,7 @@ errr cmdq_push_copy(struct command *cmd)
 	cmd_head++;
 	if (cmd_head == CMD_QUEUE_SIZE) cmd_head = 0;
 
-	return 0;	
+	return 0;
 }
 
 /**
@@ -271,7 +271,7 @@ errr cmdq_push_repeat(cmd_code c, int nrepeats)
 }
 
 /**
- * Inserts a command in the queue to be carried out. 
+ * Inserts a command in the queue to be carried out.
  */
 errr cmdq_push(cmd_code c)
 {
@@ -405,7 +405,7 @@ static int cmd_get_arg(struct command *cmd, const char *arg,
 	return CMD_ARG_NOT_PRESENT;
  }
 
- 
+
 
 /**
  * ------------------------------------------------------------------------

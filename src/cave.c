@@ -216,7 +216,7 @@ void scatter(struct chunk *c, int *yp, int *xp, int y, int x, int d, bool need_l
 
 		/* Ignore "excessively distant" locations */
 		if ((d > 1) && (distance(y, x, ny, nx) > d)) continue;
-		
+
 		/* Don't need los */
 		if (!need_los) break;
 

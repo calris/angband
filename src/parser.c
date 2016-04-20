@@ -123,7 +123,7 @@ static bool parse_random(const char *str, random_value *bonus) {
 
 	char buffer[50];
 	int i = 0, b, dn, ds, mb;
-	
+
 	const char end_chr = '|';
 	char eov;
 

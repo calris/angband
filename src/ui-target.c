@@ -99,7 +99,7 @@ void target_display_help(bool monster, bool free)
 	int wid, hgt, help_loc;
 	Term_get_size(&wid, &hgt);
 	help_loc = hgt - HELP_HEIGHT;
-	
+
 	/* Clear */
 	clear_from(help_loc);
 
@@ -136,7 +136,7 @@ void target_display_help(bool monster, bool free)
 		text_out_c(COLOUR_L_GREEN, "o");
 		text_out("' allows free selection. ");
 	}
-	
+
 	if (monster || free)
 	{
 		text_out("'");
@@ -161,7 +161,7 @@ static bool adjust_panel_help(int y, int x, bool help)
 
 	int j;
 
-	int screen_hgt_main = help ? (Term->hgt - ROW_MAP - 3) 
+	int screen_hgt_main = help ? (Term->hgt - ROW_MAP - 3)
 			 : (Term->hgt - ROW_MAP - 1);
 
 	/* Scan windows */
@@ -545,7 +545,7 @@ static ui_event target_set_interactive_aux(int y, int x, int mode)
 							(int)cave->squares[y][x].cost,
 							(int)cave->squares[y][x].when);
 				} else {
-					strnfmt(out_val, sizeof(out_val), "%s%s%s%s, %s.", 
+					strnfmt(out_val, sizeof(out_val), "%s%s%s%s, %s.",
 							s1, s2, s3, trap->kind->desc, coords);
 				}
 
@@ -556,21 +556,21 @@ static ui_event target_set_interactive_aux(int y, int x, int mode)
 
 				/* Command */
 				press = inkey_m();
-		
+
 				/* Stop on everything but "return"/"space" */
 				if ((press.key.code != KC_ENTER) && (press.key.code != ' '))
 					break;
-		
+
 				/* Sometimes stop at "space" key */
 				if ((press.key.code == ' ') && !(mode & (TARGET_LOOK)))
 					break;
 			}
 		}
-	
+
 		/* Double break */
 		if (square_isvisibletrap(cave, y, x))
 			break;
-	
+
 		/* Scan all sensed objects in the grid */
 		floor_num = scan_distant_floor(floor_list, floor_max, y, x);
 		if ((floor_num > 0) &&
@@ -604,7 +604,7 @@ static ui_event target_set_interactive_aux(int y, int x, int mode)
 
 					/* Display objects */
 					if (((press.type == EVT_MOUSE) && (press.mouse.button == 1)
-						 && (KEY_GRID_X(press) == x) && 
+						 && (KEY_GRID_X(press) == x) &&
 						 (KEY_GRID_Y(press) == y)) ||
 						((press.type == EVT_KBRD) && (press.key.code == 'r'))) {
 						int rdone = 0;
@@ -721,7 +721,7 @@ static ui_event target_set_interactive_aux(int y, int x, int mode)
 				if (press.mouse.button != 2)
 					break;
 		} else {
-    			if (press.key.code != KC_ENTER) break;
+			if (press.key.code != KC_ENTER) break;
 		}
 	}
 
@@ -822,7 +822,7 @@ static int draw_path(u16b path_n, struct loc *path_g, wchar_t *c, int *a,
 		 else if (on_screen) break;
 		 else continue;
 
-	 	/* Find the position on-screen */
+		/* Find the position on-screen */
 		move_cursor_relative(y,x);
 
 		/* This square is being overwritten, so save the original. */
@@ -831,7 +831,7 @@ static int draw_path(u16b path_n, struct loc *path_g, wchar_t *c, int *a,
 		/* Choose a colour. */
 		if (mon && mflag_has(mon->mflag, MFLAG_VISIBLE)) {
 			/* Mimics act as objects */
-			if (rf_has(mon->race->flags, RF_UNAWARE)) 
+			if (rf_has(mon->race->flags, RF_UNAWARE))
 				colour = COLOUR_YELLOW;
 			else
 				/* Visible monsters are red. */
@@ -967,7 +967,7 @@ bool target_set_interactive(int mode, int x, int y)
 	/* Calculate the window location for the help prompt */
 	Term_get_size(&wid, &hgt);
 	help_prompt_loc = hgt - 1;
-	
+
 	/* Display the help prompt */
 	prt("Press '?' for help.", help_prompt_loc, 0);
 
@@ -980,7 +980,7 @@ bool target_set_interactive(int mode, int x, int y)
 	/* Interact */
 	while (!done) {
 		bool path_drawn = false;
-		
+
 		/* Interesting grids if chosen and there are any, otherwise arbitrary */
 		if (flag && point_set_size(targets)) {
 			y = targets->pts[m].y;
@@ -988,7 +988,7 @@ bool target_set_interactive(int mode, int x, int y)
 
 			/* Adjust panel if needed */
 			if (adjust_panel_help(y, x, help)) handle_stuff(player);
-		
+
 			/* Update help */
 			if (help) {
 				bool good_target = target_able(square_monster(cave, y, x));
@@ -1144,18 +1144,18 @@ bool target_set_interactive(int mode, int x, int y)
 						done = true;
 						break;
 					}
-				
+
 					case '?':
 					{
 						help = !help;
-					
+
 						/* Redraw main window */
 						player->upkeep->redraw |= (PR_BASIC | PR_EXTRA | PR_MAP | PR_EQUIP);
 						Term_clear();
 						handle_stuff(player);
 						if (!help)
 							prt("Press '?' for help.", help_prompt_loc, 0);
-					
+
 						break;
 					}
 
@@ -1243,7 +1243,7 @@ bool target_set_interactive(int mode, int x, int y)
 				}
 				if (press.mouse.button == 2) {
 					if (mode & (TARGET_KILL)) {
-						if ((y == KEY_GRID_Y(press)) 
+						if ((y == KEY_GRID_Y(press))
 								&& (x == KEY_GRID_X(press))) {
 							d = -1;
 						}
@@ -1273,7 +1273,7 @@ bool target_set_interactive(int mode, int x, int y)
 
 					y = KEY_GRID_Y(press);
 					x = KEY_GRID_X(press);
-				  
+
 					if (press.mouse.y <= 1) {
 						/* move the screen north */
 						y--;
@@ -1287,7 +1287,7 @@ bool target_set_interactive(int mode, int x, int y)
 						/* move the screen east */
 						x++;
 					}
-          
+
 					if (y < 0) y = 0;
 					if (x < 0) x = 0;
 					if (y >= dungeon_hgt-1) y = dungeon_hgt-1;
@@ -1407,7 +1407,7 @@ bool target_set_interactive(int mode, int x, int y)
 						handle_stuff(player);
 						if (!help)
 							prt("Press '?' for help.", help_prompt_loc, 0);
-					
+
 						break;
 					}
 
@@ -1484,5 +1484,3 @@ bool target_set_interactive(int mode, int x, int y)
 	/* Success */
 	return (true);
 }
-
-

@@ -155,7 +155,7 @@ bool los(struct chunk *c, int y1, int x1, int y2, int x2)
 	/* Vertical "knights" */
 	if ((ax == 1) && (ay == 2) && square_isprojectable(c, y1 + sy, x1))
 		return (true);
-	
+
 	/* Horizontal "knights" */
 	else if ((ay == 1) && (ax == 2) && square_isprojectable(c, y1, x1 + sx))
 		return (true);
@@ -291,18 +291,18 @@ bool los(struct chunk *c, int y1, int x1, int y2, int x2)
  * info field of the "cave->squares" array, which is a special array of
  * bitflags.
  *
- * The "SQUARE_ROOM" flag is used to determine which grids are part of "rooms", 
+ * The "SQUARE_ROOM" flag is used to determine which grids are part of "rooms",
  * and thus which grids are affected by "illumination" spells.
  *
- * The "SQUARE_VAULT" flag is used to determine which grids are part of 
- * "vaults", and thus which grids cannot serve as the destinations of player 
+ * The "SQUARE_VAULT" flag is used to determine which grids are part of
+ * "vaults", and thus which grids cannot serve as the destinations of player
  * teleportation.
  *
- * The "SQUARE_GLOW" flag is used to determine which grids are "permanently 
- * illuminated".  This flag is used by the update_view() function to help 
- * determine which viewable flags may be "seen" by the player.  This flag 
- * is used by the "map_info" function to determine if a grid is only lit by 
- * the player's torch.  This flag has special semantics for wall grids 
+ * The "SQUARE_GLOW" flag is used to determine which grids are "permanently
+ * illuminated".  This flag is used by the update_view() function to help
+ * determine which viewable flags may be "seen" by the player.  This flag
+ * is used by the "map_info" function to determine if a grid is only lit by
+ * the player's torch.  This flag has special semantics for wall grids
  * (see "update_view()").
  *
  * The "SQUARE_VIEW" flag is used to determine which grids are currently in
@@ -320,7 +320,7 @@ bool los(struct chunk *c, int y1, int x1, int y2, int x2)
  * The "SQUARE_SEEN" flag is used to determine which grids are currently in
  * line of sight of the player and also illuminated in some way.  This flag
  * is set by the "update_view()" function, using computations based on the
- * "SQUARE_VIEW" and "SQUARE_GLOW" flags and terrain of various grids.  
+ * "SQUARE_VIEW" and "SQUARE_GLOW" flags and terrain of various grids.
  * This flag is used by any code which needs to know if the player can "see" a
  * given grid.  This flag is used by the "map_info()" function both to see
  * if a given "boring" grid can be seen by the player, and for some optional
@@ -381,7 +381,7 @@ bool los(struct chunk *c, int y1, int x1, int y2, int x2)
  * some way.  However, for the player to "see" the grid, as determined by
  * the "SQUARE_SEEN" flag, the player must not be blind, the grid must have
  * the "SQUARE_VIEW" flag set, and if the grid is a "wall" grid, and it is
- * not lit by the player's torch, then it must touch a projectable grid 
+ * not lit by the player's torch, then it must touch a projectable grid
  * which has both the "SQUARE_GLOW"
  * and "SQUARE_VIEW" flags set.  This last part about wall grids is induced
  * by the semantics of "SQUARE_GLOW" as applied to wall grids, and checking
@@ -449,7 +449,7 @@ void forget_view(struct chunk *c)
 /**
  * Mark the currently seen grids, then wipe in preparation for recalculating
  */
-static void mark_wasseen(struct chunk *c) 
+static void mark_wasseen(struct chunk *c)
 {
 	int x, y;
 	/* Save the old "view" grids for later */
@@ -489,7 +489,7 @@ static void add_monster_lights(struct chunk *c, struct loc from)
 			for (j = -1; j <= 1; j++) {
 				int sy = m->fy + i;
 				int sx = m->fx + j;
-				
+
 				/* If the monster isn't visible we can only light open tiles */
 				if (!in_los && !square_isprojectable(c, sy, sx))
 					continue;
@@ -497,7 +497,7 @@ static void add_monster_lights(struct chunk *c, struct loc from)
 				/* If the tile is too far away we won't light it */
 				if (distance(from.y, from.x, sy, sx) > z_info->max_sight)
 					continue;
-				
+
 				/* If the tile itself isn't in LOS, don't light it */
 				if (!los(c, from.y, from.x, sy, sx))
 					continue;
@@ -686,4 +686,3 @@ bool no_light(void)
 {
 	return (!square_isseen(cave, player->py, player->px));
 }
-

@@ -237,7 +237,7 @@ void keypress_to_text(char *buf, size_t len, const struct keypress *src,
 
 		if (mods) {
 			if (mods & KC_MOD_CONTROL && !(mods & ~KC_MOD_CONTROL)) {
-				strnfcat(buf, len, &end, "^");			
+				strnfcat(buf, len, &end, "^");
 			} else {
 				strnfcat(buf, len, &end, "{");
 				if (mods & KC_MOD_CONTROL) strnfcat(buf, len, &end, "^");

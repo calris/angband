@@ -122,7 +122,7 @@ struct cmd_info cmd_item_manage[] =
 	{ "Display inventory listing", { 'i' }, CMD_NULL, do_cmd_inven },
 	{ "Display quiver listing", { '|' }, CMD_NULL, do_cmd_quiver },
 	{ "Pick up objects", { 'g' }, CMD_PICKUP, NULL },
-	{ "Ignore an item", { 'k', KTRL('D') }, CMD_IGNORE, textui_cmd_ignore },	
+	{ "Ignore an item", { 'k', KTRL('D') }, CMD_IGNORE, textui_cmd_ignore },
 };
 
 /**

@@ -171,8 +171,8 @@ static s16b art_total = 0;
  * Working arrays for holding frequency values - global to avoid repeated
  * allocation of memory
  */
-static s16b art_freq[ART_IDX_TOTAL];  	/* artifact attributes */
-static s16b *base_freq; 			/* base items */
+static s16b art_freq[ART_IDX_TOTAL];	/* artifact attributes */
+static s16b *base_freq;				/* base items */
 
 /*
  * Mean start and increment values for to_hit, to_dam and AC.  Update these
@@ -256,7 +256,7 @@ void mods_to_fake_pvals(struct artifact *a)
 	for (i = 0; i < 3; i++)
 		fake_pval[i] = 0;
 
-	/* Now set any non-zero mod as a fake_pval, and set the mod value to the 
+	/* Now set any non-zero mod as a fake_pval, and set the mod value to the
 	 * fake_pval position this mod is in  - lunacy, but hey NRM */
 	for (i = 0; i < OBJ_MOD_MAX; i++) {
 		if (a->modifiers[i] != 0) {
@@ -273,7 +273,7 @@ void mods_to_fake_pvals(struct artifact *a)
 					break;
 				}
 				/* If those both failed, we lose a mod, but at this stage there
-				 * are only a max of three distinct mods per object, and when 
+				 * are only a max of three distinct mods per object, and when
 				 * there aren't we should have removed this silliness */
 			}
 		}
@@ -729,7 +729,7 @@ static void parse_frequencies(void)
 				file_putf(log_file, "Adding %d instances of extra to-hit bonus for weapon\n", temp);
 			else if (temp < 0)
 				file_putf(log_file, "Subtracting %d instances of extra to-hit bonus for weapon\n", temp);
-			
+
 			artprobs[ART_IDX_WEAPON_HIT] += temp;
 
 			m = randcalc(kind->to_d, 0, MINIMISE);
@@ -941,7 +941,7 @@ static void parse_frequencies(void)
 			art->tval == TV_HELM || art->tval == TV_CROWN ||
 			art->tval == TV_SHIELD || art->tval == TV_CLOAK ||
 			art->tval == TV_SOFT_ARMOR || art->tval == TV_HARD_ARMOR ||
-			art->tval == TV_DRAG_ARMOR) 		{
+			art->tval == TV_DRAG_ARMOR)		{
 			/* Check weight - is it different from normal? */
 			/* ToDo: count higher and lower separately */
 			if (art->weight != kind->weight) {
@@ -991,7 +991,7 @@ static void parse_frequencies(void)
 			}
 		} else if ((art->tval == TV_SOFT_ARMOR ||
 					art->tval == TV_HARD_ARMOR ||
-					art->tval == TV_DRAG_ARMOR) && 
+					art->tval == TV_DRAG_ARMOR) &&
 				   art->modifiers[OBJ_MOD_CON] > 0) {
 			/* Handle CON bonus on armor */
 			file_putf(log_file, "Adding 1 for CON bonus on body armor.\n");
@@ -999,7 +999,7 @@ static void parse_frequencies(void)
 			(artprobs[ART_IDX_ARMOR_CON])++;
 			/* Counted this one separately so subtract it here */
 			temp--;
-		} else if (art->tval == TV_GLOVES && 
+		} else if (art->tval == TV_GLOVES &&
 				   art->modifiers[OBJ_MOD_DEX] > 0) {
 			/* Handle DEX bonus on gloves */
 			file_putf(log_file, "Adding 1 for DEX bonus on gloves.\n");
@@ -1514,7 +1514,7 @@ static void add_pval_mod(struct artifact *art, int mod)
 {
 	art->modifiers[mod] = 1;
 	do_mod(art);
-	file_putf(log_file, "Adding ability: %s (now %+d)\n", mod_name(mod), 
+	file_putf(log_file, "Adding ability: %s (now %+d)\n", mod_name(mod),
 			  fake_pval[0]);
 }
 
@@ -1529,7 +1529,7 @@ static bool add_fixed_pval_mod(struct artifact *art, int mod)
 
 	art->modifiers[mod] = 1;
 	do_mod(art);
-	file_putf(log_file, "Adding ability: %s (now %+d)\n", mod_name(mod), 
+	file_putf(log_file, "Adding ability: %s (now %+d)\n", mod_name(mod),
 			  fake_pval[0]);
 
 	return true;
@@ -1545,14 +1545,14 @@ static bool add_first_pval_mod(struct artifact *art, int mod)
 
 	if (fake_pval[0] == 0) {
 		fake_pval[0] = (s16b)randint1(4);
-		file_putf(log_file, "Adding ability: %s (first time) (now %+d)\n", 
+		file_putf(log_file, "Adding ability: %s (first time) (now %+d)\n",
 				  mod_name(mod), fake_pval[0]);
 
 		return true;
 	}
 
 	do_mod(art);
-	file_putf(log_file, "Adding ability: %s (now %+d)\n", mod_name(mod), 
+	file_putf(log_file, "Adding ability: %s (now %+d)\n", mod_name(mod),
 			  fake_pval[0]);
 
 	return false;
@@ -1567,10 +1567,10 @@ static void add_stat(struct artifact *art)
 	bool success = false;
 
 	/* Break out if all stats are raised to avoid an infinite loop */
-	if (art->modifiers[OBJ_MOD_STR] && 
-		art->modifiers[OBJ_MOD_INT] && 
-		art->modifiers[OBJ_MOD_WIS] && 
-		art->modifiers[OBJ_MOD_DEX] && 
+	if (art->modifiers[OBJ_MOD_STR] &&
+		art->modifiers[OBJ_MOD_INT] &&
+		art->modifiers[OBJ_MOD_WIS] &&
+		art->modifiers[OBJ_MOD_DEX] &&
 		art->modifiers[OBJ_MOD_CON])
 			return;
 
@@ -2389,7 +2389,7 @@ static void do_curse(struct artifact *art)
  * fake_pval_src to fake_pval_dst
  */
 
-static void copy_artifact(struct artifact *a_src, 
+static void copy_artifact(struct artifact *a_src,
 	struct artifact *a_dst, int *fake_pval_src, int *fake_pval_dst)
 {
 	int i;

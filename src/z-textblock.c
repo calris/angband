@@ -291,7 +291,7 @@ size_t textblock_calculate_lines(textblock *tb, size_t **line_starts, size_t **l
 			}
 			else {
 				/* There was no breaking character on the current line, so we
-				 * just break at the current character. This can happen with a 
+				 * just break at the current character. This can happen with a
 				 * word that takes up the whole line, for example. */
 				adjusted_line_length = width;
 				next_line_start_offset = text_offset + 1;
@@ -411,10 +411,10 @@ void text_out_to_file(byte a, const char *str)
 	(void)a;
 
 	/* Copy to a rewriteable string */
- 	my_strcpy(buf, str, 1024);
+	my_strcpy(buf, str, 1024);
 
 	/* Current location within "buf" */
- 	s = buf;
+	s = buf;
 
 	/* Process the string */
 	while (*s) {
@@ -549,11 +549,11 @@ void text_out_c(byte a, const char *fmt, ...)
 /**
  * Given a "formatted" chunk of text (i.e. one including tags like {red}{/})
  * in 'source', with starting point 'init', this finds the next section of
- * text and any tag that goes with it, return true if it finds something to 
+ * text and any tag that goes with it, return true if it finds something to
  * print.
- * 
+ *
  * If it returns true, then it also fills 'text' with a pointer to the start
- * of the next printable section of text, and 'len' with the length of that 
+ * of the next printable section of text, and 'len' with the length of that
  * text, and 'end' with a pointer to the start of the next section.  This
  * may differ from "text + len" because of the presence of tags.  If a tag
  * applies to the section of text, it returns a pointer to the start of that
@@ -566,7 +566,7 @@ static bool next_section(const char *source, size_t init, const char **text,
 						 size_t *len, const char **tag, size_t *taglen,
 						 const char **end)
 {
-	const char *next;	
+	const char *next;
 
 	*tag = NULL;
 	*text = source + init;
@@ -672,8 +672,8 @@ void text_out_e(const char *fmt, ...)
 
 			a = color_text_to_attr(tagbuffer);
 		}
-		
-		if (a == -1) 
+
+		if (a == -1)
 			a = COLOUR_WHITE;
 
 		/* Output now */
@@ -731,4 +731,3 @@ errr text_lines_to_file(const char *path, text_writer writer)
 
 	return 0;
 }
-

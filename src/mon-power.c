@@ -198,7 +198,7 @@ static long eval_max_dam(struct monster_race *race, int ridx)
 	else if (race->friends_base)
 		/* Friends base is weaker, because they are <= monster level */
 		highest_threat[ridx] = highest_threat[ridx] * 3 / 2;
-		
+
 	/* But keep at a minimum */
 	if (dam < 1) dam  = 1;
 
@@ -309,9 +309,9 @@ static long eval_hp_adjust(struct monster_race *race)
 
 	/* Monster resistances */
 	if (resists < (race->ac + resists) / 3)
-		hp += (hp * resists) / (150 + race->level); 	
+		hp += (hp * resists) / (150 + race->level);
 	else
-		hp += (hp * (race->ac + resists) / 3) / (150 + race->level); 			
+		hp += (hp * (race->ac + resists) / 3) / (150 + race->level);
 
 	/* Boundary control */
 	if (hp < 1)
@@ -474,7 +474,7 @@ errr eval_monster_power(struct monster_race *racelist)
 			/* Define the power rating */
 			power[i] = hp * dam;
 
-			/* Adjust for group monsters, using somewhat arbitrary 
+			/* Adjust for group monsters, using somewhat arbitrary
 			 * multipliers for now */
 			if (!rf_has(race->flags, RF_UNIQUE)) {
 				if (race->friends)
@@ -482,7 +482,7 @@ errr eval_monster_power(struct monster_race *racelist)
 			}
 
 			/* Adjust for escorts */
-			if (race->friends_base) 
+			if (race->friends_base)
 				power[i] *= 2;
 
 

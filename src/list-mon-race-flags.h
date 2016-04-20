@@ -3,9 +3,9 @@
  * \brief monster race flags
  *
  * Changing flag order will break savefiles. There was a hard-coded limit of
- * 96 flags, due to 12 bytes of storage for lore flags in the savefile; this 
- * should be fixed now. Flags below start from 1 on line 13, so a flag's 
- * sequence number is its line number minus 12. Column 2 (descr) is currently 
+ * 96 flags, due to 12 bytes of storage for lore flags in the savefile; this
+ * should be fixed now. Flags below start from 1 on line 13, so a flag's
+ * sequence number is its line number minus 12. Column 2 (descr) is currently
  * used for lore descriptions.
  */
 /* symbol       descr */

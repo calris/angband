@@ -13,7 +13,7 @@
  * message: what is printed when the flag is IDd (but see also obj-identify.c)
  *          - must be "" or contain exactly one %s
  */
-/* index       	id				type		power	message */
+/* index	id				type		power	message */
 OF(PROT_FEAR,   OFID_NORMAL,	OFT_PROT,	6,		"Your %s glows.")
 OF(PROT_BLIND,  OFID_NORMAL,	OFT_PROT,	16,		"Your %s glows.")
 OF(PROT_CONF,   OFID_NORMAL,	OFT_PROT,	24,		"Your %s glows.")

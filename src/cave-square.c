@@ -369,7 +369,7 @@ bool square_isdtrap(struct chunk *c, int y, int x) {
 }
 
 /**
- * True if cave square is a feeling trigger square 
+ * True if cave square is a feeling trigger square
  */
 bool square_isfeel(struct chunk *c, int y, int x) {
 	assert(square_in_bounds(c, y, x));
@@ -506,7 +506,7 @@ bool square_canputitem(struct chunk *c, int y, int x) {
  */
 bool square_isdiggable(struct chunk *c, int y, int x) {
 	return (square_ismineral(c, y, x) ||
-			square_issecretdoor(c, y, x) || 
+			square_issecretdoor(c, y, x) ||
 			square_isrubble(c, y, x));
 }
 
@@ -656,14 +656,14 @@ bool square_changeable(struct chunk *c, int y, int x)
 
 
 /**
- * Checks if a square is at the (inner) edge of a trap detect area 
- */ 
-bool square_dtrap_edge(struct chunk *c, int y, int x) 
-{ 
-	/* Check if the square is a dtrap in the first place */ 
+ * Checks if a square is at the (inner) edge of a trap detect area
+ */
+bool square_dtrap_edge(struct chunk *c, int y, int x)
+{
+	/* Check if the square is a dtrap in the first place */
 	if (!square_isdtrap(c, y, x)) return false;
 
- 	/* Check for non-dtrap adjacent grids */ 
+	/* Check for non-dtrap adjacent grids */
 	if (square_in_bounds_fully(c, y + 1, x) && (!square_isdtrap(c, y + 1, x)))
 		return true;
 	if (square_in_bounds_fully(c, y, x + 1) && (!square_isdtrap(c, y, x + 1)))
@@ -673,7 +673,7 @@ bool square_dtrap_edge(struct chunk *c, int y, int x)
 	if (square_in_bounds_fully(c, y, x - 1) && (!square_isdtrap(c, y, x - 1)))
 		return true;
 
-	return false; 
+	return false;
 }
 
 

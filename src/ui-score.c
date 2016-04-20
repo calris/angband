@@ -207,4 +207,3 @@ void show_scores(void)
 	/* Hack - Flush it */
 	Term_fresh();
 }
-

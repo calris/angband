@@ -83,7 +83,7 @@ static void spell_message(struct monster *mon,
 	next = strchr(in_cursor, '{');
 	while (next) {
 		/* Copy the text leading up to this { */
-		strnfcat(buf, 1024, &end, "%.*s", next - in_cursor, in_cursor); 
+		strnfcat(buf, 1024, &end, "%.*s", next - in_cursor, in_cursor);
 
 		s = next + 1;
 		while (*s && isalpha((unsigned char) *s)) s++;
@@ -130,7 +130,7 @@ static const struct monster_spell *monster_spell_by_index(int index)
 }
 
 /**
- * Process a monster spell 
+ * Process a monster spell
  *
  * \param index is the monster spell flag (RSF_FOO)
  * \param mon is the attacking monster
@@ -403,7 +403,7 @@ static int mon_spell_dam(int index, int hp, const struct monster_race *race,
 int best_spell_power(const struct monster_race *race, int resist)
 {
 	const struct mon_spell_info *info;
-	int dam = 0, best_dam = 0; 
+	int dam = 0, best_dam = 0;
 
 	/* Extract the monster level */
 	int rlev = ((race->level >= 1) ? race->level : 1);
@@ -474,4 +474,3 @@ int mon_spell_lore_damage(int index, const struct monster_race *race,
 	hp = (know_hp) ? race->avg_hp : 0;
 	return mon_spell_dam(index, hp, race, MAXIMISE);
 }
-

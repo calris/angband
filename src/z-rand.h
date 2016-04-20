@@ -4,7 +4,7 @@
  *
  * Copyright (c) 1997 Ben Harrison, Randy Hutson
  * Copyright (c) 2010 Erik Osheim
- * 
+ *
  * See below for copyright on the WELL random number generator.
  *
  * This work is free software; you can redistribute it and/or modify it
@@ -25,8 +25,8 @@
 #include "h-basic.h"
 
 /**
- * Assumed maximum dungeon level.  This value is used for various 
- * calculations involving object and monster creation.  It must be at least 
+ * Assumed maximum dungeon level.  This value is used for various
+ * calculations involving object and monster creation.  It must be at least
  * 100. Setting it below 128 may prevent the creation of some objects.
  */
 #define MAX_RAND_DEPTH	128

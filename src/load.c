@@ -356,12 +356,12 @@ int rd_randomizer(void)
 
 	/* for safety, make sure state_i < RAND_DEG */
 	state_i = state_i % RAND_DEG;
-    
+
 	/* RNG variables */
 	rd_u32b(&z0);
 	rd_u32b(&z1);
 	rd_u32b(&z2);
-    
+
 	/* RNG state */
 	for (i = 0; i < RAND_DEG; i++)
 		rd_u32b(&STATE[i]);
@@ -514,7 +514,7 @@ int rd_object_memory(void)
 	/* Object modifiers */
 	rd_byte(&obj_mod_max);
 	if (obj_mod_max > OBJ_MOD_MAX) {
-	        note(format("Too many (%u) object modifiers allowed!", 
+	        note(format("Too many (%u) object modifiers allowed!",
 						obj_mod_max));
 		return (-1);
 	}
@@ -522,7 +522,7 @@ int rd_object_memory(void)
 	/* Elements */
 	rd_byte(&elem_max);
 	if (elem_max > ELEM_MAX) {
-	        note(format("Too many (%u) elements allowed!", 
+	        note(format("Too many (%u) elements allowed!",
 						elem_max));
 		return (-1);
 	}
@@ -576,18 +576,18 @@ int rd_artifacts(void)
 {
 	int i;
 	u16b tmp16u;
-	
+
 	/* Load the Artifacts */
 	rd_u16b(&tmp16u);
 	if (tmp16u > z_info->a_max) {
 		note(format("Too many (%u) artifacts!", tmp16u));
 		return (-1);
 	}
-	
+
 	/* Read the artifact flags */
 	for (i = 0; i < tmp16u; i++) {
 		byte tmp8u;
-		
+
 		rd_byte(&tmp8u);
 		a_info[i].created = tmp8u;
 		rd_byte(&tmp8u);
@@ -797,7 +797,7 @@ int rd_ignore(void)
 	for (i = 0; i < file_e_max; i++) {
 		if (i < z_info->e_max) {
 			bitflag flags, itypes[itype_size];
-			
+
 			/* Read and extract the everseen flag */
 			rd_byte(&flags);
 			e_info[i].everseen = (flags & 0x02) ? true : false;
@@ -839,7 +839,7 @@ int rd_ignore(void)
 int rd_misc(void)
 {
 	byte tmp8u;
-	
+
 	/* Read the randart seed */
 	rd_u32b(&seed_randart);
 
@@ -891,9 +891,9 @@ int rd_player_spells(void)
 {
 	int i;
 	u16b tmp16u;
-	
+
 	int cnt;
-	
+
 	/* Read the number of spells */
 	rd_u16b(&tmp16u);
 	if (tmp16u > player->class->magic.total_spells) {
@@ -903,15 +903,15 @@ int rd_player_spells(void)
 
 	/* Initialise */
 	player_spells_init(player);
-	
+
 	/* Read the spell flags */
 	for (i = 0; i < tmp16u; i++)
 		rd_byte(&player->spell_flags[i]);
-	
+
 	/* Read the spell order */
 	for (i = 0, cnt = 0; i < tmp16u; i++, cnt++)
 		rd_byte(&player->spell_order[cnt]);
-	
+
 	/* Success */
 	return (0);
 }
@@ -1393,7 +1393,7 @@ int rd_history(void)
 {
 	u32b tmp32u;
 	size_t i, j;
-	
+
 	history_clear();
 
 	/* History type flags */
@@ -1411,14 +1411,14 @@ int rd_history(void)
 		byte art_name;
 		char text[80];
 
-		for (j = 0; j < hist_size; j++)		
+		for (j = 0; j < hist_size; j++)
 			rd_byte(&type[j]);
 		rd_s32b(&turnno);
 		rd_s16b(&dlev);
 		rd_s16b(&clev);
 		rd_byte(&art_name);
 		rd_string(text, sizeof(text));
-		
+
 		history_add_full(type, &a_info[art_name], dlev, clev, turnno, text);
 	}
 

@@ -146,7 +146,7 @@ static void build_streamer(struct chunk *c, int feat, int chance)
  * Constructs a tunnel between two points
  *
  * \param c is the current chunk
- * \param row1 
+ * \param row1
  * \param col1 are the co-ordinates of the first point
  * \param row2
  * \param col2 are the co-ordinates of the second point
@@ -178,11 +178,11 @@ static void build_tunnel(struct chunk *c, int row1, int col1, int row2, int col2
 
     /* Used to prevent excessive door creation along overlapping corridors. */
     bool door_flag = false;
-	
+
     /* Reset the arrays */
     dun->tunn_n = 0;
     dun->wall_n = 0;
-	
+
     /* Save the starting location */
     start_row = row1;
     start_col = col1;
@@ -227,12 +227,12 @@ static void build_tunnel(struct chunk *c, int row1, int col1, int row2, int col2
 		if (square_isperm(c, tmp_row, tmp_col)) continue;
 
 		/* Avoid "solid" granite walls */
-		if (square_is_granite_with_flag(c, tmp_row, tmp_col, 
-										SQUARE_WALL_SOLID)) 
+		if (square_is_granite_with_flag(c, tmp_row, tmp_col,
+										SQUARE_WALL_SOLID))
 			continue;
 
 		/* Pierce "outer" walls of rooms */
-		if (square_is_granite_with_flag(c, tmp_row, tmp_col, 
+		if (square_is_granite_with_flag(c, tmp_row, tmp_col,
 										SQUARE_WALL_OUTER)) {
 			/* Get the "next" location */
 			y = tmp_row + row_dir;
@@ -240,14 +240,14 @@ static void build_tunnel(struct chunk *c, int row1, int col1, int row2, int col2
 
 			/* Stay in bounds */
 			if (!square_in_bounds(c, y, x)) continue;
- 
+
 			/* Hack -- Avoid solid permanent walls */
 			if (square_isperm(c, y, x)) continue;
 
 			/* Hack -- Avoid outer/solid granite walls */
-			if (square_is_granite_with_flag(c, y, x, SQUARE_WALL_OUTER)) 
+			if (square_is_granite_with_flag(c, y, x, SQUARE_WALL_OUTER))
 				continue;
-			if (square_is_granite_with_flag(c, y, x, SQUARE_WALL_SOLID)) 
+			if (square_is_granite_with_flag(c, y, x, SQUARE_WALL_SOLID))
 				continue;
 
 			/* Accept this location */
@@ -424,7 +424,7 @@ static void try_door(struct chunk *c, int y, int x)
 
 /**
  * Generate a new dungeon level.
- * \param p is the player 
+ * \param p is the player
  * \return a pointer to the generated chunk
  */
 struct chunk *classic_gen(struct player *p) {
@@ -455,7 +455,7 @@ struct chunk *classic_gen(struct player *p) {
     ROOM_LOG("height=%d  width=%d  nrooms=%d", c->height, c->width, num_rooms);
 
     /* Fill cave area with basic granite */
-    fill_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    fill_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_GRANITE, SQUARE_NONE);
 
     /* Actual maximum number of rooms on this level */
@@ -495,7 +495,7 @@ struct chunk *classic_gen(struct player *p) {
 					tby = by;
 					tbx = bx;
 				}
-			} 
+			}
 		}
 		bx = tbx;
 		by = tby;
@@ -530,7 +530,7 @@ struct chunk *classic_gen(struct player *p) {
 			struct room_profile profile = dun->profile->room_profiles[i];
 			if (profile.rarity > rarity) continue;
 			if (profile.cutoff <= key) continue;
-			
+
 			if (room_build(c, by, bx, profile, false)) {
 				built++;
 				break;
@@ -546,7 +546,7 @@ struct chunk *classic_gen(struct player *p) {
 	mem_free(dun->room_map);
 
     /* Generate permanent walls around the edge of the generated area */
-    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_PERM, SQUARE_NONE);
 
     /* Hack -- Scramble the room order */
@@ -691,7 +691,7 @@ static bool lab_is_tunnel(struct chunk *c, int y, int x) {
 /**
  * Build a labyrinth chunk of a given height and width
  *
- * \param depth is the native depth 
+ * \param depth is the native depth
  * \param h
  * \param w are the dimensions of the chunk
  * \param lit is whether the labyrinth is lit
@@ -896,12 +896,12 @@ static void init_cavern(struct chunk *c, int density) {
     int h = c->height;
     int w = c->width;
     int size = h * w;
-	
+
     int count = (size * density) / 100;
 
     /* Fill the entire chunk with rock */
     fill_rectangle(c, 0, 0, h - 1, w - 1, FEAT_GRANITE, SQUARE_WALL_SOLID);
-	
+
     while (count > 0) {
 		int y = randint1(h - 2);
 		int x = randint1(w - 2);
@@ -1626,11 +1626,11 @@ struct chunk *modified_chunk(int depth, int height, int width)
     ROOM_LOG("height=%d  width=%d  nfloors=%d", c->height, c->width,num_floors);
 
     /* Fill cave area with basic granite */
-    fill_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    fill_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_GRANITE, SQUARE_NONE);
 
     /* Generate permanent walls around the generated area (temporarily!) */
-    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_PERM, SQUARE_NONE);
 
     /* Actual maximum number of blocks on this level */
@@ -1724,7 +1724,7 @@ struct chunk *modified_chunk(int depth, int height, int width)
     ensure_connectedness(c);
 
     /* Turn the outer permanent walls back to granite  */
-    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_GRANITE, SQUARE_NONE);
 
 	return c;
@@ -1857,11 +1857,11 @@ struct chunk *moria_chunk(int depth, int height, int width)
     ROOM_LOG("height=%d  width=%d  nfloors=%d", c->height, c->width,num_floors);
 
     /* Fill cave area with basic granite */
-    fill_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    fill_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_GRANITE, SQUARE_NONE);
 
     /* Generate permanent walls around the generated area (temporarily!) */
-    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_PERM, SQUARE_NONE);
 
     /* Actual maximum number of blocks on this level */
@@ -1955,7 +1955,7 @@ struct chunk *moria_chunk(int depth, int height, int width)
     ensure_connectedness(c);
 
     /* Turn the outer permanent walls back to granite  */
-    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_GRANITE, SQUARE_NONE);
 
 	return c;
@@ -1973,7 +1973,7 @@ struct chunk *moria_chunk(int depth, int height, int width)
  * Monsters are mostly "Moria dwellers" - orcs, ogres, trolls and giants.
  *
  * Apart from the room and monster changes, generation is similar to modified
- * levels.  A good way of selecting these instead of modified (similar to 
+ * levels.  A good way of selecting these instead of modified (similar to
  * labyrinth levels are selected) would be
  *	if ((c->depth >= 10) && (c->depth < 40) && one_in_(40))
  */
@@ -2334,7 +2334,7 @@ struct chunk *lair_gen(struct player *p) {
 
     /* Place lair monsters */
 	spread_monsters(lair, dun->pit_type->name, lair->depth, i, lair->height / 2,
-					lair->width / 2, lair->height / 2, lair->width / 2, 
+					lair->width / 2, lair->height / 2, lair->width / 2,
 					ORIGIN_CAVERN);
 
 	/* Remove our restrictions. */
@@ -2359,7 +2359,7 @@ struct chunk *lair_gen(struct player *p) {
 	cave_free(lair);
 
     /* Generate permanent walls around the edge of the generated area */
-    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+    draw_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_PERM, SQUARE_NONE);
 
 	/* Connect */
@@ -2526,7 +2526,7 @@ struct chunk *gauntlet_gen(struct player *p) {
 	cave_free(departure);
 
 	/* Generate permanent walls around the edge of the generated area */
-	draw_rectangle(c, 0, 0, c->height - 1, c->width - 1, 
+	draw_rectangle(c, 0, 0, c->height - 1, c->width - 1,
 				   FEAT_PERM, SQUARE_NONE);
 
 	/* Connect */

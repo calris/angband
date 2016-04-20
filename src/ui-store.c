@@ -202,7 +202,7 @@ static void prt_welcome(const struct owner *proprietor)
  *  line (height - 7): end of items
  *  line (height - 6): "more" prompt
  *  line (height - 4): gold remaining
- *  line (height - 3): command help 
+ *  line (height - 3): command help
  */
 static void store_display_recalc(struct store_context *ctx)
 {
@@ -965,7 +965,7 @@ static bool store_menu_handle(struct menu *m, const ui_event *event, int oid)
 	bool processed = true;
 	struct store_context *ctx = menu_priv(m);
 	struct store *store = ctx->store;
-	
+
 	if (event->type == EVT_SELECT) {
 		/* Nothing for now, except "handle" the event */
 		return true;

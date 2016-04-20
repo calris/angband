@@ -29,7 +29,7 @@
  *
  * If graphics are turned on, this appends the title with the appropriate tile.
  * Note: if the title is the only thing in the textblock, make sure to append a
- * newline so that the textui stuff works properly. 
+ * newline so that the textui stuff works properly.
  *
  * \param tb is the textblock we are placing the title into.
  * \param race is the monster race we are describing.
@@ -144,11 +144,11 @@ void lore_description(textblock *tb, const struct monster_race *race,
 	/* Describe the spells, spell-like abilities and melee attacks */
 	lore_append_spells(tb, race, lore, known_flags, spell_colors);
 	lore_append_attack(tb, race, lore, known_flags, melee_colors);
-	
+
 	/* Do we know everything */
 	if (lore_is_fully_known(race))
 		textblock_append(tb, "You know everything about this monster.");
-	
+
 	/* Notice "Quest" monsters */
 	if (rf_has(race->flags, RF_QUESTOR))
 		textblock_append(tb, "You feel an intense desire to kill this monster...  ");
@@ -206,4 +206,3 @@ void lore_show_subwindow(const struct monster_race *race,
 	textui_textblock_place(tb, SCREEN_REGION, NULL);
 	textblock_free(tb);
 }
-

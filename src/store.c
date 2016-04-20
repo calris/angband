@@ -185,7 +185,7 @@ static enum parser_error parse_normal(struct parser *p) {
 		s->normal_size = 16;
 		s->normal_table = mem_zalloc(s->normal_size * sizeof *s->normal_table);
 	} else if (s->normal_num >= s->normal_size) {
-		s->normal_size += 8; 
+		s->normal_size += 8;
 		s->normal_table = mem_realloc(s->normal_table, s->normal_size * sizeof *s->normal_table);
 	}
 
@@ -208,7 +208,7 @@ static enum parser_error parse_always(struct parser *p) {
 		s->always_size = 8;
 		s->always_table = mem_zalloc(s->always_size * sizeof *s->always_table);
 	} else if (s->always_num >= s->always_size) {
-		s->always_size += 8; 
+		s->always_size += 8;
 		s->always_table = mem_realloc(s->always_table, s->always_size * sizeof *s->always_table);
 	}
 
@@ -1785,7 +1785,7 @@ void do_cmd_retrieve(struct command *cmd)
 
 	/* Handle stuff */
 	handle_stuff(player);
-	
+
 	/* Reduce or remove the item */
 	store_delete(store, obj, amt);
 
@@ -1959,7 +1959,7 @@ void do_cmd_stash(struct command *cmd)
 	if (object_is_equipped(player->body, obj) && cursed_p(obj->flags)) {
 		msg("Hmmm, it seems to be cursed.");
 		return;
-	}	
+	}
 
 	/* Get a copy of the object representing the number being sold */
 	object_copy_amt(&dummy, obj, amt);

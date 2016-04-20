@@ -60,7 +60,7 @@
  *  - g->hallucinate is true if the player is hallucinating something "strange"
  *    for this grid - this should pick a random monster to show if the m_idx
  *    is non-zero, and a random object if first_kind is non-zero.
- * 
+ *
  * NOTES:
  * This is called pretty frequently, whenever a grid on the map display
  * needs updating, so don't overcomplicate it.
@@ -438,7 +438,7 @@ void wiz_light(struct chunk *c, bool full)
 					sqinfo_on(c->squares[yy][xx].info, SQUARE_GLOW);
 
 					/* Memorize normal features */
-					if (!square_isfloor(c, yy, xx) || 
+					if (!square_isfloor(c, yy, xx) ||
 						square_isvisibletrap(c, yy, xx)) {
 						square_memorize(c, yy, xx);
 						square_mark(cave, yy, xx);
@@ -487,7 +487,7 @@ void cave_illuminate(struct chunk *c, bool daytime)
 			int d;
 			bool light = false;
 			struct feature *feat = &f_info[c->squares[y][x].feat];
-			
+
 			/* Skip grids with no surrounding floors or stairs */
 			for (d = 0; d < 9; d++) {
 				/* Extract adjacent (legal) location */
@@ -513,8 +513,8 @@ void cave_illuminate(struct chunk *c, bool daytime)
 				square_forget(c, y, x);
 			}
 		}
-			
-			
+
+
 	/* Light shop doorways */
 	for (y = 0; y < c->height; y++) {
 		for (x = 0; x < c->width; x++) {

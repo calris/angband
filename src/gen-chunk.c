@@ -1,5 +1,5 @@
 /**
- * \file gen-chunk.c 
+ * \file gen-chunk.c
  * \brief Handling of chunks of cave
  *
  * Copyright (c) 2014 Nick McConnell
@@ -16,7 +16,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  *
  * This file maintains a list of saved chunks of world which can be reloaded
- * at any time.  The intitial example of this is the town, which is saved 
+ * at any time.  The intitial example of this is the town, which is saved
  * immediately after generation and restored when the player returns there.
  *
  * The copying routines are also useful for generating a level in pieces and
@@ -159,7 +159,7 @@ bool chunk_list_remove(char *name)
 
 			/* Destroy the last one, and shorten the list */
 			if ((chunk_list_max % CHUNK_LIST_INCR) == 0)
-				newsize = (chunk_list_max - CHUNK_LIST_INCR) *	
+				newsize = (chunk_list_max - CHUNK_LIST_INCR) *
 					sizeof(struct chunk *);
 			chunk_list_max--;
 			chunk_list[chunk_list_max] = NULL;
@@ -243,8 +243,8 @@ void symmetry_transform(int *y, int *x, int y0, int x0, int height, int width,
  * \param dest the chunk where the copy is going
  * \param source the chunk being copied
  * \param y0
- * \param x0 
- * \param rotate 
+ * \param x0
+ * \param rotate
  * \param reflect transformation parameters  - see symmetry_transform()
  * \return success - fails if the copy would not fit in the destination chunk
  */
@@ -336,7 +336,7 @@ bool chunk_copy(struct chunk *dest, struct chunk *source, int y0, int x0,
 			}
 
 			/* Player */
-			if (source->squares[y][x].mon == -1) 
+			if (source->squares[y][x].mon == -1)
 				dest->squares[dest_y][dest_x].mon = -1;
 		}
 	}
@@ -387,4 +387,3 @@ void chunk_validate_objects(struct chunk *c) {
 		}
 	}
 }
-

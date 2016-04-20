@@ -34,7 +34,7 @@
  * - assumed max blows
  * - inhibiting values for +blows/might/shots/immunities (max is one less)
  */
-#define NONWEAP_DAMAGE   		15 /* fudge to boost extra blows */
+#define NONWEAP_DAMAGE			15 /* fudge to boost extra blows */
 #define WEAP_DAMAGE				12 /* and for off-weapon combat flags */
 #define BASE_JEWELRY_POWER		 4
 #define BASE_ARMOUR_POWER		 1

@@ -261,7 +261,7 @@ void flag_setall(bitflag *flags, const size_t size)
 void flag_negate(bitflag *flags, const size_t size)
 {
 	size_t i;
-	
+
 	for (i = 0; i < size; i++)
 		flags[i] = ~flags[i];
 }
@@ -408,7 +408,7 @@ bool flags_test(const bitflag *flags, const size_t size, ...)
 	}
 
 	va_end(args);
-	
+
 	return delta;
 }
 
@@ -417,7 +417,7 @@ bool flags_test(const bitflag *flags, const size_t size, ...)
  * Tests if all of the multiple bitflags are set in a bitfield.
  *
  * true is returned if all of the flags specified in `...` are set in `flags`,
- * false otherwise. The bitfield size is supplied in `size`. 
+ * false otherwise. The bitfield size is supplied in `size`.
  *
  * WARNING: FLAG_END must be the final argument in the `...` list.
  */
@@ -446,7 +446,7 @@ bool flags_test_all(const bitflag *flags, const size_t size, ...)
 	}
 
 	va_end(args);
-	
+
 	return delta;
 }
 

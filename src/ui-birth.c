@@ -39,7 +39,7 @@
  * This file implements the user interface side of the birth process
  * for the classic terminal-based UI of Angband.
  *
- * It models birth as a series of steps which must be carried out in 
+ * It models birth as a series of steps which must be carried out in
  * a specified order, with the option of stepping backwards to revisit
  * past choices.
  *
@@ -110,7 +110,7 @@ static enum birth_stage textui_birth_quickstart(void)
 	do {
 		/* Get a key */
 		struct keypress ke = inkey();
-		
+
 		if (ke.code == 'N' || ke.code == 'n') {
 			cmdq_push(CMD_BIRTH_RESET);
 			next = BIRTH_RACE_CHOICE;
@@ -178,7 +178,7 @@ typedef void (*browse_f) (int oid, void *db, const region *l);
  * text, current (or default) selection, and whether random selection
  * is allowed.
  */
-struct birthmenu_data 
+struct birthmenu_data
 {
 	const char **items;
 	const char *hint;
@@ -285,12 +285,12 @@ static void race_help(int i, void *db, const region *l)
 
 	/* Output to the screen */
 	text_out_hook = text_out_to_screen;
-	
+
 	/* Indent output */
 	text_out_indent = RACE_AUX_COL;
 	Term_gotoxy(RACE_AUX_COL, TABLE_ROW);
 
-	for (j = 0; j < len; j++) {  
+	for (j = 0; j < len; j++) {
 		const char *name = stat_names_reduced[j];
 		int adj = r->r_adj[j];
 
@@ -304,7 +304,7 @@ static void race_help(int i, void *db, const region *l)
 
 		text_out("\n");
 	}
-	
+
 	text_out_e("\n");
 	skill_help(r->r_skills, NULL, r->r_mhp, r->r_exp, r->infra);
 	text_out_e("\n");
@@ -354,12 +354,12 @@ static void class_help(int i, void *db, const region *l)
 
 	/* Output to the screen */
 	text_out_hook = text_out_to_screen;
-	
+
 	/* Indent output */
 	text_out_indent = CLASS_AUX_COL;
 	Term_gotoxy(CLASS_AUX_COL, TABLE_ROW);
 
-	for (j = 0; j < len; j++) {  
+	for (j = 0; j < len; j++) {
 		const char *name = stat_names_reduced[j];
 		int adj = c->c_adj[j] + r->r_adj[j];
 
@@ -375,7 +375,7 @@ static void class_help(int i, void *db, const region *l)
 	}
 
 	text_out_e("\n");
-	
+
 	skill_help(r->r_skills, c->c_skills, r->r_mhp + c->c_mhp,
 			   r->r_exp + c->c_exp, -1);
 
@@ -448,9 +448,9 @@ static void setup_menus(void)
 	struct player_class *c;
 	struct player_race *r;
 
-	const char *roller_choices[MAX_BIRTH_ROLLERS] = { 
-		"Point-based", 
-		"Standard roller" 
+	const char *roller_choices[MAX_BIRTH_ROLLERS] = {
+		"Point-based",
+		"Standard roller"
 	};
 
 	struct birthmenu_data *mdata;
@@ -480,7 +480,7 @@ static void setup_menus(void)
 	for (i = 0, c = classes; c; c = c->next, i++)
 		mdata->items[c->cidx] = c->name;
 	mdata->hint = "Class affects stats, skills, and other character traits.";
-		
+
 	/* Roller menu straightforward */
 	init_birth_menu(&roller_menu, MAX_BIRTH_ROLLERS, 0, &roller_region, false,
 					NULL);
@@ -534,28 +534,28 @@ static void clear_question(void)
 
 /**
  * Show the birth instructions on an otherwise blank screen
- */	
+ */
 static void print_menu_instructions(void)
 {
 	/* Clear screen */
 	Term_clear();
-	
+
 	/* Output to the screen */
 	text_out_hook = text_out_to_screen;
-	
+
 	/* Indent output */
 	text_out_indent = QUESTION_COL;
 	Term_gotoxy(QUESTION_COL, HEADER_ROW);
-	
+
 	/* Display some helpful information */
 	text_out_e(BIRTH_MENU_HELPTEXT);
-	
+
 	/* Reset text_out() indentation */
 	text_out_indent = 0;
 }
 
 /**
- * Allow the user to select from the current menu, and return the 
+ * Allow the user to select from the current menu, and return the
  * corresponding command to the game.  Some actions are handled entirely
  * by the UI (displaying help text, for instance).
  */
@@ -567,7 +567,7 @@ static enum birth_stage menu_question(enum birth_stage current,
 	ui_event cx;
 
 	enum birth_stage next = BIRTH_RESET;
-	
+
 	/* Print the question currently being asked. */
 	clear_question();
 	Term_putstr(QUESTION_COL, QUESTION_ROW, -1, COLOUR_YELLOW, menu_data->hint);
@@ -579,7 +579,7 @@ static enum birth_stage menu_question(enum birth_stage current,
 		cx = menu_select(current_menu, EVT_KBRD, false);
 
 		/* As all the menus are displayed in "hierarchical" style, we allow
-		   use of "back" (left arrow key or equivalent) to step back in 
+		   use of "back" (left arrow key or equivalent) to step back in
 		   the proces as well as "escape". */
 		if (cx.type == EVT_ESCAPE) {
 			next = BIRTH_BACK;
@@ -590,8 +590,8 @@ static enum birth_stage menu_question(enum birth_stage current,
 					cmdq_push(CMD_ROLL_STATS);
 					next = current + 2;
 				} else {
-					/* 
-					 * Make sure we've got a point-based char to play with. 
+					/*
+					 * Make sure we've got a point-based char to play with.
 					 * We call point_based_start here to make sure we get
 					 * an update on the points totals before trying to
 					 * display the screen.  The call to CMD_RESET_STATS
@@ -627,7 +627,7 @@ static enum birth_stage menu_question(enum birth_stage current,
 			}
 		}
 	}
-	
+
 	return next;
 }
 
@@ -655,13 +655,13 @@ static enum birth_stage roller_command(bool first_call)
 
 	/* Prepare a prompt (must squeeze everything in) */
 	strnfcat(prompt, sizeof (prompt), &promptlen, "['r' to reroll");
-	if (prev_roll) 
+	if (prev_roll)
 		strnfcat(prompt, sizeof(prompt), &promptlen, ", 'p' for previous roll");
 	strnfcat(prompt, sizeof (prompt), &promptlen, " or 'Enter' to accept]");
 
 	/* Prompt for it */
 	prt(prompt, Term->hgt - 1, Term->wid / 2 - promptlen / 2);
-	
+
 	/* Prompt and get a command */
 	ch = inkey();
 
@@ -739,14 +739,14 @@ static void point_based_points(game_event_type type, game_event_data *data,
 
 	/* Display the costs header */
 	put_str("Cost", COSTS_ROW - 1, COSTS_COL);
-	
+
 	/* Display the costs */
 	for (i = 0; i < STAT_MAX; i++) {
 		/* Display cost */
 		put_str(format("%4d", stats[i]), COSTS_ROW + i, COSTS_COL);
 		sum += stats[i];
 	}
-	
+
 	put_str(format("Total Cost: %2d/%2d", sum,
 				   data->birthstats.remaining + sum), COSTS_ROW + STAT_MAX,
 			TOTAL_COL);
@@ -767,16 +767,16 @@ static void point_based_start(void)
 
 	/* Register handlers for various events - cheat a bit because we redraw
 	   the lot at once rather than each bit at a time. */
-	event_add_handler(EVENT_BIRTHPOINTS, point_based_points, NULL);	
-	event_add_handler(EVENT_STATS, point_based_stats, NULL);	
-	event_add_handler(EVENT_GOLD, point_based_misc, NULL);	
+	event_add_handler(EVENT_BIRTHPOINTS, point_based_points, NULL);
+	event_add_handler(EVENT_STATS, point_based_stats, NULL);
+	event_add_handler(EVENT_GOLD, point_based_misc, NULL);
 }
 
 static void point_based_stop(void)
 {
-	event_remove_handler(EVENT_BIRTHPOINTS, point_based_points, NULL);	
-	event_remove_handler(EVENT_STATS, point_based_stats, NULL);	
-	event_remove_handler(EVENT_GOLD, point_based_misc, NULL);	
+	event_remove_handler(EVENT_BIRTHPOINTS, point_based_points, NULL);
+	event_remove_handler(EVENT_STATS, point_based_stats, NULL);
+	event_remove_handler(EVENT_GOLD, point_based_misc, NULL);
 }
 
 static enum birth_stage point_based_command(void)
@@ -790,7 +790,7 @@ static enum birth_stage point_based_command(void)
 
 	/* Get key */
 	ch = inkey();
-	
+
 	if (ch.code == KTRL('X')) {
 		quit(NULL);
 	} else if (ch.code == ESCAPE) {
@@ -808,17 +808,17 @@ static enum birth_stage point_based_command(void)
 		/* Prev stat, looping round to the bottom when going off the top */
 		if (dir == 8)
 			stat = (stat + STAT_MAX - 1) % STAT_MAX;
-		
+
 		/* Next stat, looping round to the top when going off the bottom */
 		if (dir == 2)
 			stat = (stat + 1) % STAT_MAX;
-		
+
 		/* Decrease stat (if possible) */
 		if (dir == 4) {
 			cmdq_push(CMD_SELL_STAT);
 			cmd_set_arg_choice(cmdq_peek(), "choice", stat);
 		}
-		
+
 		/* Increase stat (if possible) */
 		if (dir == 6) {
 			cmdq_push(CMD_BUY_STAT);
@@ -828,7 +828,7 @@ static enum birth_stage point_based_command(void)
 
 	return next;
 }
-	
+
 /**
  * ------------------------------------------------------------------------
  * Asking for the player's chosen name.
@@ -838,12 +838,12 @@ static enum birth_stage get_name_command(void)
 {
 	enum birth_stage next;
 	char name[32];
-	
+
 	if ( arg_force_name ) {
 		next = BIRTH_HISTORY_CHOICE;
 	}
 
-	
+
 	else if (get_character_name(name, sizeof(name))) {
 		cmdq_push(CMD_NAME_CHOICE);
 		cmd_set_arg_string(cmdq_peek(), "name", name);
@@ -852,7 +852,7 @@ static enum birth_stage get_name_command(void)
 		next = BIRTH_BACK;
 	}
 
-	
+
 	return next;
 }
 
@@ -961,7 +961,7 @@ int edit_text(char *buffer, int buflen) {
 
 				break;
 			}
-			
+
 			default: {
 				bool atnull = (buffer[cursor] == 0);
 
@@ -1054,7 +1054,7 @@ static enum birth_stage get_confirm_command(void)
 
 	/* Get a key */
 	ke = inkey();
-	
+
 	/* Start over */
 	if (ke.code == 'S' || ke.code == 's') {
 		next = BIRTH_RESET;
@@ -1082,7 +1082,7 @@ static enum birth_stage get_confirm_command(void)
  * ------------------------------------------------------------------------ */
 
 /**
- * This is called when we receive a request for a command in the birth 
+ * This is called when we receive a request for a command in the birth
  * process.
 
  * The birth process continues until we send a final character confirmation
@@ -1113,7 +1113,7 @@ int textui_do_birth(void)
 				cmdq_push(CMD_BIRTH_RESET);
 
 				roller = BIRTH_RESET;
-				
+
 				if (quickstart_allowed)
 					next = BIRTH_QUICKSTART;
 				else
@@ -1158,7 +1158,7 @@ int textui_do_birth(void)
 					next = current_stage - 1;
 
 				/* Make sure the character gets reset before quickstarting */
-				if (next == BIRTH_QUICKSTART) 
+				if (next == BIRTH_QUICKSTART)
 					next = BIRTH_RESET;
 
 				break;
@@ -1167,7 +1167,7 @@ int textui_do_birth(void)
 			case BIRTH_POINTBASED:
 			{
 				roller = BIRTH_POINTBASED;
-		
+
 				if (prev > BIRTH_POINTBASED)
 					point_based_start();
 
@@ -1276,4 +1276,3 @@ void ui_init_birthstate_handlers(void)
 	event_add_handler(EVENT_ENTER_BIRTH, ui_enter_birthscreen, NULL);
 	event_add_handler(EVENT_LEAVE_BIRTH, ui_leave_birthscreen, NULL);
 }
-

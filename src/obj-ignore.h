@@ -43,9 +43,9 @@ typedef enum
 
 #define ITYPE_SIZE              FLAG_SIZE(ITYPE_MAX)
 
-#define itype_has(f, flag)        	flag_has_dbg(f, ITYPE_SIZE, flag, #f, #flag)
-#define itype_on(f, flag)         	flag_on_dbg(f, ITYPE_SIZE, flag, #f, #flag)
-#define itype_wipe(f)             	flag_wipe(f, ITYPE_SIZE)
+#define itype_has(f, flag)		flag_has_dbg(f, ITYPE_SIZE, flag, #f, #flag)
+#define itype_on(f, flag)		flag_on_dbg(f, ITYPE_SIZE, flag, #f, #flag)
+#define itype_wipe(f)			flag_wipe(f, ITYPE_SIZE)
 
 /*
  * The different kinds of quality ignore
@@ -65,7 +65,7 @@ enum
 
 
 /**
- * Structure to describe ego item short name. 
+ * Structure to describe ego item short name.
  */
 struct ego_desc {
   s16b e_idx;

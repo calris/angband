@@ -3,7 +3,7 @@
  * \brief Elements used in spells and other attacks.
  *
  * Fields:
- * name - text name 
+ * name - text name
  * desc - text description of attack
  * player desc - text description of player attack
  * blind desc - text description of attack if blind
@@ -15,7 +15,7 @@
  * color - color of the effect
  */
 
-/* name  		desc				player desc			blind desc			num denom           divisor	cap		message type	color */
+/* name			desc				player desc			blind desc			num denom           divisor	cap		message type	color */
 ELEM(ACID,		"acid",				"acid",				"acid",				1,  RV(3,0,0,0),	3,		1600,	MSG_BR_ACID,	COLOUR_SLATE)
 ELEM(ELEC,		"lightning",		"lightning",		"lightning",		1,  RV(3,0,0,0),	3,		1600,	MSG_BR_ELEC,	COLOUR_BLUE)
 ELEM(FIRE,		"fire",				"fire",				"fire",				1,  RV(3,0,0,0),	3,		1600,	MSG_BR_FIRE,	COLOUR_RED)

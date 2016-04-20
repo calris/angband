@@ -50,7 +50,7 @@ struct flag_type {
  */
 struct blow_info {
 	int str_plus;
-	int dex_plus;  
+	int dex_plus;
 	int centiblows;
 };
 
@@ -181,7 +181,7 @@ static size_t element_info_collect(const bool list[], const char *recepticle[])
 		if (list[i])
 			recepticle[count++] = elements[i].name;
 	}
-	
+
 	return count;
 }
 
@@ -593,7 +593,7 @@ static void get_known_elements(const struct object *obj, const oinfo_detail_t mo
  *
  * Fills in whether the object is too_heavy to wield effectively,
  * and the possible_blows[] information of .str_plus and .dex_plus needed
- * to achieve the approximate number of blows in centiblows. 
+ * to achieve the approximate number of blows in centiblows.
  *
  * `max_blows` must be at least 1 to hold the current number of blows
  * `possible_blows` must be at least [`max_blows`] in size, and will be limited
@@ -722,7 +722,7 @@ static bool describe_blows(textblock *tb, const struct object *obj)
 
 	/* First entry is always current blows (+0, +0) */
 	textblock_append_c(tb, COLOUR_L_GREEN, "%d.%d ",
-			blow_info[0].centiblows / 100, 
+			blow_info[0].centiblows / 100,
 			(blow_info[0].centiblows / 10) % 10);
 	textblock_append(tb, "blow%s/round.\n",
 			(blow_info[0].centiblows > 100) ? "s" : "");
@@ -732,13 +732,13 @@ static bool describe_blows(textblock *tb, const struct object *obj)
 		struct blow_info entry = blow_info[i];
 
 		if (entry.centiblows % 10 == 0) {
-			textblock_append(tb, 
+			textblock_append(tb,
 				"With +%d STR and +%d DEX you would get %d.%d blows\n",
-				entry.str_plus, entry.dex_plus, 
+				entry.str_plus, entry.dex_plus,
 				(entry.centiblows / 100),
 				(entry.centiblows / 10) % 10);
 		} else {
-			textblock_append(tb, 
+			textblock_append(tb,
 				"With +%d STR and +%d DEX you would attack a bit faster\n",
 				entry.str_plus, entry.dex_plus);
 		}
@@ -753,7 +753,7 @@ static bool describe_blows(textblock *tb, const struct object *obj)
  * the player wields the given weapon.
  *
  * Fills in the damage against normal adversaries in `normal_damage`, as well
- * as the slays on the weapon in slay_list[] and corresponding damages in 
+ * as the slays on the weapon in slay_list[] and corresponding damages in
  * slay_damage[].  These must both be at least SL_MAX long to be safe.
  * `nonweap_slay` is set to whether other items being worn could add to the
  * damage done by branding attacks.
@@ -993,7 +993,7 @@ static bool describe_damage(textblock *tb, const struct object *obj)
  * Gets miscellaneous combat information about the given object.
  *
  * Fills in whether there is a special effect when thrown in `thrown effect`,
- * the `range` in ft (or zero if not ammo), whether the weapon has the 
+ * the `range` in ft (or zero if not ammo), whether the weapon has the
  * impact flag set, the percentage chance of breakage and whether it is
  * too heavy to be weilded effectively at the moment.
  */
@@ -1102,7 +1102,7 @@ static bool describe_combat(textblock *tb, const struct object *obj)
  * Returns information about objects that can be used for digging.
  *
  * `deciturns` will be filled in with the avg number of deciturns it will
- * take to dig through each type of diggable terrain, and must be at least 
+ * take to dig through each type of diggable terrain, and must be at least
  * [DIGGING_MAX].
  *
  * Returns false if the object has no effect on digging, or if the specifics
@@ -1201,7 +1201,7 @@ static bool describe_digger(textblock *tb, const struct object *obj)
  * Fills in the radius of the light in `rad`, whether it uses fuel and
  * how many turns light it can refuel in similar items.
  *
- * Return false if the object is not known to be a light source (which 
+ * Return false if the object is not known to be a light source (which
  * includes it not actually being a light source).
  */
 static bool obj_known_light(const struct object *obj, oinfo_detail_t mode, int *rad, bool *uses_fuel, int *refuel_turns)
@@ -1283,7 +1283,7 @@ static bool describe_light(textblock *tb, const struct object *obj,
  * Fills in:
  *  - the effect
  *  - whether the effect can be aimed
- *  -  the minimum and maximum time in game turns for the item to recharge 
+ *  -  the minimum and maximum time in game turns for the item to recharge
  *     (or zero if it does not recharge)
  *  - the percentage chance of the effect failing when used
  *
@@ -1404,7 +1404,7 @@ static bool describe_effect(textblock *tb, const struct object *obj,
 				level = obj->ego->level;
 
 			/* Get the boost */
-			boost = MAX(player->state.skills[SKILL_DEVICE] - level, 0);			
+			boost = MAX(player->state.skills[SKILL_DEVICE] - level, 0);
 
 			if (effect->dice != NULL)
 				roll = dice_roll(effect->dice, &value);
@@ -1595,7 +1595,7 @@ static bool describe_effect(textblock *tb, const struct object *obj,
 	}
 
 	if (failure_chance > 0) {
-		textblock_append(tb, "Your chance of success is %d.%d%%\n", 
+		textblock_append(tb, "Your chance of success is %d.%d%%\n",
 			(1000 - failure_chance) / 10, (1000 - failure_chance) % 10);
 	}
 
@@ -1775,12 +1775,12 @@ static textblock *object_info_out(const struct object *obj, int mode)
 			something = true;
 			textblock_append(tb, "\n");
 		}
-		
+
 		if (subjective && describe_combat(tb, obj)) {
 			something = true;
 			textblock_append(tb, "\n");
 		}
-		
+
 		if (!terse && subjective && describe_digger(tb, obj)) something = true;
 	}
 

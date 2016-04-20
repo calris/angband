@@ -21,7 +21,7 @@
 #include "z-file.h"
 
 /**
- * Option types 
+ * Option types
  */
 enum
 {
@@ -35,7 +35,7 @@ enum
 };
 
 /**
- * Option indexes 
+ * Option indexes
  */
 enum
 {
@@ -61,7 +61,7 @@ enum
 extern int option_page[OPT_PAGE_MAX][OPT_PAGE_PER];
 
 /**
- * Functions 
+ * Functions
 */
 const char *option_name(int opt);
 const char *option_desc(int opt);

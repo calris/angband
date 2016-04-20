@@ -590,10 +590,10 @@ static void term_getsize(term_data *td)
 			td->tile_wid = td->font_wid;
 			td->tile_hgt = td->font_hgt;
 		}
-		
+
 	    tile_width = 1;
 	    tile_height = 1;
-		
+
 		if ((td->tile_hgt >= td->font_hgt * 3) &&
 			(td->tile_wid >= td->font_wid * 3)) {
 			tile_width = 3;
@@ -607,16 +607,16 @@ static void term_getsize(term_data *td)
 			td->tile_wid /= 2;
 			td->tile_hgt /= 2;
 		}
-		
+
 		if (td->tile_wid >= td->font_wid * 2) {
 			tile_width *= 2;
 			td->tile_wid /= 2;
 		}
-		
+
 		if (td->tile_wid < td->font_wid) td->tile_wid = td->font_wid;
 		if (td->tile_hgt < td->font_hgt) td->tile_hgt = td->font_hgt;
 	}
-	
+
 	/* Window sizes */
 	wid = td->cols * td->tile_wid + td->size_ow1 + td->size_ow2;
 	hgt = td->rows * td->tile_hgt + td->size_oh1 + td->size_oh2;
@@ -1061,7 +1061,7 @@ static bool init_graphics(void)
 				have_space = true;
 				strcpy(ext, "_pre.png");
 				if (!file_exists(modname)) {
-					/* if the file does not exist, mark that we need to 
+					/* if the file does not exist, mark that we need to
 					 * create it, so clear the extension pointer */
 					ext = NULL;
 				} else if (file_newer(buf, modname)) {
@@ -1675,10 +1675,10 @@ static errr Term_xtra_win_react(void)
 		if (use_graphics_nice) {
 			/* HACK - Assume bizarre */
 			td->bizarre = true;
-                  
+
 			/* Analyze the font */
 			term_getsize(td);
-			
+
 			/* Resize the window */
 			term_window_resize(td);
 		}
@@ -2357,7 +2357,7 @@ static errr Term_pict_win_alpha(int x, int y, int n,
 
 		x3 = (tcp[i] & 0x7F) * w1;
 		y3 = trow * h1;
- 
+
 		/* Set the correct mode for stretching the tiles */
 		SetStretchBltMode(hdc, COLORONCOLOR);
 
@@ -2392,7 +2392,7 @@ static errr Term_pict_win_alpha(int x, int y, int n,
 				/* This tile is drawn every frame but it is needed, otherwise
 				 * the top does not get drawn again when the user of this tile
 				 * does not move, but something else does */
-				Term_mark(x, y); 
+				Term_mark(x, y);
 			} else {
 				AlphaBlend(hdc, x2, y2, tw2, th2, hdcSrc, x1, y1, w1, h1,
 						   blendfn);
@@ -2895,7 +2895,7 @@ static void setup_menus(void)
 		EnableMenuItem(hm, mode->grafID + IDM_OPTIONS_GRAPHICS_NONE,
 					   MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 		mode = mode->pNext;
-	} 
+	}
 
 	EnableMenuItem(hm, IDM_OPTIONS_GRAPHICS_NICE,
 				   MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
@@ -2932,7 +2932,7 @@ static void setup_menus(void)
 					  (arg_graphics == mode->grafID ?
 					   MF_CHECKED : MF_UNCHECKED));
 		mode = mode->pNext;
-	} 
+	}
 
 	CheckMenuItem(hm, IDM_OPTIONS_GRAPHICS_NICE,
 				  (arg_graphics_nice ? MF_CHECKED : MF_UNCHECKED));
@@ -3029,7 +3029,7 @@ static void setup_menus(void)
 				EnableMenuItem(hm, mode->grafID + IDM_OPTIONS_GRAPHICS_NONE, MF_ENABLED);
 			}
 			mode = mode->pNext;
-		} 
+		}
 
 		EnableMenuItem(hm, IDM_OPTIONS_GRAPHICS_NICE, MF_ENABLED);
 
@@ -3083,7 +3083,7 @@ static void check_for_save_file(LPSTR cmd_line)
 
 	/* Validate the file */
 	validate_file(savefile);
-	
+
 	/* Start game */
 	game_in_progress = true;
 	Term_fresh();
@@ -3289,7 +3289,7 @@ static void process_menus(WORD wCmd)
 				plog("You may not do that right now.");
 				break;
 			}
-                  
+
 			i = wCmd - IDM_WINDOW_FONT_0;
 
 			if ((i < 0) || (i >= MAX_TERM_DATA)) break;
@@ -3440,8 +3440,8 @@ static void process_menus(WORD wCmd)
 				plog("You may not do that right now.");
 				break;
 			}
-			
-			
+
+
 			if (MessageBox(NULL,
 					"This will reset the size and layout of the angband windows\n based on your screen size. Do you want to continue?",
 					VERSION_NAME, MB_YESNO|MB_ICONWARNING) == IDYES) {
@@ -3454,7 +3454,7 @@ static void process_menus(WORD wCmd)
 				for (i = 0; i < MAX_TERM_DATA; i++) {
 					/* Activate */
 					Term_activate(&(data[i].t));
-	        
+
 					/* Resize the term */
 					Term_resize(data[i].cols, data[i].rows);
 				}
@@ -3464,7 +3464,7 @@ static void process_menus(WORD wCmd)
 				/* Do something to sub-windows */
 				for (i = MAX_TERM_DATA - 1; i >= 0; i--) {
 					if (!(data[i].w)) continue;
-					
+
 					/* Client window size */
 					rc.left = 0;
 					rc.top = 0;
@@ -3506,7 +3506,7 @@ static void process_menus(WORD wCmd)
 				Term_xtra_win_react();
 
 				/* Hack -- Force redraw */
-				Term_key_push(KTRL('R'));			
+				Term_key_push(KTRL('R'));
 			}
 
 			break;
@@ -3527,7 +3527,7 @@ static void process_menus(WORD wCmd)
 
 			/* Hack -- Force redraw */
 			Term_key_push(KTRL('R'));
-			
+
 			break;
 		}
 
@@ -3874,7 +3874,7 @@ static void process_menus(WORD wCmd)
 						selected_mode = desired_mode;
 						break;
 					}
-				} while (graphics_modes[i++].grafID != 0); 
+				} while (graphics_modes[i++].grafID != 0);
 
 				/* Toggle "arg_graphics" */
 				if (arg_graphics != selected_mode) {

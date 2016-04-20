@@ -274,5 +274,3 @@ void enter_score(time_t *death_time)
 	/* Success */
 	return;
 }
-
-

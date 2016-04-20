@@ -194,7 +194,7 @@ typedef union {
 /*** Functions ***/
 
 /**
- * Given a string (and that string's length), return the corresponding keycode 
+ * Given a string (and that string's length), return the corresponding keycode
  */
 keycode_t keycode_find_code(const char *str, size_t len);
 

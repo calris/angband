@@ -261,7 +261,7 @@ int cmp_distance(const void *a, const void *b)
 }
 
 /**
- * Help select a location.  This function picks the closest from a set in 
+ * Help select a location.  This function picks the closest from a set in
  *(roughly) a given direction.
  */
 s16b target_pick(int y1, int x1, int dy, int dx, struct point_set *targets)
@@ -441,7 +441,7 @@ struct point_set *target_get_monsters(int mode)
 				if (!(cave->squares[y][x].mon > 0)) continue;
 
 				/* Must be a targettable monster */
-			 	if (!target_able(square_monster(cave, y, x))) continue;
+				if (!target_able(square_monster(cave, y, x))) continue;
 			}
 
 			/* Save the location */
@@ -482,7 +482,7 @@ bool target_set_closest(int mode)
 	y = targets->pts[0].y;
 	x = targets->pts[0].x;
 	mon = square_monster(cave, y, x);
-	
+
 	/* Target the monster, if possible */
 	if (!target_able(mon)) {
 		msg("No Available Target.");

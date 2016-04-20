@@ -438,7 +438,7 @@ struct object *gear_object_for_use(struct object *obj, int num, bool message,
 		player->upkeep->total_weight -= (num * obj->weight);
 
 		/* Describe if necessary */
-		if (message) 
+		if (message)
 			object_desc(name, sizeof(name), obj, ODESC_PREFIX | ODESC_FULL);
 	} else {
 		/* Describe if necessary */
@@ -464,7 +464,7 @@ struct object *gear_object_for_use(struct object *obj, int num, bool message,
 		if (tracked_object_is(player->upkeep, obj))
 			track_object(player->upkeep, NULL);
 
-		/* Inventory has changed, so disable repeat command */ 
+		/* Inventory has changed, so disable repeat command */
 		cmd_disable_repeat();
 	}
 

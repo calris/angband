@@ -419,7 +419,7 @@ void object_list_format_name(const object_list_entry_t *entry,
 		has_singular_prefix = true;
 
 	/* Work out if the object is in view */
-	los = projectable(cave, py, px, iy, ix, PROJECT_NONE) || 
+	los = projectable(cave, py, px, iy, ix, PROJECT_NONE) ||
 		((iy == py) && (ix == px));
 	field = los ? OBJECT_LIST_SECTION_LOS : OBJECT_LIST_SECTION_NO_LOS;
 
@@ -452,4 +452,3 @@ void object_list_format_name(const object_list_entry_t *entry,
 	chunk = strtok(source, "\0");
 	my_strcat(line_buffer, chunk, size);
 }
-

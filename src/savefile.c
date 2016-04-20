@@ -65,7 +65,7 @@
  * TODO:
  * - wr_ and rd_ should be passed a buffer to work with, rather than using
  *   the rd_ and wr_ functions with a universal buffer
- * - 
+ * -
  */
 
 /**
@@ -100,7 +100,7 @@ struct blockinfo {
 static const struct {
 	char name[16];
 	void (*save)(void);
-	u32b version;	
+	u32b version;
 } savers[] = {
 	{ "description", wr_description, 1 },
 	{ "rng", wr_randomizer, 1 },
@@ -142,10 +142,10 @@ static const struct blockinfo loaders[] = {
 	{ "misc", rd_misc, 1 },
 	{ "player hp", rd_player_hp, 1 },
 	{ "player spells", rd_player_spells, 1 },
-	{ "gear", rd_gear, 1 },	
-	{ "stores", rd_stores, 1 },	
+	{ "gear", rd_gear, 1 },
+	{ "stores", rd_stores, 1 },
 	{ "dungeon", rd_dungeon, 1 },
-	{ "objects", rd_objects, 1 },	
+	{ "objects", rd_objects, 1 },
 	{ "monsters", rd_monsters, 1 },
 	{ "traps", rd_traps, 1 },
 	{ "chunks", rd_chunks, 1 },
@@ -421,7 +421,7 @@ bool savefile_save(const char *path)
 				file_move(old_savefile, path);
 			else
 				file_delete(old_savefile);
-		} 
+		}
 
 		safe_setuid_drop();
 
@@ -506,7 +506,7 @@ static loader_t find_loader(struct blockheader *b,
 		if (b->version != loaders[i].version) continue;
 
 		return loaders[i].loader;
-	} 
+	}
 
 	return NULL;
 }

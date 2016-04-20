@@ -1,6 +1,6 @@
 /**
  * \file list-mon-spells.h
- * \brief List of monster spell flags 
+ * \brief List of monster spell flags
  *
  * Changing flag order will break savefiles.  Flags
  * below start from 0 on line 20, so a flag's sequence number is its line
@@ -10,7 +10,7 @@
  * name - spell name
  * type - spell type
  */
-/* 	name		type*/
+/*	name		type*/
 RSF(NONE,		)
 RSF(SHRIEK,		RST_ANNOY | RST_INNATE)
 RSF(ARROW_1,	RST_BOLT | RST_INNATE)

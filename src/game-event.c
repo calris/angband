@@ -23,7 +23,7 @@
 
 struct event_handler_entry
 {
-	struct event_handler_entry *next;	
+	struct event_handler_entry *next;
 	game_event_handler *fn;
 	void *user;
 };
@@ -34,7 +34,7 @@ static void game_event_dispatch(game_event_type type, game_event_data *data)
 {
 	struct event_handler_entry *this = event_handlers[type];
 
-	/* 
+	/*
 	 * Send the word out to all interested event handlers.
 	 */
 	while (this)

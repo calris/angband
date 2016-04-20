@@ -225,7 +225,7 @@ static void compact_monsters_aux(int i1, int i2)
 
 	/* Update the cave */
 	cave->squares[y][x].mon = i2;
-	
+
 	/* Update midx */
 	mon->midx = i2;
 
@@ -436,7 +436,7 @@ s16b mon_pop(struct chunk *c)
 		return m_idx;
 	}
 
-	/* Warn the player if no index is available 
+	/* Warn the player if no index is available
 	 * (except during dungeon creation)
 	 */
 	if (character_dungeon)
@@ -494,7 +494,7 @@ static struct monster_race *get_mon_race_aux(long total,
 		/* Decrement */
 		value -= table[i].prob3;
 	}
-	
+
 	return &r_info[table[i].index];
 }
 
@@ -554,12 +554,12 @@ struct monster_race *get_mon_num(int level)
 		race = &r_info[table[i].index];
 
 		/* No seasonal monsters outside of Christmas */
-		if (rf_has(race->flags, RF_SEASONAL) && 
+		if (rf_has(race->flags, RF_SEASONAL) &&
 			!(date->tm_mon == 11 && date->tm_mday >= 24 && date->tm_mday <= 26))
 			continue;
 
 		/* Only one copy of a a unique must be around at the same time */
-		if (rf_has(race->flags, RF_UNIQUE) && 
+		if (rf_has(race->flags, RF_UNIQUE) &&
 				race->cur_num >= race->max_num)
 			continue;
 
@@ -582,7 +582,7 @@ struct monster_race *get_mon_num(int level)
 
 	/* Try for a "harder" monster once (50%) or twice (10%) */
 	p = randint0(100);
-	
+
 	if (p < 60) {
 		struct monster_race *old = race;
 
@@ -661,7 +661,7 @@ static bool mon_create_drop(struct chunk *c, struct monster *mon, byte origin)
 	int number = 0, level, j, monlevel;
 
 	struct object *obj;
-	
+
 	assert(mon);
 
 	great = (rf_has(mon->race->flags, RF_DROP_GREAT));
@@ -678,7 +678,7 @@ static bool mon_create_drop(struct chunk *c, struct monster *mon, byte origin)
         monlevel = MIN(monlevel + 15, monlevel * 2);
         extra_roll = true;
     }
-    
+
 	/* Take the best of (average of monster level and current depth)
 	   and (monster level) - to reward fighting OOD monsters */
 	level = MAX((monlevel + player->depth) / 2, monlevel);
@@ -807,7 +807,7 @@ s16b place_monster(struct chunk *c, int y, int x, struct monster *mon,
 		int i = 1;
 
 		/* Pick a random object kind to mimic */
-		for (mimic_kind = new_mon->race->mimic_kinds; mimic_kind; 
+		for (mimic_kind = new_mon->race->mimic_kinds; mimic_kind;
 				mimic_kind = mimic_kind->next, i++) {
 			if (one_in_(i)) kind = mimic_kind->kind;
 		}
@@ -999,9 +999,9 @@ static bool place_new_monster_one(struct chunk *c, int y, int x,
 	/* Radiate light? */
 	if (rf_has(race->flags, RF_HAS_LIGHT))
 		player->upkeep->update |= PU_UPDATE_VIEW;
-	
+
 	/* Is this obviously a monster? (Mimics etc. aren't) */
-	if (rf_has(race->flags, RF_UNAWARE)) 
+	if (rf_has(race->flags, RF_UNAWARE))
 		mflag_on(mon->mflag, MFLAG_UNAWARE);
 	else
 		mflag_off(mon->mflag, MFLAG_UNAWARE);
@@ -1024,7 +1024,7 @@ static bool place_new_monster_one(struct chunk *c, int y, int x,
  */
 #define GROUP_MAX	25
 
-		
+
 /**
  * Attempts to place a group of monsters of race `r_idx` around
  * the given location. The number of monsters to place is `total`.
@@ -1033,9 +1033,9 @@ static bool place_new_monster_one(struct chunk *c, int y, int x,
  * which is given in monster.txt.
  *
  * `origin` is the item origin to use for any monster drops (e.g. ORIGIN_DROP,
- * ORIGIN_DROP_PIT, etc.) 
+ * ORIGIN_DROP_PIT, etc.)
  */
-static bool place_new_monster_group(struct chunk *c, int y, int x, 
+static bool place_new_monster_group(struct chunk *c, int y, int x,
 									struct monster_race *race, bool sleep,
 									int total, byte origin)
 {
@@ -1048,7 +1048,7 @@ static bool place_new_monster_group(struct chunk *c, int y, int x,
 	byte hack_x[GROUP_MAX];
 
 	assert(race);
-	
+
 	/* Start on the monster */
 	hack_n = 1;
 	hack_x[0] = x;
@@ -1083,7 +1083,7 @@ static bool place_new_monster_group(struct chunk *c, int y, int x,
 }
 
 /* Maximum distance from center for a group of monsters */
-#define GROUP_DISTANCE 5 
+#define GROUP_DISTANCE 5
 
 static struct monster_base *place_monster_base = NULL;
 
@@ -1096,82 +1096,82 @@ static bool place_monster_base_okay(struct monster_race *race)
 {
 	assert(place_monster_base);
 	assert(race);
-	
+
 	/* Check if it matches */
 	if (race->base != place_monster_base) return false;
-	
+
 	/* No uniques */
 	if (rf_has(race->flags, RF_UNIQUE)) return false;
-	
+
 	return true;
 }
 
 /**
  * Helper function to place monsters that appear as friends or escorts
  */
- bool place_friends(struct chunk *c, int y, int x, struct monster_race *race, 
+ bool place_friends(struct chunk *c, int y, int x, struct monster_race *race,
 					struct monster_race *friends_race, int total, bool sleep,
 					byte origin)
  {
 	int level_difference, extra_chance, nx, ny;
 	int j;
 	bool is_unique, success = true;
-	
+
 	/* Find the difference between current dungeon depth and monster level */
 	level_difference = player->depth - friends_race->level + 5;
-	
+
 	/* Handle unique monsters */
 	is_unique = rf_has(friends_race->flags, RF_UNIQUE);
-	
+
 	/* Make sure the unique hasn't been killed already */
 	if (is_unique){
 		total = friends_race->cur_num < friends_race->max_num ? 1 : 0;
 	}
-	
+
 	/* More than 4 levels OoD, no groups allowed */
 	if (level_difference <= 0 && !is_unique){
 		return false;
 	}
-	
+
 	/* Reduce group size within 5 levels of natural depth*/
 	if (level_difference < 10 && !is_unique){
 		extra_chance = (total * level_difference) % 10;
 		total = total * level_difference / 10;
-		
+
 		/* Instead of flooring the group value, we use the decimal place
 		   as a chance of an extra monster */
 		if (randint0(10) > extra_chance){
 			total += 1;
 		}
 	}
-	
+
 	/* No monsters in this group */
 	if (total <= 0){
 		return false;
 	}
-	
+
 	/* Handle friends same as original monster */
 	if (race->ridx == friends_race->ridx){
 		success = place_new_monster_group(c, y, x, race, sleep, total, origin);
 		return success;
 	}
-	
+
 	/* Find a nearby place to put the other groups */
 	for (j = 0; j < 50; j++){
 		scatter(c, &ny, &nx, y, x, GROUP_DISTANCE, false);
 		if (square_isopen(c, ny, nx)) break;
 	}
-		
+
 	/* Place the monsters */
 	success = place_new_monster_one(c, ny, nx, friends_race, sleep, origin);
 	if (total > 1)
 		success = place_new_monster_group(c, ny, nx, friends_race, sleep, total,
 										  origin);
-	
+
 	return success;
-	
+
 }
-	
+
 /**
  * Attempts to place a monster of the given race at the given location.
  *
@@ -1183,7 +1183,7 @@ static bool place_monster_base_okay(struct monster_race *race)
  * which is given in monster.txt.
  *
  * `origin` is the item origin to use for any monster drops (e.g. ORIGIN_DROP,
- * ORIGIN_DROP_PIT, etc.) 
+ * ORIGIN_DROP_PIT, etc.)
  */
 bool place_new_monster(struct chunk *c, int y, int x, struct monster_race *race,
 					   bool sleep, bool group_okay, byte origin)
@@ -1191,10 +1191,10 @@ bool place_new_monster(struct chunk *c, int y, int x, struct monster_race *race,
 	struct monster_friends *friends;
 	struct monster_friends_base *friends_base;
 	int total;
-	
+
 	assert(c);
 	assert(race);
-	
+
 	/* Place one monster, or fail */
 	if (!place_new_monster_one(c, y, x, race, sleep, origin)) return (false);
 
@@ -1205,23 +1205,23 @@ bool place_new_monster(struct chunk *c, int y, int x, struct monster_race *race,
 	for (friends = race->friends; friends; friends = friends->next) {
 		if ((unsigned int)randint0(100) >= friends->percent_chance)
 			continue;
-		
+
 		/* Calculate the base number of monsters to place */
 		total = damroll(friends->number_dice, friends->number_side);
-		
+
 		place_friends(c, y, x, race, friends->race, total, sleep, origin);
-		
+
 	}
 
 	/* Go through the friends_base flags */
-	for (friends_base = race->friends_base; friends_base; 
+	for (friends_base = race->friends_base; friends_base;
 			friends_base = friends_base->next){
 		struct monster_race *friends_race;
 
 		/* Check if we pass chance for the monster appearing */
 		if ((unsigned int)randint0(100) >= friends_base->percent_chance)
 			continue;
-			
+
 		total = damroll(friends_base->number_dice, friends_base->number_side);
 
 		/* Set the escort index base*/
@@ -1248,7 +1248,7 @@ bool place_new_monster(struct chunk *c, int y, int x, struct monster_race *race,
 
 
 /**
- * Picks a monster race, makes a new monster of that race, then attempts to 
+ * Picks a monster race, makes a new monster of that race, then attempts to
  * place it in the dungeon. The monster race chosen will be appropriate for
  * dungeon level equal to `depth`.
  *
@@ -1259,7 +1259,7 @@ bool place_new_monster(struct chunk *c, int y, int x, struct monster_race *race,
  * monster appears with friends or an escort.
  *
  * `origin` is the item origin to use for any monster drops (e.g. ORIGIN_DROP,
- * ORIGIN_DROP_PIT, etc.) 
+ * ORIGIN_DROP_PIT, etc.)
  *
  * Returns true if we successfully place a monster.
  */
@@ -1276,8 +1276,8 @@ bool pick_and_place_monster(struct chunk *c, int y, int x, int depth,
 
 
 /**
- * Picks a monster race, makes a new monster of that race, then attempts to 
- * place it in the dungeon at least `dis` away from the player. The monster 
+ * Picks a monster race, makes a new monster of that race, then attempts to
+ * place it in the dungeon at least `dis` away from the player. The monster
  * race chosen will be appropriate for dungeon level equal to `depth`.
  *
  * If `sleep` is true, the monster is placed with its default sleep value,
@@ -1409,7 +1409,7 @@ void monster_death(struct monster *mon, bool stats)
  *
  * We announce monster death (using an optional "death message" (`note`)
  * if given, and a otherwise a generic killed/destroyed message).
- * 
+ *
  * Returns true if the monster has been killed (and deleted).
  *
  * TODO: Consider decreasing monster experience over time, say, by using
@@ -1508,8 +1508,8 @@ bool mon_take_hit(struct monster *mon, int dam, bool *fear, const char *note)
 			char unique_name[80];
 			mon->race->max_num = 0;
 
-			/* 
-			 * This gets the correct name if we slay an invisible 
+			/*
+			 * This gets the correct name if we slay an invisible
 			 * unique and don't have See Invisible.
 			 */
 			monster_desc(unique_name, sizeof(unique_name), mon,
@@ -1570,7 +1570,7 @@ bool mon_take_hit(struct monster *mon, int dam, bool *fear, const char *note)
 	}
 
 	/* Sometimes a monster gets scared by damage */
-	if (!mon->m_timed[MON_TMD_FEAR] && 
+	if (!mon->m_timed[MON_TMD_FEAR] &&
 		!rf_has(mon->race->flags, RF_NO_FEAR) &&	dam > 0) {
 		int percentage;
 

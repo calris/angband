@@ -376,7 +376,7 @@ void spell_learn(int spell_index)
 
 	/* Message if needed */
 	if (player->upkeep->new_spells)
-		msg("You can learn %d more %s%s.", player->upkeep->new_spells, noun, 
+		msg("You can learn %d more %s%s.", player->upkeep->new_spells, noun,
 			PLURAL(player->upkeep->new_spells));
 
 	/* Redraw Study Status */

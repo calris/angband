@@ -270,11 +270,11 @@ void chunk_validate_objects(struct chunk *c);
 void fill_rectangle(struct chunk *c, int y1, int x1, int y2, int x2, int feat,
 					int flag);
 void generate_mark(struct chunk *c, int y1, int x1, int y2, int x2, int flag);
-void draw_rectangle(struct chunk *c, int y1, int x1, int y2, int x2, int feat, 
+void draw_rectangle(struct chunk *c, int y1, int x1, int y2, int x2, int feat,
 					int flag);
 void set_marked_granite(struct chunk *c, int y, int x, int flag);
-extern bool generate_starburst_room(struct chunk *c, int y1, int x1, int y2, 
-									int x2, bool light, int feat, 
+extern bool generate_starburst_room(struct chunk *c, int y1, int x1, int y2,
+									int x2, bool light, int feat,
 									bool special_ok);
 
 struct vault *random_vault(int depth, const char *typ);
@@ -332,7 +332,7 @@ bool alloc_object(struct chunk *c, int set, int typ, int depth, byte origin);
 
 /* gen-monster.c */
 bool mon_restrict(const char *monster_type, int depth, bool unique_ok);
-void spread_monsters(struct chunk *c, const char *type, int depth, int num, 
+void spread_monsters(struct chunk *c, const char *type, int depth, int num,
 					 int y0, int x0, int dy, int dx, byte origin);
 void get_vault_monsters(struct chunk *c, char racial_symbol[], char *vault_type,
 						const char *data, int y1, int y2, int x1, int x2);

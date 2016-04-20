@@ -93,11 +93,11 @@ enum
 /**
  * Flags for player.spell_flags[]
  */
-#define PY_SPELL_LEARNED    0x01 	/* Spell has been learned */
-#define PY_SPELL_WORKED     0x02 	/* Spell has been successfully tried */
-#define PY_SPELL_FORGOTTEN  0x04 	/* Spell has been forgotten */
+#define PY_SPELL_LEARNED    0x01	/* Spell has been learned */
+#define PY_SPELL_WORKED     0x02	/* Spell has been successfully tried */
+#define PY_SPELL_FORGOTTEN  0x04	/* Spell has been forgotten */
 
-#define BTH_PLUS_ADJ    	3 		/* Adjust BTH per plus-to-hit */
+#define BTH_PLUS_ADJ		3		/* Adjust BTH per plus-to-hit */
 
 /**
  * Player magic realms
@@ -144,7 +144,7 @@ enum
 	DIGGING_QUARTZ,
 	DIGGING_GRANITE,
 	DIGGING_DOORS,
-	
+
 	DIGGING_MAX
 };
 
@@ -193,29 +193,29 @@ extern struct player_body *bodies;
 struct player_race {
 	struct player_race *next;
 	const char *name;
-	
+
 	unsigned int ridx;
 
 	int r_adj[STAT_MAX];	/* Racial stat bonuses */
-	
+
 	int r_skills[SKILL_MAX];	/* racial skills */
-	
+
 	int r_mhp;			/* Race hit-dice modifier */
 	int r_exp;			/* Race experience factor */
-	
+
 	int b_age;			/* base age */
 	int m_age;			/* mod age */
-	
+
 	int base_hgt;		/* base height */
 	int mod_hgt;		/* mod height */
 	int base_wgt;		/* base weight */
 	int mod_wgt;		/* mod weight */
-	
+
 	int infra;			/* Infra-vision	range */
-	
+
 	int body;			/* Race body */
 	struct history_chart *history;
-	
+
 	bitflag flags[OF_SIZE];   /* Racial (object) flags */
 	bitflag pflags[PF_SIZE];  /* Racial (player) flags */
 
@@ -287,7 +287,7 @@ struct class_book {
 struct class_magic {
 	int spell_first;		/**< Level of first spell */
 	int spell_weight;		/**< Max armour weight to avoid mana penalties */
-	struct magic_realm *spell_realm;  		/**< Primary spellcasting realm */
+	struct magic_realm *spell_realm;		/**< Primary spellcasting realm */
 	int num_books;			/**< Number of spellbooks */
 	struct class_book *books;		/**< Details of spellbooks */
 	int total_spells;		/**< Number of spells for this class */
@@ -301,28 +301,28 @@ struct player_class {
 	struct player_class *next;
 	const char *name;
 	unsigned int cidx;
-	
+
 	const char *title[10];    /* Titles */
-	
+
 	int c_adj[STAT_MAX]; /* Class stat modifier */
-	
+
 	int c_skills[SKILL_MAX];	/* class skills */
 	int x_skills[SKILL_MAX];	/* extra skills */
-	
+
 	int c_mhp;        /* Class hit-dice adjustment */
 	int c_exp;        /* Class experience factor */
-	
+
 	bitflag pflags[PF_SIZE]; /* Class (player) flags */
-	
+
 	int max_attacks;  /* Maximum possible attacks */
 	int min_weight;   /* Minimum weapon weight for calculations */
 	int att_multiply; /* Multiplier for attack calculations */
-	
+
 	int sense_base;   /* Base pseudo-id value */
 	int sense_div;    /* Pseudo-id divisor */
-	
+
 	struct start_item *start_items; /* Starting inventory */
-	
+
 	struct class_magic magic; /* Magic spells */
 };
 
@@ -333,20 +333,20 @@ extern struct player_class *classes;
  * entries for that chart, and each entry contains a text description and a
  * successor chart to move history generation to.
  * For example:
- * 	chart 1 {
- * 		entry {
- * 			desc "You are the illegitimate and unacknowledged child";
- * 			next 2;
- * 		};
- * 		entry {
- * 			desc "You are the illegitimate but acknowledged child";
- * 			next 2;
- * 		};
- * 		entry {
- * 			desc "You are one of several children";
- * 			next 3;
- * 		};
- * 	};
+ *	chart 1 {
+ *		entry {
+ *			desc "You are the illegitimate and unacknowledged child";
+ *			next 2;
+ *		};
+ *		entry {
+ *			desc "You are the illegitimate but acknowledged child";
+ *			next 2;
+ *		};
+ *		entry {
+ *			desc "You are one of several children";
+ *			next 3;
+ *		};
+ *	};
  *
  * History generation works by walking the graph from the starting chart for
  * each race, picking a random entry (with weighted probability) each time.
@@ -373,13 +373,13 @@ struct history_chart {
  */
 typedef struct {
 	char full_name[32];		/* Full name */
-	
+
 	bool opt[OPT_MAX];		/* Options */
-	
+
 	byte hitpoint_warn;		/* Hitpoint warning (0 to 9) */
 	u16b lazymove_delay;	/* Delay in cs before moving to allow another key */
 	byte delay_factor;		/* Delay factor (0 to 9) */
-	
+
 	byte name_suffix;		/* numeric suffix for player name */
 } player_other;
 
@@ -448,9 +448,9 @@ struct player_upkeep {
 	struct object *object;				/* Object trackee */
 	struct object_kind *object_kind;	/* Object kind trackee */
 
-	u32b notice;		/* Bit flags for pending actions such as 
+	u32b notice;		/* Bit flags for pending actions such as
 						 * reordering inventory, ignoring, etc. */
-	u32b update;		/* Bit flags for recalculations needed 
+	u32b update;		/* Bit flags for recalculations needed
 						 * such as HP, or visible area */
 	u32b redraw;	    /* Bit flags for things that /have/ changed,
 						 * and just need to be redrawn by the UI,

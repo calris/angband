@@ -52,7 +52,7 @@ u16* tiles_bin;/* = (u16*)0x06020400; */
 byte nds_btn_cmds[NDS_NUM_MAPPABLE << NDS_NUM_MODIFIER][NDS_CMD_LENGTH];
 
 /* make sure there's something there to start with */
-byte btn_defaults[] = 
+byte btn_defaults[] =
   {
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
     'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'z'};
@@ -89,20 +89,20 @@ u16b NDS_SCREEN_ROWS;
 #define TILE_BUFFER_SIZE		(TILE_WIDTH*TILE_HEIGHT*(total_tiles_used+1)*2)
 
 const nds_kbd_key row0[] = {
-  {16,(u16)'`'}, {16,(u16)'1'}, {16,(u16)'2'}, {16,(u16)'3'}, {16,(u16)'4'}, 
-  {16,(u16)'5'}, {16,(u16)'6'}, {16,(u16)'7'}, {16,(u16)'8'}, {16,(u16)'9'}, 
+  {16,(u16)'`'}, {16,(u16)'1'}, {16,(u16)'2'}, {16,(u16)'3'}, {16,(u16)'4'},
+  {16,(u16)'5'}, {16,(u16)'6'}, {16,(u16)'7'}, {16,(u16)'8'}, {16,(u16)'9'},
   {16,(u16)'0'}, {16,(u16)'-'}, {16,(u16)'='}, {32,(u16)'\b'}, {0,0}};
 const nds_kbd_key row1[] = {
-  {24,(u16)'\t'}, {16,(u16)'q'}, {16,(u16)'w'}, {16,(u16)'e'}, {16,(u16)'r'}, 
-  {16,(u16)'t'}, {16,(u16)'y'}, {16,(u16)'u'}, {16,(u16)'i'}, {16,(u16)'o'}, 
+  {24,(u16)'\t'}, {16,(u16)'q'}, {16,(u16)'w'}, {16,(u16)'e'}, {16,(u16)'r'},
+  {16,(u16)'t'}, {16,(u16)'y'}, {16,(u16)'u'}, {16,(u16)'i'}, {16,(u16)'o'},
   {16,(u16)'p'}, {16,(u16)'['}, {16,(u16)']'}, {24,(u16)'\\'}, {0,0}};
 const nds_kbd_key row2[] = {
-  {32,K_CAPS}, {16,(u16)'a'}, {16,(u16)'s'}, {16,(u16)'d'}, {16,(u16)'f'}, 
-  {16,(u16)'g'}, {16,(u16)'h'}, {16,(u16)'j'}, {16,(u16)'k'}, {16,(u16)'l'}, 
+  {32,K_CAPS}, {16,(u16)'a'}, {16,(u16)'s'}, {16,(u16)'d'}, {16,(u16)'f'},
+  {16,(u16)'g'}, {16,(u16)'h'}, {16,(u16)'j'}, {16,(u16)'k'}, {16,(u16)'l'},
   {16,(u16)';'}, {16,(u16)'\''}, {32,(u16)'\n'}, {0,0}};
 const nds_kbd_key row3[] = {
-  {40,K_SHIFT}, {16,(u16)'z'}, {16,(u16)'x'}, {16,(u16)'c'}, {16,(u16)'v'}, 
-  {16,(u16)'b'}, {16,(u16)'n'}, {16,(u16)'m'}, {16,(u16)','}, {16,(u16)'.'}, 
+  {40,K_SHIFT}, {16,(u16)'z'}, {16,(u16)'x'}, {16,(u16)'c'}, {16,(u16)'v'},
+  {16,(u16)'b'}, {16,(u16)'n'}, {16,(u16)'m'}, {16,(u16)','}, {16,(u16)'.'},
   {16,(u16)'/'}, {40,K_SHIFT}, {0,0}};
 const nds_kbd_key row4[] = {
   {32,K_CTRL}, {24,K_ALT}, {128,(u16)' '}, {24,K_ALT}, {32,K_CTRL}, {0,0}};
@@ -126,12 +126,12 @@ typedef struct term_data term_data;
 struct term_data
 {
   term t;
-  
+
   byte rows;
   byte cols;
-  
+
   int tile_height;
-  int tile_width; 
+  int tile_width;
 };
 
 
@@ -160,21 +160,21 @@ static term_data data[MAX_TERM_DATA];
  */
 
 u16b color_data[] = {
-	RGB15(  0,  0,  0), 		/* COLOUR_DARK */
-	RGB15( 31, 31, 31), 		/* COLOUR_WHITE */
-	RGB15( 15, 15, 15), 		/* COLOUR_SLATE */
-	RGB15( 31, 15,  0),		/* COLOUR_ORANGE */ 
-	RGB15( 23,  0,  0), 		/* COLOUR_RED */
-	RGB15(  0, 15,  9), 		/* COLOUR_GREEN */
-	RGB15(  0,  0, 31), 		/* COLOUR_BLUE */
-	RGB15( 15,  9,  0), 		/* COLOUR_UMBER */
-	RGB15(  9,  9,  9), 		/* COLOUR_L_DARK */
-	RGB15( 23, 23, 23), 		/* COLOUR_L_WHITE */
-	RGB15( 31,  0, 31), 		/* COLOUR_VIOLET */
-	RGB15( 31, 31,  0), 		/* COLOUR_YELLOW */
-	RGB15( 31,  0,  0), 		/* COLOUR_L_RED */
-	RGB15(  0, 31,  0), 		/* COLOUR_L_GREEN */
-	RGB15(  0, 31, 31), 		/* COLOUR_L_BLUE */
+	RGB15(  0,  0,  0),		/* COLOUR_DARK */
+	RGB15( 31, 31, 31),		/* COLOUR_WHITE */
+	RGB15( 15, 15, 15),		/* COLOUR_SLATE */
+	RGB15( 31, 15,  0),		/* COLOUR_ORANGE */
+	RGB15( 23,  0,  0),		/* COLOUR_RED */
+	RGB15(  0, 15,  9),		/* COLOUR_GREEN */
+	RGB15(  0,  0, 31),		/* COLOUR_BLUE */
+	RGB15( 15,  9,  0),		/* COLOUR_UMBER */
+	RGB15(  9,  9,  9),		/* COLOUR_L_DARK */
+	RGB15( 23, 23, 23),		/* COLOUR_L_WHITE */
+	RGB15( 31,  0, 31),		/* COLOUR_VIOLET */
+	RGB15( 31, 31,  0),		/* COLOUR_YELLOW */
+	RGB15( 31,  0,  0),		/* COLOUR_L_RED */
+	RGB15(  0, 31,  0),		/* COLOUR_L_GREEN */
+	RGB15(  0, 31, 31),		/* COLOUR_L_BLUE */
 	RGB15( 23, 15,  9)		/* COLOUR_L_UMBER */
 };
 
@@ -244,63 +244,63 @@ static void handle_touch(int x, int y, int button, bool press)
 
 static bool shift = false, ctrl = false, alt = false, caps = false;
 
-u16b kbd_mod_code(u16 ret) 
+u16b kbd_mod_code(u16 ret)
 {
   if (ret & K_MODIFIER) return ret;
-  if (caps && !shift) 
+  if (caps && !shift)
     {
       if (ret >= 'a' && ret <= 'z') ret -= 0x20;
     }
-  if (shift) 
+  if (shift)
     {
       char* temp;
       if (!caps && ret >= 'a' && ret <= 'z') ret -= 0x20;
       if ((temp = strchr(shifts,ret)) != NULL) ret = *(temp + 1);
     }
-  if (alt) 
+  if (alt)
     {
       ret |= 0x80;
     }
-  if (ctrl/* && ret >= 'a' && ret < 'a'+32*/) 
+  if (ctrl/* && ret >= 'a' && ret < 'a'+32*/)
     {
       ret = ret & 0x1f;
     }
   return ret;
 }
 
-void kbd_set_color_from_pos(u16b r, u16b k, byte color) 
+void kbd_set_color_from_pos(u16b r, u16b k, byte color)
 {
   u16b ii, xx = 0, jj;
-  u16b *map[] = { 
-    (u16b*)(BG_MAP_RAM_SUB(8)+3*32*2), 
-    (u16b*)(BG_MAP_RAM_SUB(9)+3*32*2), 
+  u16b *map[] = {
+    (u16b*)(BG_MAP_RAM_SUB(8)+3*32*2),
+    (u16b*)(BG_MAP_RAM_SUB(9)+3*32*2),
     (u16b*)(BG_MAP_RAM_SUB(10)+3*32*2),
-    (u16b*)(BG_MAP_RAM_SUB(11)+3*32*2) 
+    (u16b*)(BG_MAP_RAM_SUB(11)+3*32*2)
   };
-  for (ii = 0; ii < k; ii++) 
+  for (ii = 0; ii < k; ii++)
     {
       xx += kbdrows[r][ii].width >> 3;
     }
-  for (ii = 0; ii < (kbdrows[r][k].width>>3); ii++) 
+  for (ii = 0; ii < (kbdrows[r][k].width>>3); ii++)
     {
-      for (jj = 0; jj < 4; jj++) 
+      for (jj = 0; jj < 4; jj++)
 	{
-	  map[jj][(10 + r * 2) * 32 + ii + xx + 1] 
+	  map[jj][(10 + r * 2) * 32 + ii + xx + 1]
 	    = (map[jj][(10+r*2)*32+ii+xx+1] & 0x0FFF) | (color << 12);
-	  map[jj][(10 + r * 2 + 1) * 32 + ii + xx + 1] 
+	  map[jj][(10 + r * 2 + 1) * 32 + ii + xx + 1]
 	    = (map[jj][(10+r*2+1)*32+ii+xx+1] & 0x0FFF) | (color << 12);
     }
   }
 }
 
-void kbd_set_color_from_code(u16b code, byte color) 
+void kbd_set_color_from_code(u16b code, byte color)
 {
   u16b r,k;
-  for (r = 0; r < 5; r++) 
+  for (r = 0; r < 5; r++)
     {
-      for (k = 0; kbdrows[r][k].width != 0; k++) 
+      for (k = 0; kbdrows[r][k].width != 0; k++)
 	{
-	  if (kbd_mod_code(kbdrows[r][k].code) == code)  
+	  if (kbd_mod_code(kbdrows[r][k].code) == code)
 	    {
 	      kbd_set_color_from_pos(r,k,color);
 	    }
@@ -311,34 +311,34 @@ void kbd_set_color_from_code(u16b code, byte color)
 
 void kbd_set_map() {
   SUB_BG0_CR = BG_TILE_BASE(0) | BG_MAP_BASE(8 + (caps | (shift<<1))) | BG_PRIORITY(0) | BG_16_COLOR;
-  
+
 }
 
-u16b kbd_xy2key(byte x, byte y) 
+u16b kbd_xy2key(byte x, byte y)
 {
-  if (x >= 104 && x < 152 && y >=24 && y < 72) 
+  if (x >= 104 && x < 152 && y >=24 && y < 72)
     {	/* on arrow-pad */
       byte kx = (x-104)/16, ky = (y-24)/16;
       return (kx + (2 - ky) * 3 + 1 + '0')/* | (shift ? K_SHIFTED_MOVE : 0)*/;
-    
+
     }
-  if (y >=80 && y < 96) 
+  if (y >=80 && y < 96)
     {
       if (x >= 8 && x < 24) return '\033';
       if (x >= 40 && x < 248) {	/* F-key */
 	x -= 40;
 	y = x/72;	/* which section */
 	x -= y*72;	/* offset in section */
-	if (x < 64) 
+	if (x < 64)
 	  {
 	    return K_F(y*4+(x>>4)+1);	/* section*4 + offset/16 + 1 */
-	  } 
-	else 
+	  }
+	else
 	  {
 	    return 0;
 	  }
       }
-      
+
     }
   s16b ox = x - 8, oy = y-104;
   if (ox < 0 || ox >= 240) return 0;
@@ -350,9 +350,9 @@ u16b kbd_xy2key(byte x, byte y)
   return kbd_mod_code(ret);
 }
 
-void kbd_dotoggle(bool *flag, int how) 
+void kbd_dotoggle(bool *flag, int how)
 {
-  switch (how) 
+  switch (how)
     {
     case 0: *flag = false; return;
     case 1: *flag = true; return;
@@ -363,10 +363,10 @@ void kbd_dotoggle(bool *flag, int how)
 
 /* which: K_SHIFT, K_CTRL, K_ALT, K_MODIFIER=all keys */
 /* how: -1 = toggle, 0 = off, 1 = on */
-void kbd_togglemod(int which, int how) 
+void kbd_togglemod(int which, int how)
 {
   /*boolean old_shift = shift, old_ctrl = ctrl, old_alt = alt, old_caps = caps; */
-  switch (which) 
+  switch (which)
     {
     case K_CTRL: kbd_dotoggle(&ctrl,how); break;
     case K_SHIFT: kbd_dotoggle(&shift,how); break;
@@ -381,10 +381,10 @@ void kbd_togglemod(int which, int how)
       /* same as shift. */
       break;
     }
-  
+
   /* if (old_shift != shift) */
   kbd_set_color_from_code(K_SHIFT,shift);
-  
+
   /* if (old_ctrl != ctrl) */
   kbd_set_color_from_code(K_CTRL,ctrl);
 
@@ -405,7 +405,7 @@ byte process_special_keystrokes = 1;
 /* run this every frame */
 /* returns a key code if one has been typed, else returns 0 */
 /* assumes scankeys() was already called this frame (in real vblank handler) */
-byte kbd_vblank() 
+byte kbd_vblank()
 {
   /* frames the stylus has been held down for */
   static u16b touched = 0;
@@ -415,7 +415,7 @@ byte kbd_vblank()
   static u16b last_code;
   /* the keycode of the currently pressed key, is usu. returned */
   u16b keycode;
-  
+
   /* if screen is being touched... */
   if (keysHeld() & KEY_TOUCH) {
     if (touched < 3) {	/* if counter < 3... */
@@ -423,17 +423,17 @@ byte kbd_vblank()
       xarr[touched-1] = IPC->touchXpx;	/* add this to the array for */
       yarr[touched-1] = IPC->touchYpx;	/* finding the median */
     }
-  } 
-  else 
+  }
+  else
     {	/* not being touched */
       touched = 0;	/* so reset the counter for next time */
     }
-  
+
   /* if the stylus was released */
-  if (keysUp() & KEY_TOUCH) 
+  if (keysUp() & KEY_TOUCH)
     {
       /* if last_code is set and it wasn't a modifier */
-      if (last_code && !(last_code & K_MODIFIER)) 
+      if (last_code && !(last_code & K_MODIFIER))
 	{
 	  /* clear the hiliting on this key */
 	  kbd_set_color_from_code(last_code,0);
@@ -442,53 +442,53 @@ byte kbd_vblank()
 	}
       last_code = 0;
     }
-  
+
   /* if the screen has been touched for 3 frames... */
-  if (touched == 3) 
+  if (touched == 3)
     {
       touched++;	/* do not return the keycode again */
       /* also, not setting to zero prevents the keysHeld() thing */
       /*  from starting the process over and getting 3 more samples */
-      
+
       u16b i, tmp, the_x=0, the_y=0;
-      
+
       /* x/yarr now contains 3 values from each of the 3 frames */
       /* take the median of each array and put into the_x/y */
-      
+
       /* sort the array */
       /* bubble sort, ugh */
-      for (i = 1; i < 3; i++) 
+      for (i = 1; i < 3; i++)
 	{
-	  if (xarr[i] < xarr[i-1]) 
+	  if (xarr[i] < xarr[i-1])
 	    {
 	      tmp = xarr[i];
 	      xarr[i] = xarr[i-1];
 	      xarr[i-1] = tmp;
 	    }
-	  if (yarr[i] < yarr[i-1]) 
+	  if (yarr[i] < yarr[i-1])
 	    {
 	      tmp = yarr[i];
 	      yarr[i] = yarr[i-1];
 	      yarr[i-1] = tmp;
 	    }
 	}
-    
+
       /* get the middle value (median) */
       /* if it's -1, take the top value */
       if (xarr[1] == -1) the_x = xarr[2];
       else the_x = xarr[1];
       if (yarr[1] == -1) the_y = yarr[2];
       else the_y = yarr[1];
-      
+
       /* get the keycode that corresponds to this key */
       u16b keycode = kbd_xy2key(the_x, the_y);
-      
+
       /* if it's not a modifier, highlight it */
-      if (keycode && !(keycode & K_MODIFIER)) 
+      if (keycode && !(keycode & K_MODIFIER))
 	kbd_set_color_from_code(keycode,1);
       /* set last_code so it can be un-highlighted later */
       last_code = keycode;
-      
+
       /*/* check for special keystrokes: alt-b, f5, f6 */
       if (process_special_keystrokes) {
 	/* alt-b: assign button macro */
@@ -499,7 +499,7 @@ byte kbd_vblank()
 	  nds_assign_button();
 	  keycode = last_code = 0;	/* don't let nethack process it */
 	}
-	
+
 	if (keycode & K_F(0)) {	/* its an f-key */
 	  if (keycode == K_F(5)) {	/* F5: toggle to text mode */
 	    nds_ascii_graphics = ~nds_ascii_graphics;
@@ -522,19 +522,19 @@ byte kbd_vblank()
 	  kbd_togglemod(K_MODIFIER,0);
 	}
 	}*/
-      
+
       /* if it's a modifier, toggle it */
       if (keycode & K_MODIFIER) kbd_togglemod(keycode,-1);
       else if ((keycode & 0x7F) != 0) {	/* it's an actual keystroke, return it */
 	return (keycode & 0xFF);
       }
     }
-  
+
   return 0;
 }
 
 
-void nds_check_buttons(u16b kd, u16b kh) 
+void nds_check_buttons(u16b kd, u16b kh)
 {
   s16b btn = nds_buttons_to_btnid(kd,kh);
   if (btn == -1) return;
@@ -545,7 +545,7 @@ void nds_check_buttons(u16b kd, u16b kh)
 }
 
 /*
- * All event handling 
+ * All event handling
  */
 u16b *ebuf = (u16b*)(&BG_GFX[256*192]);
 /* store the queue just past mainscreen display data */
@@ -563,7 +563,7 @@ u16b get_event() {
   u16b r = ebuf[ebuf_read];
   ebuf[ebuf_read] = 0;
   ebuf_read++;
-  if (ebuf_read > ebuf_write) 
+  if (ebuf_read > ebuf_write)
     {
       ebuf_write++;
       if (ebuf_write >= MAX_EBUF) ebuf_write = 0;
@@ -572,13 +572,13 @@ u16b get_event() {
   return r;
 }
 
-void put_key_event(byte c) 
+void put_key_event(byte c)
 {
   ebuf[ebuf_write++] = EVENT_SET | (u16)c;
   if (ebuf_write >= MAX_EBUF) ebuf_write = 0;
 }
 
-void put_mouse_event(byte x, byte y) 
+void put_mouse_event(byte x, byte y)
 {
   ebuf[ebuf_write++] = EVENT_SET | MEVENT_FLAG | (u16b)x | (((u16b)y) << 7);
   if (ebuf_write >= MAX_EBUF) ebuf_write = 0;
@@ -586,7 +586,7 @@ void put_mouse_event(byte x, byte y)
 
 void do_vblank() {
   swiWaitForVBlank();
-  
+
   /* --------------------------- */
   /*  Handle the arrow buttons */
   scanKeys();
@@ -607,25 +607,25 @@ void do_vblank() {
     if (kh & KEY_RIGHT) dirs_down++;
     if (kh & KEY_UP) dirs_down++;
     if (kh & KEY_DOWN) dirs_down++;
-    if (dirs_down == 1 && !(kh & (KEY_R | KEY_L))) 
+    if (dirs_down == 1 && !(kh & (KEY_R | KEY_L)))
       {
 	for (i = 0; i < 4; i++)
-	  if (kh & (1 << (i + 4))) 
+	  if (kh & (1 << (i + 4)))
 	    put_key_event(k2d[i]);
-      } 
-    else 
-      if (dirs_down == 2 && (kh & (KEY_R | KEY_L))) 
+      }
+    else
+      if (dirs_down == 2 && (kh & (KEY_R | KEY_L)))
 	{
 	  for (i = 0; i < 4; i++)
-	    if (kh & (1 << (i + 4))) 
+	    if (kh & (1 << (i + 4)))
 	      put_key_event(k2d[i + 4]);
 	}
   }
-  
+
   /* --------------------------- */
   /*  Check for button macros */
   nds_check_buttons(kd, kh);
-  
+
   /* --------------------------- */
   /*  Check for typing on the touchscreen kbd */
   byte keycode = kbd_vblank();
@@ -655,7 +655,7 @@ static errr CheckEvents(bool wait)
 
   if (!wait && !has_event()) return (1);
 
-  while (!e) 
+  while (!e)
     {
       e = get_event();
 
@@ -663,7 +663,7 @@ static errr CheckEvents(bool wait)
     }
 
   /* Mouse */
-  if (IS_MEVENT(e)) 
+  if (IS_MEVENT(e))
     handle_touch(EVENT_X(e) + 1, EVENT_Y(e), 1, true);
 
   /* Undefined */
@@ -696,32 +696,32 @@ static errr CheckEvents(bool wait)
 static errr Term_xtra_nds(int n, int v)
 {
   term_data *td = (term_data*)(Term->data);
-  
+
   /* Analyze */
   switch (n)
     {
     case TERM_XTRA_EVENT:
       {
 	/*
-	 * Process some pending events 
+	 * Process some pending events
 	 */
 	return (CheckEvents(v));
       }
-      
+
     case TERM_XTRA_FLUSH:
       {
 	/*
-	 * Flush all pending events 
+	 * Flush all pending events
 	 */
-	while (!CheckEvents(false)); 
-	
+	while (!CheckEvents(false));
+
 	return (0);
       }
-      
+
     case TERM_XTRA_CLEAR:
       {
 	/*
-	 * Clear the entire window 
+	 * Clear the entire window
 	 */
 	int x, y;
 	u32b vram_offset;
@@ -732,17 +732,17 @@ static errr Term_xtra_nds(int n, int v)
 	    for (x = 0; x < 80; x++)
 	      {
 		vram_offset = (y & 0x1F)*8*256+x*3;
-	
+
 		byte xx,yy;
 		for (yy=0;yy<8;yy++)
-		  for (xx=0;xx<3;xx++) 
+		  for (xx=0;xx<3;xx++)
 		    fb[yy*256+xx+vram_offset] = 0;
 	      }
 	  }
-	
+
 	return (0);
       }
-      
+
     case TERM_XTRA_SHAPE:
       {
 	/*
@@ -754,20 +754,20 @@ static errr Term_xtra_nds(int n, int v)
 	 * This action is optional, but can improve both the
 	 * efficiency (and attractiveness) of the program.
 	 */
-	
+
 	return (0);
       }
-      
+
     case TERM_XTRA_FROSH:
       {
 	return (0);
       }
-      
+
     case TERM_XTRA_FRESH:
       {
 	return (0);
       }
-      
+
     case TERM_XTRA_NOISE:
       {
 	/*
@@ -777,10 +777,10 @@ static errr Term_xtra_nds(int n, int v)
 	 *
 	 * This action is optional, but convenient.
 	 */
-	
+
 	return (0);
       }
-      
+
     case TERM_XTRA_SOUND:
       {
 	/*
@@ -792,18 +792,18 @@ static errr Term_xtra_nds(int n, int v)
 	 *
 	 * This action is optional, and not very important.
 	 */
-	
+
 	return (0);
       }
-      
+
     case TERM_XTRA_BORED:
       {
 	/*
-	 * Handle random events when bored 
+	 * Handle random events when bored
 	 */
 	return (CheckEvents(0));
       }
-      
+
     case TERM_XTRA_REACT:
       {
 	/*
@@ -816,10 +816,10 @@ static errr Term_xtra_nds(int n, int v)
 	 * handling "color changes" and the "arg_sound" and/or
 	 * "arg_graphics" options.
 	 */
-	
+
 	return (0);
       }
-      
+
     case TERM_XTRA_ALIVE:
       {
 	/*
@@ -835,10 +835,10 @@ static errr Term_xtra_nds(int n, int v)
 	 * This action is currently only used by "main-gcu.c",
 	 * on UNIX machines, to allow proper "suspending".
 	 */
-	
+
 	return (0);
       }
-      
+
     case TERM_XTRA_LEVEL:
       {
 	/*
@@ -856,23 +856,23 @@ static errr Term_xtra_nds(int n, int v)
 	 * on what term is active handle activation themself, or if only
 	 * one "term_data" structure is supported by this file.
 	 */
-	
+
 	return (0);
       }
-      
+
     case TERM_XTRA_DELAY:
       {
 	/*
-	 * Delay for some milliseconds 
+	 * Delay for some milliseconds
 	 */
 	int i;
 	for (i = 0; i < v; i++)
 	  swiWaitForVBlank();
-	
+
 	return (0);
       }
     }
-  
+
   /* Unknown or Unhandled action */
   return (1);
 }
@@ -885,45 +885,45 @@ static errr Term_curs_nds(int x, int y)
 {
   u32b vram_offset = (y - 1) * TILE_HEIGHT * 256 + x * TILE_WIDTH + 8 * 256;
   byte xx, yy;
-  for (xx = 0; xx < TILE_WIDTH; xx++) 
+  for (xx = 0; xx < TILE_WIDTH; xx++)
     {
-      BG_GFX[xx + vram_offset] 
+      BG_GFX[xx + vram_offset]
 	= RGB15(31, 31, 0)| BIT(15);
-      BG_GFX[256 * (TILE_HEIGHT-1) + xx + vram_offset] 
+      BG_GFX[256 * (TILE_HEIGHT-1) + xx + vram_offset]
 	= RGB15(31, 31, 0)| BIT(15);
     }
-  for (yy = 0; yy < TILE_HEIGHT; yy++) 
+  for (yy = 0; yy < TILE_HEIGHT; yy++)
     {
-      BG_GFX[yy * 256 + vram_offset] 
+      BG_GFX[yy * 256 + vram_offset]
 	= RGB15(31, 31, 0)| BIT(15);
-      BG_GFX[yy * 256 + TILE_WIDTH - 1 + vram_offset] 
+      BG_GFX[yy * 256 + TILE_WIDTH - 1 + vram_offset]
 	= RGB15(31, 31, 0)| BIT(15);
     }
-  
-  
+
+
   /* Success */
   return (0);
 }
 
 
-void draw_char(byte x, byte y, char c) 
+void draw_char(byte x, byte y, char c)
 {
   u32b vram_offset = (y & 0x1F) * 8 * 256 + x * 3, tile_offset = c * 24;
   u16b* fb = BG_GFX;
   const u16b* chardata = top_font_bin;
-  if (y & 32) 
+  if (y & 32)
     {
       fb = &BG_GFX_SUB[16 * 1024];
       chardata = btm_font_bin;
     }
   byte xx, yy;
   for (yy = 0; yy < 8; yy++)
-    for (xx = 0; xx < 3; xx++) 
-      fb[yy * 256 + xx + vram_offset] 
+    for (xx = 0; xx < 3; xx++)
+      fb[yy * 256 + xx + vram_offset]
 	= chardata[yy * 3 + xx + tile_offset] | BIT(15);
 }
 
-void draw_color_char(byte x, byte y, char c, byte clr) 
+void draw_color_char(byte x, byte y, char c, byte clr)
 {
 	u32b vram_offset = (y & 0x1F) * 8 * 256 + x * 3, tile_offset = c * 24;
 	u16b* fb = BG_GFX;
@@ -1000,21 +1000,21 @@ static errr Term_wipe_nds(int x, int y, int n)
 static errr Term_text_nds(int x, int y, int n, byte a, const char *cp)
 {
   int i;
-  
+
   /* Do nothing if the string is null */
   if (!cp || !*cp) return (-1);
-  
+
   /* Get the length of the string */
   if ((n > strlen(cp)) || (n < 0)) n = strlen(cp);
 
   /* Put the characters directly */
-  for (i = 0; i < n, *cp; i++) 
+  for (i = 0; i < n, *cp; i++)
     {
       /* Check it's the right attr */
       if ((x + i < Term->wid) && (Term->scr->a[y][x + i] == a))
 	/* Put the char */
 	draw_color_char(x + i, y, (*(cp++)), a);
-      else 
+      else
 	break;
     }
   /* Success */
@@ -1023,14 +1023,14 @@ static errr Term_text_nds(int x, int y, int n, byte a, const char *cp)
 
 
 void draw_tile(byte x, byte y, u16b tile) {
-  u32b vram_offset = (y & 0x7F) * TILE_HEIGHT * 256 + x * TILE_WIDTH + 
-    8 * 256, 
+  u32b vram_offset = (y & 0x7F) * TILE_HEIGHT * 256 + x * TILE_WIDTH +
+    8 * 256,
     tile_offset = (tile & 0x7FFF) * TILE_WIDTH * TILE_HEIGHT;
   u16b* fb = BG_GFX;
   byte xx, yy;
   for (yy = 0; yy < TILE_HEIGHT; yy++)
-    for (xx = 0; xx < TILE_WIDTH; xx++) 
-      fb[yy * 256 + xx + vram_offset] = 
+    for (xx = 0; xx < TILE_WIDTH; xx++)
+      fb[yy * 256 + xx + vram_offset] =
 	tiles_bin[yy * TILE_WIDTH + xx + tile_offset] | BIT(15);
 }
 
@@ -1063,17 +1063,17 @@ void draw_tile(byte x, byte y, u16b tile) {
 static errr Term_pict_nds(int x, int y, int n, const byte *ap, const char *cp)
 {
 	term_data *td = (term_data*)(Term->data);
-	u16b tile_number = DEF_TILES_PER_ROW * (*ap - 0x80) + (*cp - 0x80); 
+	u16b tile_number = DEF_TILES_PER_ROW * (*ap - 0x80) + (*cp - 0x80);
 	/* XXX XXX XXX */
 
 	int i;
-	
+
 	/* Put the characters directly */
-	for (i = 0; i < n, *cp; i++) 
+	for (i = 0; i < n, *cp; i++)
 	  {
-	    if ((x + i < Term->wid) && (*cp != '\0')) 
+	    if ((x + i < Term->wid) && (*cp != '\0'))
 	      draw_tile(x + i, y, tile_number);
-	    else 
+	    else
 	      break;
 	  }
 	/* Success */
@@ -1104,42 +1104,42 @@ static errr Term_pict_nds(int x, int y, int n, const byte *ap, const char *cp)
 static void term_data_link(int i)
 {
   term_data *td = &data[i];
-  
+
   term *t = &td->t;
-  
+
   /* Initialize the term */
   term_init(t, 85, 24, 256);
-  
+
   /* Choose "soft" or "hard" cursor XXX XXX XXX */
   /* A "soft" cursor must be explicitly "drawn" by the program */
   /* while a "hard" cursor has some "physical" existance and is */
   /* moved whenever text is drawn on the screen.  See "term.c". */
   t->soft_cursor = true;
-  
+
   /* Use "Term_pict()" for all attr/char pairs XXX XXX XXX */
   /* See the "Term_pict_xxx()" function above. */
   /* td->t->always_pict = true; */
-  
+
   /* Use "Term_pict()" for some attr/char pairs XXX XXX XXX */
   /* See the "Term_pict_xxx()" function above. */
   t->higher_pict = true;
-  
+
   /* Use "Term_text()" even for "black" text XXX XXX XXX */
   /* See the "Term_text_xxx()" function above. */
   /* t->always_text = true; */
-  
+
   /* Ignore the "TERM_XTRA_BORED" action XXX XXX XXX */
   /* This may make things slightly more efficient. */
   t->never_bored = true;
-  
+
   /* Ignore the "TERM_XTRA_FROSH" action XXX XXX XXX */
   /* This may make things slightly more efficient. */
   /* td->t->never_frosh = true; */
-  
+
   /* Prepare the init/nuke hooks */
   t->init_hook = Term_init_nds;
   t->nuke_hook = Term_nuke_nds;
-  
+
   /* Prepare the template hooks */
   t->xtra_hook = Term_xtra_nds;
   t->curs_hook = Term_curs_nds;
@@ -1149,7 +1149,7 @@ static void term_data_link(int i)
 
   /* Remember where we came from */
   t->data = (vptr)(td);
-  
+
   /* Activate it */
   Term_activate(t);
 }
@@ -1162,12 +1162,12 @@ static void term_data_link(int i)
 errr init_nds(void)
 {
   /* Initialize globals */
-  
+
   /* Initialize "term_data" structures */
-  
+
   int i;
   bool none = true;
-  
+
   term_data *td;
 
   /* Main window */
@@ -1177,20 +1177,20 @@ errr init_nds(void)
   td->cols = 37;
   td->tile_height = 8;
   td->tile_width = 3;
-        
+
    /* Create windows (backwards!) */
   for (i = MAX_TERM_DATA - 1; i >= 0; i--)
     {
       /* Link */
       term_data_link(i);
       none = false;
-      
+
       /* Set global pointer */
       angband_term[0] = Term;
     }
-  
+
   if (none) return (1);
-  
+
   /* Success */
   return (0);
 }
@@ -1261,7 +1261,7 @@ bool nds_load_file(const char* name, u16b* dest, u32b len) {
   if (len == 0) len = 0xffffffff;	/* max possible len */
   for (i=0;i<1024;i++) readbuf[i] = 0;
   while ((l=fread(readbuf,2,1024,f)) > 0 && wi*2 < len) {
-    for (i = 0; i < (l) && wi * 2 < len; i++) 
+    for (i = 0; i < (l) && wi * 2 < len; i++)
       {	/* 0 to l/2 */
 	dest[wi++] = readbuf[i];
       }
@@ -1273,21 +1273,21 @@ bool nds_load_file(const char* name, u16b* dest, u32b len) {
 
 bool nds_load_kbd() {
 #define NUM_FILES	3
-  const char *files[] = 
+  const char *files[] =
     {
       /*	"subfont_rgb.bin","subfont_bgr.bin", */
       "kbd.bin","kbd.pal","kbd.map",
     };
-  const u16b* dests[] = 
+  const u16b* dests[] =
     {
       /*	subfont_rgb_bin, subfont_bgr_bin, */
       (u16b*)BG_TILE_RAM_SUB(0), BG_PALETTE_SUB, (u16*)BG_MAP_RAM_SUB(8),
     };
-  
+
   char buf[64] = "\0";
   u16b i;
   for (i = 0; i < NUM_FILES; i++) {
-    if (!nds_load_file(files[i], dests[i], 0)) 
+    if (!nds_load_file(files[i], dests[i], 0))
       {
 	sprintf(buf,"Error opening %s (errno=%d)\n",files[i],errno);
 	nds_fatal_err(buf);
@@ -1295,13 +1295,13 @@ bool nds_load_kbd() {
       }
   }
 #undef NUM_FILES
-  
+
   return true;
 }
 
 void kbd_init() {
   u16b i;
-  for (i = 0; i < 16; i++) 
+  for (i = 0; i < 16; i++)
     {
       BG_PALETTE_SUB[i+16] = BG_PALETTE_SUB[i] ^ 0x7FFF;
     }
@@ -1309,36 +1309,36 @@ void kbd_init() {
 
 void nds_init_buttons() {
   u16b i, j;
-  for (i = 0; i < (NDS_NUM_MAPPABLE << NDS_NUM_MODIFIER); i++) 
+  for (i = 0; i < (NDS_NUM_MAPPABLE << NDS_NUM_MODIFIER); i++)
     {
-     for (j = 0; j < NDS_CMD_LENGTH; j++) 
+     for (j = 0; j < NDS_CMD_LENGTH; j++)
        {
 	 nds_btn_cmds[i][j] = 0;
        }
     }
-  if (access(NDS_BUTTON_FILE,0444) == -1) 
+  if (access(NDS_BUTTON_FILE,0444) == -1)
     {
       /* Set defaults */
-      for (i = 0; i < (NDS_NUM_MAPPABLE << NDS_NUM_MODIFIER); i++) 
+      for (i = 0; i < (NDS_NUM_MAPPABLE << NDS_NUM_MODIFIER); i++)
 	nds_btn_cmds[i][0] = btn_defaults[i];
-      
+
       return;
     }
-  
+
   FILE* f = fopen(NDS_BUTTON_FILE, "r");
   fread(&nds_btn_cmds[0], NDS_CMD_LENGTH,
 	(NDS_NUM_MAPPABLE << NDS_NUM_MODIFIER), f);
   fclose(f);
 }
 
-void swap_font(bool bottom) 
+void swap_font(bool bottom)
 {
-  if (!bottom) 
+  if (!bottom)
     {
       if (top_font_bin == subfont_rgb_bin) top_font_bin = subfont_bgr_bin;
       else top_font_bin = subfont_rgb_bin;
-    } 
-  else 
+    }
+  else
     {
       if (btm_font_bin == subfont_rgb_bin) btm_font_bin = subfont_bgr_bin;
       else btm_font_bin = subfont_rgb_bin;
@@ -1350,13 +1350,13 @@ void on_irq();
 /* on_irq, do nothing */
 void on_irq() {
   REG_IME = 0;
-  if(REG_IF & IRQ_VBLANK) 
+  if(REG_IF & IRQ_VBLANK)
     {
       /* Tell the DS we handled the VBLANK interrupt */
       VBLANK_INTR_WAIT_FLAGS |= IRQ_VBLANK;
       REG_IF |= IRQ_VBLANK;
-    } 
-  else 
+    }
+  else
     {
       /* Ignore all other interrupts */
       REG_IF = REG_IF;
@@ -1364,14 +1364,14 @@ void on_irq() {
   REG_IME=1;
 }
 
-void nds_raw_print(const char* str) 
+void nds_raw_print(const char* str)
 {
   static u16b x=0,y=32;
-  while (*str) 
+  while (*str)
     {
       draw_char(x,y,(u8)(*(str++)));
       x++;
-      if (x > 78) 
+      if (x > 78)
 	{
 	  x = 0;
 	  y++;
@@ -1382,7 +1382,7 @@ void nds_raw_print(const char* str)
   fflush(0);
 }
 
-bool nds_load_tile_bmp(const char *name, u16b *dest, u32b len) 
+bool nds_load_tile_bmp(const char *name, u16b *dest, u32b len)
 {
 #define h	TILE_HEIGHT
 #define w	TILE_WIDTH
@@ -1408,7 +1408,7 @@ bool nds_load_tile_bmp(const char *name, u16b *dest, u32b len)
   fseek(f, 2, SEEK_CUR);
   fread(&depth,2,1,f);
   strnfmt(buf, 10, "depth = %d", depth);
-  if (depth != 24) 
+  if (depth != 24)
     {
       fclose(f);
       nds_raw_print(" depth problem");
@@ -1417,18 +1417,18 @@ bool nds_load_tile_bmp(const char *name, u16b *dest, u32b len)
   y = ih2 - 1;	/* some crazy person decided to store the lines in a .bmp backwards */
   ih = ih2 / h;
   iw = iw2 / w;
-  
+
   if (len == 0) len = 0xffffffff;
-  
+
   fseek(f,off,SEEK_SET);
-  
+
   byte temp[1];
-  while (y >= 0) 
+  while (y >= 0)
     {
-      for (i = 0; i < iw; i++) 
+      for (i = 0; i < iw; i++)
 	{
 	  writeidx = bmpxy2off(i*w, y);
-	  for (j = 0; j < w; j++) 
+	  for (j = 0; j < w; j++)
 	    {
 	      fread(temp, 1, 1, f);
 	      if (writeidx * 2 < len) dest[writeidx++] = c2(temp, 0);
@@ -1438,44 +1438,44 @@ bool nds_load_tile_bmp(const char *name, u16b *dest, u32b len)
       fseek(f, 2 - (iw * w), SEEK_CUR);
       y--;
     }
-  
-  fclose(f); 
+
+  fclose(f);
   return true;
 #undef bmpxy2off
 #undef h
 #undef w
-} 
+}
 
 bool nds_load_tile_file(char* name, u16b* dest, u32b len) {
   char ext[4];
   u16b slen = strlen(name);
   strcpy(ext, name + slen - 3);
   nds_raw_print(name + len - 3);
-  if (strcmpi(ext, "bmp") == 0) 
+  if (strcmpi(ext, "bmp") == 0)
     {
       return nds_load_tile_bmp(name, dest, len);
-    } 
-  else 
+    }
+  else
     {	/* assume .bin maybe w/ funny ext */
       return nds_load_file(name, dest, len);
     }
 }
 
-bool nds_load_tiles() 
+bool nds_load_tiles()
 {
   char buf[64];
   int died1 = -1, died2 = -1;;
-  if (TILE_FILE != NULL) 
+  if (TILE_FILE != NULL)
     {
       if (TILE_WIDTH == 0) TILE_WIDTH = DEF_TILE_WIDTH;
       if (TILE_HEIGHT == 0) TILE_HEIGHT = DEF_TILE_HEIGHT;
       tiles_bin = (u16b*)malloc(TILE_BUFFER_SIZE);
-      if (!nds_load_tile_file(TILE_FILE, tiles_bin, TILE_BUFFER_SIZE) ) 
+      if (!nds_load_tile_file(TILE_FILE, tiles_bin, TILE_BUFFER_SIZE) )
 	{
 	  died1 = errno;
 	  free(tiles_bin);
-	} 
-      else 
+	}
+      else
 	{
 	  goto finish;
 	}
@@ -1483,33 +1483,33 @@ bool nds_load_tiles()
   TILE_WIDTH = DEF_TILE_WIDTH;
   TILE_HEIGHT = DEF_TILE_HEIGHT;
   tiles_bin = (u16b*)malloc(TILE_BUFFER_SIZE);
-  if (!nds_load_tile_file(DEF_TILE_FILE, tiles_bin, TILE_BUFFER_SIZE) ) 
+  if (!nds_load_tile_file(DEF_TILE_FILE, tiles_bin, TILE_BUFFER_SIZE) )
     {
       died2 = errno;
       free(tiles_bin);
     }
-  
-  if (died1 != -1) 
+
+  if (died1 != -1)
     {
       sprintf(buf, "Error loading tileset %s (errno=%d)\n", TILE_FILE, died1);
-      if (died2 == -1) 
+      if (died2 == -1)
 	{
 	  nds_raw_print(buf);
-	} 
-      else 
+	}
+      else
 	{
 	  nds_fatal_err(buf);
 	}
     }
-  if (died2 != -1) 
+  if (died2 != -1)
     {
     sprintf(buf, "Error loading default tileset %s %s\n", DEF_TILE_FILE,
 	    strerror(died2));
     nds_fatal_err(buf);
     return false;
     }
-  
-  
+
+
  finish:
   NDS_SCREEN_ROWS = 168 / TILE_HEIGHT;
   NDS_SCREEN_COLS = 256 / TILE_WIDTH;
@@ -1535,8 +1535,8 @@ static void hook_plog(const char *str)
 static void hook_quit(const char *str)
 {
   int i, j;
-  
-  
+
+
   /* Give a warning */
   if (str)
     {
@@ -1570,7 +1570,7 @@ int main(int argc, char *argv[])
 
   /* Initialize the machine itself  */
   /*START NETHACK STUFF */
-  
+
   powerON(POWER_ALL_2D | POWER_SWAP_LCDS);
   videoSetMode(MODE_5_2D | DISPLAY_BG2_ACTIVE);
   videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG2_ACTIVE);
@@ -1595,7 +1595,7 @@ int main(int argc, char *argv[])
   SUB_BG2_YDY = 1<<8;
   SUB_BG2_CY = 0;
   SUB_BG2_CX = 0;
-  
+
   /* Enable the V-blank interrupt */
   REG_IME = 0;
   IRQ_HANDLER = on_irq;
@@ -1603,84 +1603,84 @@ int main(int argc, char *argv[])
   REG_IF = ~0;
   REG_DISPSTAT = DISP_VBLANK_IRQ;
   REG_IME = 1;
-  
-  
+
+
   register int fd;
-  
-  
+
+
   nds_init_fonts();
-  
+
   swiWaitForVBlank();
   swiWaitForVBlank();
   swiWaitForVBlank();
   swiWaitForVBlank();
   swiWaitForVBlank();
   swiWaitForVBlank();
-  
-  if (!fatInitDefault()) 
+
+  if (!fatInitDefault())
     {
       nds_fatal_err("\nError initializing FAT drivers.\n");
       nds_fatal_err("Make sure the game is patched with the correct DLDI.\n");
-      nds_fatal_err(" (see http://chishm.drunkencoders.com/DLDI/ for more info).\n"); 
+      nds_fatal_err(" (see http://chishm.drunkencoders.com/DLDI/ for more info).\n");
       nds_fatal_err("\n\nUnable to access filesystem.\nCannot continue.\n");
       return 1;
     }
-  
+
   swiWaitForVBlank();
   swiWaitForVBlank();
   swiWaitForVBlank();
   swiWaitForVBlank();
-  
+
   chdir("/angband");
-  if (!nds_load_kbd()) 
+  if (!nds_load_kbd())
     {
       nds_fatal_err("\nError loading keyboard graphics.\nCannot continue.\n");
       return 1;	/* die */
     }
   kbd_init();
   nds_init_buttons();
-  
+
   IPC->mailData = 0x00424242;	/* to arm7: everything has init'ed */
-  while ((IPC->mailData & 0xFFFFFF00) != 0x42424200); 
+  while ((IPC->mailData & 0xFFFFFF00) != 0x42424200);
   /*wait for arm7's reply */
-  if (IPC->mailData & 0x00000001) 
+  if (IPC->mailData & 0x00000001)
     {	/* it's a DS lite */
       swap_font(false);
-    } 
-  else if (access("/angband/swapfont",04) != -1) 
+    }
+  else if (access("/angband/swapfont",04) != -1)
     {
       swap_font(false);
     }
-  
+
   use_graphics = true;
 
-  if (!nds_load_tiles()) 
+  if (!nds_load_tiles())
     {
       nds_fatal_err("\n\nNo tileset could be loaded.\nCannot continue.\n");
       return 1;
     }
 
-  if (!use_graphics) 
+  if (!use_graphics)
     {
       TILE_HEIGHT = 8;
       TILE_WIDTH = 3;
     }
 
-  
-  
+
+
   /* Activate hooks */
   plog_aux = hook_plog;
   quit_aux = hook_quit;
-  
+
   /* Initialize the windows */
   if (init_nds()) quit("Oops!");
-  
+
   /* XXX XXX XXX */
   ANGBAND_SYS = "nds";
-  
+
   /* Initialize some stuff */
   init_stuff();
-  
+
   draw_tile(2, 2, 5);
   draw_tile(4, 2, 15);
   draw_tile(6, 2, 25);
@@ -1688,29 +1688,27 @@ int main(int argc, char *argv[])
 
   /* About to start */
   game_start = true;
-  
+
   while (game_start)
     {
       /* Initialize */
       init_angband();
 
       for (i = 0; i < 50; i++)
-	draw_tile(i % 10, i/10, i+600);      
+	draw_tile(i % 10, i/10, i+600);
       /* Wait for response */
       pause_line(Term);
-      
+
       /* Play the game */
       play_game(new_game);
-      
+
       /* Free resources */
       cleanup_angband();
     }
-  
+
   /* Quit */
   quit(NULL);
-  
+
   /* Exit */
   return (0);
 }
-
-

@@ -748,7 +748,7 @@ struct object *floor_object_for_use(struct object *obj, int num, bool message,
 		if (tracked_object_is(player->upkeep, obj))
 			track_object(player->upkeep, NULL);
 
-		/* Inventory has changed, so disable repeat command */ 
+		/* Inventory has changed, so disable repeat command */
 		cmd_disable_repeat();
 	}
 

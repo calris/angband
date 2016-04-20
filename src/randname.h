@@ -25,9 +25,9 @@
 typedef enum {
 	RANDNAME_TOLKIEN = 1,
 	RANDNAME_SCROLL,
- 
+
 	/* End of type marker - not a valid name type */
-	RANDNAME_NUM_TYPES 
+	RANDNAME_NUM_TYPES
 } randname_type;
 
 extern const char *** name_sections;

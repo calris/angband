@@ -61,7 +61,7 @@
  * abstract classes represented by member_funcs and group_funcs.
  *
  * After the knowledge menus are various knowledge functions - message review;
- * inventory, equipment, monster and object lists; symbol lookup; and the 
+ * inventory, equipment, monster and object lists; symbol lookup; and the
  * "locate" command which scrolls the screen around the current dungeon level.
  */
 
@@ -159,8 +159,8 @@ static int feat_order(int feat)
 
 	switch (f->d_char)
 	{
-		case L'.': 				return 0;
-		case L'\'': case L'+': 	return 1;
+		case L'.':				return 0;
+		case L'\'': case L'+':	return 1;
 		case L'<': case L'>':	return 2;
 		case L'#':				return 3;
 		case L'*': case L'%' :	return 4;
@@ -264,7 +264,7 @@ static void place_tile_cursor(int col, int row, byte a, byte c, byte attr_top,
 
 
 /**
- * Remove the tile display and clear the screen 
+ * Remove the tile display and clear the screen
  */
 static void remove_tiles(int col, int row, bool *picker_ptr, int width,
 						 int height)
@@ -493,7 +493,7 @@ static bool tile_picker_command(ui_event ke, bool *tile_picker_ptr,
 /**
  * Display glyph and colours
  */
-static void display_glyphs(int col, int row, int height, int width, byte a, 
+static void display_glyphs(int col, int row, int height, int width, byte a,
 			   wchar_t c)
 {
 	int i;
@@ -507,7 +507,7 @@ static void display_glyphs(int col, int row, int height, int width, byte a,
 	prt("Choose colour:", row + height/2, col);
 	Term_locate(&x, &y);
 	for (i = 0; i < MAX_COLORS; i++) big_pad(x + i, y, i, c);
-	
+
 	/* Place the cursor */
 	Term_gotoxy(x + a, y);
 }
@@ -521,22 +521,22 @@ static bool glyph_command(ui_event ke, bool *glyph_picker_ptr,
 {
         static byte attr_old = 0;
 	static char char_old = 0;
-	
+
 	/* Get mouse movement */
 	if (*glyph_picker_ptr && (ke.type == EVT_MOUSE)) {
 	        byte a = *cur_attr_ptr;
 
 		int mx = logical_width(ke.mouse.x - col);
-		
+
 		if (ke.mouse.y != row + height/2) return false;
-		
+
 		if ((mx >= 0) && (mx < MAX_COLORS) && (ke.mouse.button == 1)) {
 		        /* Set the visual */
 		        *cur_attr_ptr = a = mx - 14;
 
 			/* Accept change */
 			remove_tiles(col, row, glyph_picker_ptr, width, height);
-			
+
 			return true;
 		} else {
 		        return false;
@@ -556,7 +556,7 @@ static bool glyph_command(ui_event ke, bool *glyph_picker_ptr,
 				*cur_attr_ptr = attr_old;
 				*cur_char_ptr = char_old;
 				remove_tiles(col, row, glyph_picker_ptr, width, height);
-				
+
 				return true;
 			}
 
@@ -570,7 +570,7 @@ static bool glyph_command(ui_event ke, bool *glyph_picker_ptr,
 			    remove_tiles(col, row, glyph_picker_ptr, width, height);
 			    return true;
 		    }
-		    
+
 		    break;
 	    }
 
@@ -598,11 +598,11 @@ static bool glyph_command(ui_event ke, bool *glyph_picker_ptr,
 		    if (*glyph_picker_ptr) {
 			    char code_point[6];
 			    bool res = false;
-	
+
 			    /* Ask the user for a code point */
 			    Term_gotoxy(col, row + height/2 + 2);
 			    res = get_string("(up to 5 hex digits):", code_point, 5);
-	
+
 			    /* Process input */
 			    if (res) {
 				    unsigned long int point = strtoul(code_point,
@@ -611,31 +611,31 @@ static bool glyph_command(ui_event ke, bool *glyph_picker_ptr,
 				    return true;
 			    }
 		    }
-		    
+
 		    break;
-		    
-		    
+
+
 	    }
-	    
+
 	    default:
 	    {
 		    int d = target_dir(ke.key);
 		    byte a = *cur_attr_ptr;
-		    
+
 		    if (!*glyph_picker_ptr)
 				break;
 
 		    /* Horizontal only */
 		    if (ddy[d] != 0) break;
-		    
+
 		    /* Horizontal movement */
 		    if (ddx[d] != 0) {
 				a += ddx[d] + BASIC_COLORS;
 				a = a % BASIC_COLORS;
 				*cur_attr_ptr = a;
 		    }
-    
-	
+
+
 		    /* We need to always eat the input even if it is clipped,
 		     * otherwise it will be interpreted as a change object
 		     * selection command with messy results.
@@ -706,7 +706,7 @@ static void display_knowledge(const char *title, int *obj_list, int o_count,
 	int g_cur = 0, grp_old = -1; /* group list positions */
 	int o_cur = 0;					/* object list positions */
 	int g_o_count = 0;				 /* object count for group */
-	int oid = -1;  				/* object identifiers */
+	int oid = -1;				/* object identifiers */
 
 	region title_area = { 0, 0, 0, 4 };
 	region group_region = { 0, 6, MISSING, -2 };
@@ -907,17 +907,17 @@ static void display_knowledge(const char *title, int *obj_list, int o_count,
 		if (tile_picker) {
 		        bigcurs = true;
 			display_tiles(g_name_len + 3, 7, browser_rows - 1,
-				      wid - (g_name_len + 3), attr_top, 
+				      wid - (g_name_len + 3), attr_top,
 				      char_left);
-			place_tile_cursor(g_name_len + 3, 7, 
+			place_tile_cursor(g_name_len + 3, 7,
 					  *o_funcs.xattr(oid),
-					  (byte) *o_funcs.xchar(oid), 
+					  (byte) *o_funcs.xchar(oid),
 					  attr_top, char_left);
 		}
 
 		if (glyph_picker) {
 		        display_glyphs(g_name_len + 3, 7, browser_rows - 1,
-				       wid - (g_name_len + 3), 
+				       wid - (g_name_len + 3),
 				       *o_funcs.xattr(oid),
 				       *o_funcs.xchar(oid));
 		}
@@ -948,18 +948,18 @@ static void display_knowledge(const char *title, int *obj_list, int o_count,
 		/* XXX Do visual mode command if needed */
 		if (o_funcs.xattr && o_funcs.xchar) {
 			if (tiles) {
-				if (tile_picker_command(ke, &tile_picker, 
+				if (tile_picker_command(ke, &tile_picker,
 										browser_rows - 1,
 										wid - (g_name_len + 3),
 										&attr_top, &char_left,
 										o_funcs.xattr(oid),
-										(byte *) o_funcs.xchar(oid), 
+										(byte *) o_funcs.xchar(oid),
 										g_name_len + 3, 7, &delay))
 					continue;
 			} else {
-				if (glyph_command(ke, &glyph_picker, 
-								  browser_rows - 1, wid - (g_name_len + 3), 
-								  o_funcs.xattr(oid), o_funcs.xchar(oid), 
+				if (glyph_command(ke, &glyph_picker,
+								  browser_rows - 1, wid - (g_name_len + 3),
+								  o_funcs.xattr(oid), o_funcs.xchar(oid),
 								  g_name_len + 3, 7))
 					continue;
 			}
@@ -1341,8 +1341,8 @@ static const grouper object_text_order[] =
 	{TV_WAND,			"Wand"			},
 	{TV_STAFF,			"Staff"			},
 	{TV_ROD,			"Rod"			},
- 	{TV_FOOD,			"Food"			},
- 	{TV_MUSHROOM,		"Mushroom"		},
+	{TV_FOOD,			"Food"			},
+	{TV_MUSHROOM,		"Mushroom"		},
 	{TV_PRAYER_BOOK,	"Priest Book"	},
 	{TV_MAGIC_BOOK,		"Magic Book"	},
 	{TV_LIGHT,			"Light"			},
@@ -1753,12 +1753,12 @@ static void display_object(int col, int row, bool cursor, int oid)
 	wchar_t c = object_kind_char(kind);
 
 	/* Display known artifacts differently */
-	if (kf_has(kind->kind_flags, KF_INSTA_ART) && 
+	if (kf_has(kind->kind_flags, KF_INSTA_ART) &&
 		artifact_is_known(get_artifact_from_kind(kind)))
-		get_artifact_display_name(o_name, sizeof(o_name), 
+		get_artifact_display_name(o_name, sizeof(o_name),
 								  get_artifact_from_kind(kind));
 	else
- 		object_kind_name(o_name, sizeof(o_name), kind, OPT(cheat_xtra));
+		object_kind_name(o_name, sizeof(o_name), kind, OPT(cheat_xtra));
 
 	/* If the type is "tried", display that */
 	if (kind->tried && !aware)
@@ -1798,7 +1798,7 @@ static void desc_obj_fake(int k_idx)
 	region area = { 0, 0, 0, 0 };
 
 	/* Check for known artifacts, display them as artifacts */
-	if (kf_has(kind->kind_flags, KF_INSTA_ART) && 
+	if (kf_has(kind->kind_flags, KF_INSTA_ART) &&
 		artifact_is_known(get_artifact_from_kind(kind))) {
 		desc_art_fake(get_artifact_from_kind(kind));
 		return;
@@ -2143,7 +2143,7 @@ static void f_xtra_act(struct keypress ch, int oid)
                 case LIGHTING_TORCH: f_uik_lighting = LIGHTING_LOS; break;
 				case LIGHTING_LOS:  f_uik_lighting = LIGHTING_DARK; break;
 				default:	f_uik_lighting = LIGHTING_LIT; break;
-		}		
+		}
 	} else if (ch.code == 'L') {
 		switch (f_uik_lighting) {
 				case LIGHTING_DARK:  f_uik_lighting = LIGHTING_LOS; break;
@@ -2152,7 +2152,7 @@ static void f_xtra_act(struct keypress ch, int oid)
 				default:	f_uik_lighting = LIGHTING_LIT; break;
 		}
 	}
-	
+
 }
 
 
@@ -2324,7 +2324,7 @@ static void t_xtra_act(struct keypress ch, int oid)
                 case LIGHTING_TORCH: t_uik_lighting = LIGHTING_LOS; break;
 				case LIGHTING_LOS:  t_uik_lighting = LIGHTING_DARK; break;
 				default:	t_uik_lighting = LIGHTING_LIT; break;
-		}		
+		}
 	} else if (ch.code == 'L') {
 		switch (t_uik_lighting) {
 				case LIGHTING_DARK:  t_uik_lighting = LIGHTING_LOS; break;
@@ -2333,7 +2333,7 @@ static void t_xtra_act(struct keypress ch, int oid)
 				default:	t_uik_lighting = LIGHTING_LIT; break;
 		}
 	}
-	
+
 }
 
 
@@ -2395,22 +2395,22 @@ static void do_cmd_knowledge_history(const char *name, int row)
  */
 static menu_action knowledge_actions[] =
 {
-{ 0, 0, "Display object knowledge",   	   textui_browse_object_knowledge },
-{ 0, 0, "Display artifact knowledge", 	   do_cmd_knowledge_artifacts },
-{ 0, 0, "Display ego item knowledge", 	   do_cmd_knowledge_ego_items },
-{ 0, 0, "Display monster knowledge",  	   do_cmd_knowledge_monsters  },
-{ 0, 0, "Display feature knowledge",  	   do_cmd_knowledge_features  },
+{ 0, 0, "Display object knowledge",	   textui_browse_object_knowledge },
+{ 0, 0, "Display artifact knowledge",	   do_cmd_knowledge_artifacts },
+{ 0, 0, "Display ego item knowledge",	   do_cmd_knowledge_ego_items },
+{ 0, 0, "Display monster knowledge",	   do_cmd_knowledge_monsters  },
+{ 0, 0, "Display feature knowledge",	   do_cmd_knowledge_features  },
 { 0, 0, "Display trap knowledge",          do_cmd_knowledge_traps  },
 { 0, 0, "Display contents of general store", do_cmd_knowledge_store     },
 { 0, 0, "Display contents of armourer",      do_cmd_knowledge_store     },
 { 0, 0, "Display contents of weaponsmith",   do_cmd_knowledge_store     },
-{ 0, 0, "Display contents of temple",   	   do_cmd_knowledge_store     },
+{ 0, 0, "Display contents of temple",		   do_cmd_knowledge_store     },
 { 0, 0, "Display contents of alchemist",     do_cmd_knowledge_store     },
 { 0, 0, "Display contents of magic shop",    do_cmd_knowledge_store     },
 { 0, 0, "Display contents of black market",  do_cmd_knowledge_store     },
-{ 0, 0, "Display contents of home",   	   do_cmd_knowledge_store     },
-{ 0, 0, "Display hall of fame",       	   do_cmd_knowledge_scores    },
-{ 0, 0, "Display character history",  	   do_cmd_knowledge_history   },
+{ 0, 0, "Display contents of home",	   do_cmd_knowledge_store     },
+{ 0, 0, "Display hall of fame",		   do_cmd_knowledge_scores    },
+{ 0, 0, "Display character history",	   do_cmd_knowledge_history   },
 };
 
 static struct menu knowledge_menu;
@@ -2597,7 +2597,7 @@ void do_cmd_messages(void)
 		else
 			prt("[Movement keys to navigate, '=' to find, or ESCAPE to exit]",
 				hgt - 1, 0);
-			
+
 		/* Get a command */
 		ke = inkey_ex();
 
@@ -2628,7 +2628,7 @@ void do_cmd_messages(void)
 					/* Get the string to find */
 					prt("Find: ", hgt - 1, 0);
 					if (!askfor_aux(shower, sizeof shower, NULL)) continue;
-		
+
 					/* Set to find */
 					ke.key.code = '-';
 					break;
@@ -2693,8 +2693,8 @@ void do_cmd_messages(void)
 
 
 #define GET_ITEM_PARAMS \
- 	(USE_EQUIP | USE_INVEN | USE_QUIVER | USE_FLOOR | SHOW_QUIVER | SHOW_EMPTY | IS_HARMLESS)
- 
+	(USE_EQUIP | USE_INVEN | USE_QUIVER | USE_FLOOR | SHOW_QUIVER | SHOW_EMPTY | IS_HARMLESS)
+
 /**
  * Display inventory
  */
@@ -2871,7 +2871,7 @@ void do_cmd_locate(void)
 		/* Get the current panel */
 		int y2 = Term->offset_y;
 		int x2 = Term->offset_x;
-		
+
 		/* Adjust for tiles */
 		int panel_hgt = (int)(PANEL_SIZE / tile_height);
 		int panel_wid = (int)(PANEL_SIZE / tile_width);
@@ -2893,7 +2893,7 @@ void do_cmd_locate(void)
 		/* More detail */
 		if (OPT(center_player)) {
 			strnfmt(out_val, sizeof(out_val),
-		        	"Map sector [%d(%02d),%d(%02d)], which is%s your sector.  Direction?",
+				"Map sector [%d(%02d),%d(%02d)], which is%s your sector.  Direction?",
 					(y2 / panel_hgt), (y2 % panel_hgt),
 					(x2 / panel_wid), (x2 % panel_wid), tmp_val);
 		}
@@ -3016,7 +3016,7 @@ static void lookup_symbol(char sym, char *buf, size_t max)
 			return;
 		}
 	}
-	
+
 	/* Look through monster templates */
 	for (race = rb_info; race; race = race->next) {
 		/* Slight hack - P appears twice */
@@ -3033,7 +3033,7 @@ static void lookup_symbol(char sym, char *buf, size_t max)
         } else {
 			strnfmt(buf, max, "? - Unknown Symbol.");
         }
-	
+
 	return;
 }
 
@@ -3133,7 +3133,7 @@ void do_cmd_query_symbol(void)
 		sort(who, n, sizeof(*who), cmp_level);
 	} else {
 		/* Any unsupported response is "nope, no history please" */
-	
+
 		/* XXX XXX Free the "who" array */
 		mem_free(who);
 

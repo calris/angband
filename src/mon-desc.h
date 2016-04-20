@@ -30,7 +30,7 @@
 #define MDESC_IND_HID   0x04    /* Indefinites for hidden monsters */
 #define MDESC_IND_VIS   0x08    /* Indefinites for visible monsters */
 #define MDESC_PRO_HID   0x10    /* Pronominalize hidden monsters */
-#define MDESC_PRO_VIS   0x20    /* Pronominalize visible monsters */ 
+#define MDESC_PRO_VIS   0x20    /* Pronominalize visible monsters */
 #define MDESC_HIDE      0x40    /* Assume the monster is hidden */
 #define MDESC_SHOW      0x80    /* Assume the monster is visible */
 #define MDESC_CAPITAL   0x100   /* Capitalise */

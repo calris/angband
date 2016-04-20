@@ -394,7 +394,7 @@ static const project_object_handler_f object_handlers[] = {
 	#define PROJ_ENV(a, col, desc) project_object_handler_##a,
 	#include "list-project-environs.h"
 	#undef PROJ_ENV
-	#define PROJ_MON(a, obv, desc) NULL, 
+	#define PROJ_MON(a, obv, desc) NULL,
 	#include "list-project-monsters.h"
 	#undef PROJ_MON
 	NULL
@@ -412,7 +412,7 @@ static const project_object_handler_f object_handlers[] = {
  * \param x the coordinates of the grid being handled
  * \param dam is the "damage" from the effect at distance r from the centre
  * \param typ is the projection (GF_) type
- * \param protected_obj is an object that should not be affected by the 
+ * \param protected_obj is an object that should not be affected by the
  *        projection, typically the object that created it
  * \return whether the effects were obvious
  *

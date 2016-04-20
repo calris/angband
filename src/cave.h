@@ -125,7 +125,7 @@ struct grid_data {
 	bool unseen_money;		/* Is there some unaware money there? */
 
 	enum grid_light_level lighting; /* Light level */
-	bool in_view; 			/* Can the player can currently see the grid? */
+	bool in_view;			/* Can the player can currently see the grid? */
 	bool is_player;
 	bool hallucinate;
 	bool trapborder;
@@ -153,7 +153,7 @@ struct chunk {
 
 	int height;
 	int width;
-	
+
 	u16b feeling_squares; /* How many feeling squares the player has visited */
 	int *feat_count;
 

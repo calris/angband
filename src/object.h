@@ -181,13 +181,13 @@ struct object_kind {
 
 	/** Also saved in savefile **/
 
-	quark_t note; 	/**< Autoinscription quark number */
+	quark_t note;	/**< Autoinscription quark number */
 
 	bool aware;		/**< Set if player is aware of the kind's effects */
 	bool tried;		/**< Set if kind has been tried */
 
-	byte ignore;  	/**< Ignore settings */
-	bool everseen; 	/**< Kind has been seen (to despoilify ignore menus) */
+	byte ignore;	/**< Ignore settings */
+	bool everseen;	/**< Kind has been seen (to despoilify ignore menus) */
 };
 
 extern struct object_kind *k_info;
@@ -291,7 +291,7 @@ struct ego_item {
 	int level;				/* Minimum level */
 	int rarity;			/* Object rarity */
 	int rating;			/* Level rating boost */
-	int alloc_prob; 		/** Chance of being generated (i.e. rarity) */
+	int alloc_prob;			/** Chance of being generated (i.e. rarity) */
 	int alloc_min;			/** Minimum depth (can appear earlier) */
 	int alloc_max;			/** Maximum depth (will NEVER appear deeper) */
 
@@ -405,7 +405,7 @@ struct object {
 	byte origin_depth;  /* What depth the item was found at */
 	u16b origin_xtra;   /* Extra information about origin */
 
-	quark_t note; 		/* Inscription index */
+	quark_t note;		/* Inscription index */
 };
 
 struct flavor

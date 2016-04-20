@@ -632,7 +632,7 @@ static void place_feeling(struct chunk *c)
 {
 	int y,x,i,j;
 	int tries = 500;
-	
+
 	for (i = 0; i < z_info->feeling_total; i++) {
 		for (j = 0; j < tries; j++) {
 			/* Pick a random dungeon coordinate */
@@ -649,7 +649,7 @@ static void place_feeling(struct chunk *c)
 
 			/* Set the cave square appropriately */
 			sqinfo_on(c->squares[y][x].info, SQUARE_FEEL);
-			
+
 			break;
 		}
 	}
@@ -892,12 +892,12 @@ void cave_generate(struct chunk **c, struct player *p)
 			for (i = 1; i < z_info->r_max; i++) {
 				struct monster_race *race = &r_info[i];
 				int y, x;
-				
+
 				/* The monster must be an unseen quest monster of this depth. */
 				if (race->cur_num > 0) continue;
 				if (!rf_has(race->flags, RF_QUESTOR)) continue;
 				if (race->level != chunk->depth) continue;
-	
+
 				/* Pick a location and place the monster */
 				find_empty(chunk, &y, &x);
 				place_new_monster(chunk, y, x, race, true, true, ORIGIN_DROP);

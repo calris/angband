@@ -480,4 +480,3 @@ u32b djb2_hash(const char *str)
 
 	return hash;
 }
-

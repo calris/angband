@@ -572,11 +572,11 @@ static void reset_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 	}
 
 	/* Use the new "birth stat" values to work out the "other"
-	   stat values (i.e. after modifiers) and tell the UI things have 
+	   stat values (i.e. after modifiers) and tell the UI things have
 	   changed. */
 	if (update_display) {
 		recalculate_stats(stats, *points_left);
-		event_signal_birthpoints(points_spent, *points_left);	
+		event_signal_birthpoints(points_spent, *points_left);
 	}
 }
 
@@ -631,7 +631,7 @@ static bool sell_stat(int choice, int stats[STAT_MAX], int points_spent[STAT_MAX
 			/* Recalculate everything that's changed because
 			   the stat has changed, and inform the UI. */
 			recalculate_stats(stats, *points_left);
-	
+
 			return true;
 		}
 	}
@@ -649,13 +649,13 @@ static bool sell_stat(int choice, int stats[STAT_MAX], int points_spent[STAT_MAX
  *
  * 0. buy base STR 17
  * 1. if possible buy adj DEX of 18/10
- * 2. spend up to half remaining points on each of spell-stat and con, 
- *    but only up to max base of 16 unless a pure class 
+ * 2. spend up to half remaining points on each of spell-stat and con,
+ *    but only up to max base of 16 unless a pure class
  *    [mage or priest or warrior]
- * 3. If there are any points left, spend as much as possible in order 
+ * 3. If there are any points left, spend as much as possible in order
  *    on DEX and then the non-spell-stat.
  */
-static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX], 
+static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 						   int *points_left)
 {
 	int step = 0;
@@ -664,7 +664,7 @@ static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 	bool caster = false, warrior = false;
 
 	/* Determine whether the class is warrior */
-	if (player->class->max_attacks > 5) { 
+	if (player->class->max_attacks > 5) {
 		warrior = true;
 	}
 
@@ -674,19 +674,19 @@ static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 	}
 
 	while (*points_left && step >= 0) {
-	
+
 		switch (step) {
-		
+
 			/* Buy base STR 17 */
 			case 0: {
-			
+
 				if (!maxed[STAT_STR] && stats[STAT_STR] < 17) {
 					if (!buy_stat(STAT_STR, stats, points_spent, points_left,
 								  false))
 						maxed[STAT_STR] = true;
 				} else {
 					step++;
-					
+
 					/* If pure caster skip to step 3 */
 					if (caster){
 						step = 3;
@@ -721,15 +721,15 @@ static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 				step++;
 			}
 
-			/* 
-			 * Spend up to half remaining points on each of spell-stat and 
-			 * con, but only up to max base of 16 unless a pure class 
+			/*
+			 * Spend up to half remaining points on each of spell-stat and
+			 * con, but only up to max base of 16 unless a pure class
 			 * [mage or priest or warrior]
 			 */
-			case 3: 
+			case 3:
 			{
 				int points_trigger = *points_left / 2;
-				
+
 				if (warrior) {
 					points_trigger = *points_left;
 				} else {
@@ -743,8 +743,8 @@ static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 						}
 
 						if (points_spent[spell_stat] > points_trigger) {
-						
-							sell_stat(spell_stat, stats, points_spent, 
+
+							sell_stat(spell_stat, stats, points_spent,
 									  points_left, false);
 							maxed[spell_stat] = true;
 						}
@@ -756,7 +756,7 @@ static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 				while (!maxed[STAT_CON] &&
 					   !(caster) && stats[STAT_CON] < 16 &&
 					   points_spent[STAT_CON] < points_trigger) {
-					   
+
 					if (!buy_stat(STAT_CON, stats, points_spent,points_left,
 								  false)) {
 						maxed[STAT_CON] = true;
@@ -768,17 +768,17 @@ static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 						maxed[STAT_CON] = true;
 					}
 				}
-				
+
 				step++;
 				break;
 			}
 
-			/* 
-			 * If there are any points left, spend as much as possible in 
-			 * order on DEX, and the non-spell-stat. 
+			/*
+			 * If there are any points left, spend as much as possible in
+			 * order on DEX, and the non-spell-stat.
 			 */
 			case 4:{
-			
+
 				int next_stat;
 
 				if (!maxed[STAT_DEX]) {
@@ -801,7 +801,7 @@ static void generate_stats(int stats[STAT_MAX], int points_spent[STAT_MAX],
 			}
 
 			default: {
-			
+
 				step = -1;
 				break;
 			}
@@ -897,10 +897,10 @@ void do_cmd_birth_init(struct command *cmd)
 		int success = int_to_roman((roman_to_int(buf) + 1), buf,
 			(sizeof(op_ptr->full_name) - (buf -
 			(char *)&op_ptr->full_name)));
-			
+
 		if (!success) msg("Sorry, could not deal with suffix");
 	}
-	
+
 	/* We're ready to start the birth process */
 	event_signal_flag(EVENT_ENTER_BIRTH, quickstart_allowed);
 }
@@ -1013,7 +1013,7 @@ void do_cmd_prev_stats(struct command *cmd)
 	event_signal(EVENT_GOLD);
 	event_signal(EVENT_AC);
 	event_signal(EVENT_HP);
-	event_signal(EVENT_STATS);	
+	event_signal(EVENT_STATS);
 }
 
 void do_cmd_choose_name(struct command *cmd)
@@ -1117,14 +1117,14 @@ void do_cmd_accept_character(struct command *cmd)
  * Find the start of a possible Roman numerals suffix by going back from the
  * end of the string to a space, then checking that all the remaining chars
  * are valid Roman numerals.
- * 
- * Return the start position, or NULL if there isn't a valid suffix. 
+ *
+ * Return the start position, or NULL if there isn't a valid suffix.
  */
 char *find_roman_suffix_start(const char *buf)
 {
 	const char *start = strrchr(buf, ' ');
 	const char *p;
-	
+
 	if (start) {
 		start++;
 		p = start;
@@ -1134,7 +1134,7 @@ char *find_roman_suffix_start(const char *buf)
 				start = NULL;
 				break;
 			}
-			++p;			    
+			++p;
 		}
 	}
 	return (char *)start;

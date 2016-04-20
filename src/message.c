@@ -341,7 +341,7 @@ const char *message_sound_name(int message)
 
 /**
  * Make a noise, without a message.  Sound modules hook into this event.
- * 
+ *
  * \param type MSG_* constant for the sound type
  */
 void sound(int type)

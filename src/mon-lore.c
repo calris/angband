@@ -204,9 +204,9 @@ void get_attack_colors(int melee_colors[RBE_MAX], int spell_colors[RSF_MAX])
 	else
 		spell_colors[RSF_BR_SOUN] = COLOUR_ORANGE;
 
- 	/* Shards */
- 	if (st.el_info[ELEM_SHARD].res_level <= 0)
- 		spell_colors[RSF_BR_SHAR] = COLOUR_ORANGE;
+	/* Shards */
+	if (st.el_info[ELEM_SHARD].res_level <= 0)
+		spell_colors[RSF_BR_SHAR] = COLOUR_ORANGE;
 
 	/* Confusion */
 	if (!of_has(st.flags, OF_PROT_CONF))
@@ -324,7 +324,7 @@ void get_attack_colors(int melee_colors[RBE_MAX], int spell_colors[RSF_MAX])
 		melee_colors[RBE_LOSE_ALL] = COLOUR_L_RED;
 
 	/* Hold life isn't 100% effective */
-	melee_colors[RBE_EXP_10] = melee_colors[RBE_EXP_20] = 
+	melee_colors[RBE_EXP_10] = melee_colors[RBE_EXP_20] =
 			melee_colors[RBE_EXP_40] = melee_colors[RBE_EXP_80] =
 			of_has(st.flags, OF_HOLD_LIFE) ? COLOUR_YELLOW : COLOUR_ORANGE;
 
@@ -460,7 +460,7 @@ void wipe_monster_lore(const struct monster_race *race, struct monster_lore *lor
 void lore_do_probe(struct monster *mon)
 {
 	struct monster_lore *lore = get_lore(mon->race);
-	
+
 	lore->all_known = true;
 	lore_update(mon->race, lore);
 
@@ -480,7 +480,7 @@ bool lore_is_fully_known(const struct monster_race *race)
 	/* Check if already known */
 	if (lore->all_known)
 		return true;
-		
+
 	if (!lore->armour_known)
 		return false;
 	/* Only check spells if the monster can cast them */
@@ -490,7 +490,7 @@ bool lore_is_fully_known(const struct monster_race *race)
 		return false;
 	if (!lore->sleep_known)
 		return false;
-		
+
 	/* Check if blows are known */
 	for (i = 0; i < z_info->mon_blows_max; i++){
 		/* Only check if the blow exists */
@@ -498,27 +498,27 @@ bool lore_is_fully_known(const struct monster_race *race)
 			break;
 		if (!lore->blow_known[i])
 			return false;
-		
+
 	}
-		
+
 	/* Check all the flags */
 	for (i = 0; i < RF_SIZE; i++)
 		if (!lore->flags[i])
 			return false;
-		
-		
+
+
 	/* Check spell flags */
 	for (i = 0; i < RSF_SIZE; i++)
-		if (lore->spell_flags[i] != race->spell_flags[i])			
+		if (lore->spell_flags[i] != race->spell_flags[i])
 			return false;
-	
+
 	/* The player knows everything */
 	lore->all_known = true;
 	lore_update(race, lore);
 	return true;
 }
-	
-	
+
+
 /**
  * Take note that the given monster just dropped some treasure
  *

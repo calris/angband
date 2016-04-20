@@ -318,7 +318,7 @@ static void set_obj_names(bool terse)
 	for (i = 0; i < num_obj; i++) {
 		obj = items[i].object;
 
-		/* Null objects are used to skip lines, or display only a label */		
+		/* Null objects are used to skip lines, or display only a label */
 		if (!obj) {
 			if ((i < num_head) || !strcmp(items[i].label, "In quiver"))
 				strnfmt(items[i].o_name, sizeof(items[i].o_name), "");
@@ -1662,4 +1662,3 @@ void textui_cmd_toggle_ignore(void)
 	player->upkeep->notice |= PN_IGNORE;
 	do_cmd_redraw();
 }
-

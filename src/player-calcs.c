@@ -1,6 +1,6 @@
 /**
  * \file player-calcs.c
- * \brief Player status calculation, signalling ui events based on 
+ * \brief Player status calculation, signalling ui events based on
  *	status changes.
  *
  * Copyright (c) 1997 Ben Harrison, James E. Wilson, Robert A. Koeneke
@@ -1383,7 +1383,7 @@ int mana_per_level(struct player *p, struct player_state *state)
  */
 static void calc_mana(struct player *p, struct player_state *state, bool update)
 {
-	int i, msp, levels, cur_wgt, max_wgt; 
+	int i, msp, levels, cur_wgt, max_wgt;
 	struct object *obj;
 
 	/* Hack -- Must be literate */
@@ -1413,7 +1413,7 @@ static void calc_mana(struct player *p, struct player_state *state, bool update)
 		obj = equipped_item_by_slot_name(p, "hands");
 
 		/* Normal gloves hurt mage-type spells */
-		if (obj && !of_has(obj->flags, OF_FREE_ACT) && 
+		if (obj && !of_has(obj->flags, OF_FREE_ACT) &&
 			!kf_has(obj->kind->kind_flags, KF_SPELLS_OK) &&
 			(obj->modifiers[OBJ_MOD_DEX] <= 0)) {
 			/* Encumbered */
@@ -1780,7 +1780,7 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 		state->skills[SKILL_SEARCH] += (obj->modifiers[OBJ_MOD_SEARCH] * 5);
 
 		/* Affect searching frequency (factor of five) */
-		state->skills[SKILL_SEARCH_FREQUENCY] += 
+		state->skills[SKILL_SEARCH_FREQUENCY] +=
 			(obj->modifiers[OBJ_MOD_SEARCH] * 5);
 
 		/* Affect infravision */
@@ -2116,7 +2116,7 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 		if (hold < obj->weight / 10) {
 			/* Hard to wield a heavy bow */
 			state->to_h += 2 * (hold - obj->weight / 10);
-			
+
 			/* Heavy Bow */
 			state->heavy_shoot = true;
 		}
@@ -2177,7 +2177,7 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 		if (hold < obj->weight / 10) {
 			/* Hard to wield a heavy weapon */
 			state->to_h += 2 * (hold - obj->weight / 10);
-			
+
 			/* Heavy weapon */
 			state->heavy_wield = true;
 		}
@@ -2275,7 +2275,7 @@ static void update_bonuses(struct player *p)
 		p->upkeep->redraw |= (PR_SPEED);
 
 	/* Redraw armor (if needed) */
-	if ((known_state.ac != p->known_state.ac) || 
+	if ((known_state.ac != p->known_state.ac) ||
 		(known_state.to_a != p->known_state.to_a))
 		p->upkeep->redraw |= (PR_ARMOR);
 
@@ -2306,7 +2306,7 @@ static void update_bonuses(struct player *p)
 			else if (equipped_item_by_slot_name(p, "weapon"))
 				msg("You have no trouble wielding your weapon.");
 			else
-				msg("You feel relieved to put down your heavy weapon.");	
+				msg("You feel relieved to put down your heavy weapon.");
 		}
 
 		/* Take note when "illegal weapon" changes */
@@ -2588,7 +2588,7 @@ void redraw_stuff(struct player *p)
 	if (!character_generated) return;
 
 	/* Map is not shown, subwindow updates only */
-	if (!map_is_visible()) 
+	if (!map_is_visible())
 		redraw &= PR_SUBWINDOW;
 
 	/* Hack - rarely update while resting or running, makes it over quicker */
@@ -2631,4 +2631,3 @@ void handle_stuff(struct player *p)
 	if (p->upkeep->update) update_stuff(p);
 	if (p->upkeep->redraw) redraw_stuff(p);
 }
-

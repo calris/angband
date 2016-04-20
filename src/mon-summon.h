@@ -25,7 +25,7 @@
  * Flags for summon_specific()
  */
 enum summon_flag {
-	#define S(a, b, c, d, e, f, g, h) S_##a, 
+	#define S(a, b, c, d, e, f, g, h) S_##a,
 	#include "list-summon-types.h"
 	#undef S
 };

@@ -44,14 +44,14 @@
 #include <time.h>
 
 #define OBJ_FEEL_MAX	 11
-#define MON_FEEL_MAX 	 10
-#define LEVEL_MAX 		101
+#define MON_FEEL_MAX	 10
+#define LEVEL_MAX		101
 #define TOP_DICE		 21 /* highest catalogued values for wearables */
 #define TOP_SIDES		 11
 #define TOP_AC			146
 #define TOP_PLUS		 56
 #define TOP_POWER		999
-#define TOP_MOD 		 25
+#define TOP_MOD			 25
 #define RUNS_PER_CHECKPOINT	10000
 
 /* For ref, e_max is 128, a_max is 136, r_max is ~650,
@@ -158,7 +158,7 @@ static void free_stats_memory(void)
 	for (i = 0; i < LEVEL_MAX; i++) {
 		mem_free(level_data[i].monsters);
 /*		mem_free(level_data[i].vaults);
- 		mem_free(level_data[i].pits); */
+		mem_free(level_data[i].pits); */
 		for (j = 0; j < ORIGIN_STATS; j++) {
 			mem_free(level_data[i].artifacts[j]);
 			mem_free(level_data[i].consumables[j]);
@@ -394,10 +394,10 @@ static void prep_output_dir(void)
 
 /**
  * Caller is responsible for prepping and finalizing flags_stmt, which
- * should have two parameters. 
+ * should have two parameters.
  */
-static int stats_dump_oflags(sqlite3_stmt *flags_stmt, int idx, 
-	bitflag flags[OF_SIZE]) 
+static int stats_dump_oflags(sqlite3_stmt *flags_stmt, int idx,
+	bitflag flags[OF_SIZE])
 {
 	int err, flag;
 
@@ -439,10 +439,10 @@ static int stats_dump_artifacts(void)
 
 		err = sqlite3_bind_int(info_stmt, 1, idx);
 		if (err) return err;
-		err = sqlite3_bind_text(info_stmt, 2, art->name, 
+		err = sqlite3_bind_text(info_stmt, 2, art->name,
 			strlen(art->name), SQLITE_STATIC);
 		if (err) return err;
-		err = stats_db_bind_ints(info_stmt, 13, 2, 
+		err = stats_db_bind_ints(info_stmt, 13, 2,
 			art->tval, art->sval, art->weight,
 			art->cost, art->alloc_prob, art->alloc_min,
 			art->alloc_max, art->ac, art->dd,
@@ -454,7 +454,7 @@ static int stats_dump_artifacts(void)
 
 		for (i = 0; i < OBJ_MOD_MAX; i++)
 		{
-			err = stats_db_bind_ints(mods_stmt, 3, 0, idx, i, 
+			err = stats_db_bind_ints(mods_stmt, 3, 0, idx, i,
 									 art->modifiers[i]);
 				if (err) return err;
 				STATS_DB_STEP_RESET(mods_stmt)
@@ -493,18 +493,18 @@ static int stats_dump_egos(void)
 
 		err = sqlite3_bind_int(info_stmt, 1, idx);
 		if (err) return err;
-		err = sqlite3_bind_text(info_stmt, 2, ego->name, 
+		err = sqlite3_bind_text(info_stmt, 2, ego->name,
 			strlen(ego->name), SQLITE_STATIC);
 		if (err) return err;
-		err = stats_db_bind_rv(info_stmt, 3, ego->to_h); 
+		err = stats_db_bind_rv(info_stmt, 3, ego->to_h);
 		if (err) return err;
-		err = stats_db_bind_rv(info_stmt, 4, ego->to_d); 
+		err = stats_db_bind_rv(info_stmt, 4, ego->to_d);
 		if (err) return err;
-		err = stats_db_bind_rv(info_stmt, 5, ego->to_a); 
+		err = stats_db_bind_rv(info_stmt, 5, ego->to_a);
 		if (err) return err;
-		err = stats_db_bind_ints(info_stmt, 8, 5, 
+		err = stats_db_bind_ints(info_stmt, 8, 5,
 			ego->cost, ego->level, ego->rarity,
-			ego->rating, ego->min_to_h, 
+			ego->rating, ego->min_to_h,
 			ego->min_to_d, ego->min_to_a);
 		if (err) return err;
 		STATS_DB_STEP_RESET(info_stmt)
@@ -513,7 +513,7 @@ static int stats_dump_egos(void)
 		if (err) return err;
 
 		for (i = 0; i < OBJ_MOD_MAX; i++) {
-			err = stats_db_bind_ints(mods_stmt, 3, 0, idx, i, 
+			err = stats_db_bind_ints(mods_stmt, 3, 0, idx, i,
 									 ego->min_modifiers[i]);
 				if (err) return err;
 				STATS_DB_STEP_RESET(mods_stmt)
@@ -552,7 +552,7 @@ static int stats_dump_objects(void)
 
 		err = sqlite3_bind_int(info_stmt, 1, idx);
 		if (err) return err;
-		err = sqlite3_bind_text(info_stmt, 2, kind->name, 
+		err = sqlite3_bind_text(info_stmt, 2, kind->name,
 			strlen(kind->name), SQLITE_STATIC);
 		if (err) return err;
 		err = stats_db_bind_ints(info_stmt, 13, 2,
@@ -620,7 +620,7 @@ static int stats_dump_objects(void)
 			STATS_DB_STEP_RESET(flags_stmt)
 		}
 	}
-	
+
 	STATS_DB_FINALIZE(info_stmt)
 	STATS_DB_FINALIZE(flags_stmt)
 
@@ -678,7 +678,7 @@ static int stats_dump_monsters(void)
 			flag != FLAG_END;
 			flag = rsf_next(race->spell_flags, flag + 1))
 		{
-			err = stats_db_bind_ints(spell_flags_stmt, 2, 0, 
+			err = stats_db_bind_ints(spell_flags_stmt, 2, 0,
 				idx, flag);
 			if (err) return err;
 			STATS_DB_STEP_RESET(spell_flags_stmt)
@@ -713,15 +713,15 @@ static int stats_dump_monsters(void)
 		for (flag = rsf_next(base->spell_flags, FLAG_START);
 			flag != FLAG_END;
 			flag = rsf_next(base->spell_flags, flag + 1)) {
-			err = sqlite3_bind_text(spell_flags_stmt, 1, 
-				base->name, strlen(base->name), 
+			err = sqlite3_bind_text(spell_flags_stmt, 1,
+				base->name, strlen(base->name),
 				SQLITE_STATIC);
 			if (err) return err;
 			err = sqlite3_bind_int(spell_flags_stmt, 2, flag);
 			if (err) return err;
 			STATS_DB_STEP_RESET(spell_flags_stmt)
 		}
-		
+
 	}
 
 	STATS_DB_FINALIZE(flags_stmt)
@@ -782,14 +782,14 @@ static int stats_dump_lists(void)
         #undef OBJ_MOD
 	};
 
-	err = stats_db_stmt_prep(&sql_stmt, 
+	err = stats_db_stmt_prep(&sql_stmt,
 		"INSERT INTO effects_list VALUES(?,?,?,?);");
 	if (err) return err;
 
 	for (idx = 1; idx < EF_MAX; idx++) {
 		if (! effects[idx].desc) continue;
 
-		err = stats_db_bind_ints(sql_stmt, 2, 0, idx, 
+		err = stats_db_bind_ints(sql_stmt, 2, 0, idx,
 			effects[idx].aim);
 		if (err) return err;
 		err = sqlite3_bind_text(sql_stmt, 2, effects[idx].desc,
@@ -800,7 +800,7 @@ static int stats_dump_lists(void)
 
 	STATS_DB_FINALIZE(sql_stmt)
 
-	err = stats_db_stmt_prep(&sql_stmt, 
+	err = stats_db_stmt_prep(&sql_stmt,
 		"INSERT INTO monster_flags_list VALUES(?,?);");
 	if (err) return err;
 
@@ -815,7 +815,7 @@ static int stats_dump_lists(void)
 
 	STATS_DB_FINALIZE(sql_stmt)
 
-	err = stats_db_stmt_prep(&sql_stmt, 
+	err = stats_db_stmt_prep(&sql_stmt,
 		"INSERT INTO object_flags_list VALUES(?,?,?,?);");
 	if (err) return err;
 
@@ -823,7 +823,7 @@ static int stats_dump_lists(void)
 		struct object_flag *of = &object_flag_table[idx];
 		if (! of->message) continue;
 
-		err = stats_db_bind_ints(sql_stmt, 3, 0, idx, 
+		err = stats_db_bind_ints(sql_stmt, 3, 0, idx,
 			of->type, of->power);
 		if (err) return err;
 		err = sqlite3_bind_text(sql_stmt, 4, of->message,
@@ -834,7 +834,7 @@ static int stats_dump_lists(void)
 
 	STATS_DB_FINALIZE(sql_stmt)
 
-	err = stats_db_stmt_prep(&sql_stmt, 
+	err = stats_db_stmt_prep(&sql_stmt,
 		"INSERT INTO object_mods_list VALUES(?,?,?,?,?);");
 	if (err) return err;
 
@@ -1116,13 +1116,13 @@ static int stats_level_data_offsetof(const char *member)
 		return offsetof(struct level_data, consumables);
 	else if (streq(member, "wearables"))
 		return offsetof(struct level_data, wearables);
-		
+
 	/* We should not get to this point. */
 	assert(0);
 }
 
 /**
- * Find the offset of the given member of the wearables_data struct. Not 
+ * Find the offset of the given member of the wearables_data struct. Not
  * elegant.
  */
 static int stats_wearables_data_offsetof(const char *member)
@@ -1143,7 +1143,7 @@ static int stats_wearables_data_offsetof(const char *member)
 		return offsetof(struct wearables_data, flags);
 	else if (streq(member, "mods"))
 		return offsetof(struct wearables_data, modifiers);
-		
+
 	/* We should not get to this point. */
 	assert(0);
 }
@@ -1179,7 +1179,7 @@ static int stats_write_db_level_data(const char *table, int max_idx)
 
 	for (level = 1; level < LEVEL_MAX; level++)
 		for (i = 0; i < max_idx; i++) {
-	/* This arcane expression finds the value of 
+	/* This arcane expression finds the value of
 			 * level_data[level].<table>[i] */
 			u32b count;
 			if (streq(table, "gold"))
@@ -1199,7 +1199,7 @@ static int stats_write_db_level_data(const char *table, int max_idx)
 	return sqlite3_finalize(sql_stmt);
 }
 
-static int stats_write_db_level_data_items(const char *table, int max_idx, 
+static int stats_write_db_level_data_items(const char *table, int max_idx,
 	bool translate_consumables)
 {
 	char sql_buf[256];
@@ -1215,11 +1215,11 @@ static int stats_write_db_level_data_items(const char *table, int max_idx,
 	for (level = 1; level < LEVEL_MAX; level++)
 		for (origin = 0; origin < ORIGIN_STATS; origin++)
 			for (i = 0; i < max_idx; i++) {
-				/* This arcane expression finds the value of 
+				/* This arcane expression finds the value of
 				 * level_data[level].<table>[origin][i] */
 				u32b count = ((u32b **)((byte *)&level_data[level] + offset))[origin][i];
 				if (!count) continue;
-				
+
 				err = stats_db_bind_ints(sql_stmt, 4, 0, level, count, translate_consumables ? stats_lookup_index(consumables_index, z_info->k_max, i) : i, origin);
 				if (err) return err;
 
@@ -1234,7 +1234,7 @@ static int stats_write_db_wearables_count(void)
 	sqlite3_stmt *sql_stmt;
 	int err, level, origin, k_idx, idx;
 
-	err = stats_db_stmt_prep(&sql_stmt, 
+	err = stats_db_stmt_prep(&sql_stmt,
 		"INSERT INTO wearables_count VALUES(?,?,?,?);");
 	if (err) return err;
 
@@ -1245,7 +1245,7 @@ static int stats_write_db_wearables_count(void)
 				/* Skip if object did not appear */
 				if (!count) continue;
 
-				k_idx = stats_lookup_index(wearables_index, 
+				k_idx = stats_lookup_index(wearables_index,
 					z_info->k_max, idx);
 
 				/* Skip if pile */
@@ -1262,7 +1262,7 @@ static int stats_write_db_wearables_count(void)
 }
 
 /**
- * Unfortunately, the arcane expression used to find the value of an array 
+ * Unfortunately, the arcane expression used to find the value of an array
  * member of a struct differs depending on whether the member is declared
  * as an array or as a pointer. Pass in true if the member is an array, and
  * false if the member is a pointer.
@@ -1282,7 +1282,7 @@ static int stats_write_db_wearables_array(const char *field, int max_val, bool a
 	for (level = 1; level < LEVEL_MAX; level++)
 		for (origin = 0; origin < ORIGIN_STATS; origin++)
 			for (idx = 0; idx < wearable_count + 1; idx++) {
-				k_idx = stats_lookup_index(wearables_index, 
+				k_idx = stats_lookup_index(wearables_index,
 					z_info->k_max, idx);
 
 				/* Skip if pile */
@@ -1311,12 +1311,12 @@ static int stats_write_db_wearables_array(const char *field, int max_val, bool a
 }
 
 /**
- * Unfortunately, the arcane expression used to find the value of an array 
+ * Unfortunately, the arcane expression used to find the value of an array
  * member of a struct differs depending on whether the member is declared
  * as an array or as a pointer. Pass in true if the member is an array, and
  * false if the member is a pointer.
  */
-static int stats_write_db_wearables_2d_array(const char *field, 
+static int stats_write_db_wearables_2d_array(const char *field,
 	int max_val1, int max_val2, bool array_p)
 {
 	char sql_buf[256];
@@ -1333,7 +1333,7 @@ static int stats_write_db_wearables_2d_array(const char *field,
 	for (level = 1; level < LEVEL_MAX; level++)
 		for (origin = 0; origin < ORIGIN_STATS; origin++)
 			for (idx = 0; idx < wearable_count + 1; idx++) {
-				k_idx = stats_lookup_index(wearables_index, 
+				k_idx = stats_lookup_index(wearables_index,
 					z_info->k_max, idx);
 
 				/* Skip if pile */
@@ -1342,7 +1342,7 @@ static int stats_write_db_wearables_2d_array(const char *field,
 				for (i = 0; i < max_val1; i++)
 					for (j = 0; j < max_val2; j++) {
 						/* This arcane expression finds the value of
-				 		* level_data[level].wearables[origin][idx].<field>[i][j]
+						* level_data[level].wearables[origin][idx].<field>[i][j]
 						*/
 						u32b count;
 
@@ -1356,7 +1356,7 @@ static int stats_write_db_wearables_2d_array(const char *field,
 						if (!count) continue;
 
 						err = stats_db_bind_ints(sql_stmt, 6, 0,
-							level, count, k_idx, origin, 
+							level, count, k_idx, origin,
 							i, j);
 						if (err) return err;
 
@@ -1376,7 +1376,7 @@ static int stats_write_db(u32b run)
 	err = stats_db_exec("BEGIN TRANSACTION;");
 	if (err) return err;
 
-	strnfmt(sql_buf, 256, 
+	strnfmt(sql_buf, 256,
 		"INSERT OR REPLACE INTO metadata VALUES('runs', %d);", run);
 	err = stats_db_exec(sql_buf);
 	if (err) return err;
@@ -1393,11 +1393,11 @@ static int stats_write_db(u32b run)
 	err = stats_write_db_level_data("gold", ORIGIN_STATS);
 	if (err) return err;
 
-	err = stats_write_db_level_data_items("artifacts", z_info->a_max, 
+	err = stats_write_db_level_data_items("artifacts", z_info->a_max,
 		false);
 	if (err) return err;
 
-	err = stats_write_db_level_data_items("consumables", 
+	err = stats_write_db_level_data_items("consumables",
 		consumable_count + 1, true);
 	if (err) return err;
 
@@ -1446,7 +1446,7 @@ void progress_bar(u32b run, time_t start) {
 
 	time_t delta = time(NULL) - start;
 	u32b togo = num_runs - run;
-	u32b expect = delta ? ((long long)delta * (long long)togo) / run 
+	u32b expect = delta ? ((long long)delta * (long long)togo) / run
 		: 0;
 
 	int h = expect / 3600;
@@ -1463,7 +1463,7 @@ void progress_bar(u32b run, time_t start) {
 
 /**
  * Clean up memory after each run. Should only affect character and
- * dungeon structs allocated during normal initialization, not persistent 
+ * dungeon structs allocated during normal initialization, not persistent
  * data like *_info.
  */
 
@@ -1478,7 +1478,7 @@ static errr run_stats(void)
 	struct artifact *a_info_save;
 	unsigned int i;
 	int err;
-	bool status; 
+	bool status;
 
 	time_t start;
 

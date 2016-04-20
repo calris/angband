@@ -3,7 +3,7 @@
  * \brief Monster attacks
  *
  * Monster ranged attacks - choosing an attack spell or shot and making it.
- * Monster melee attacks - monster critical blows, whether a monster 
+ * Monster melee attacks - monster critical blows, whether a monster
  * attack hits, what happens when a monster attacks an adjacent player.
  *
  * Copyright (c) 1997 Ben Harrison, David Reeve Sward, Keldon Jones.
@@ -52,7 +52,7 @@
  * And non-INTELLIGENT monsters only use it partially effectively.
  *
  * Actually learn what the player resists, and use that information
- * to remove attacks or spells before using them. 
+ * to remove attacks or spells before using them.
  *
  * This has the added advantage that attacks and spells are related.
  * The "smart_learn" option means that the monster "learns" the flags
@@ -80,7 +80,7 @@ static void remove_bad_spells(struct monster *mon, bitflag f[RSF_SIZE])
 
 	/* Don't heal if full */
 	if (mon->hp >= mon->maxhp) rsf_off(f2, RSF_HEAL);
-	
+
 	/* Don't haste if hasted with time remaining */
 	if (mon->m_timed[MON_TMD_FAST] > 10) rsf_off(f2, RSF_HASTE);
 

@@ -263,10 +263,10 @@ static struct ego_item *ego_find_random(struct object *obj, int level)
 
 		/* Access the ego item */
 		ego = &e_info[table[i].index];
-        
+
         /* enforce maximum */
         if (level > ego->alloc_max) continue;
-        
+
         /* roll for Out of Depth (ood) */
         if (level < ego->alloc_min){
             ood_chance = MAX(2, (ego->alloc_min - level) / 3);
@@ -792,13 +792,13 @@ int apply_magic(struct object *obj, int lev, bool allow_artifacts, bool good,
 
 	/* Chance of being `good` and `great` */
 	/* This has changed over the years:
-	 * 3.0.0:   good = MIN(75, lev + 10);      great = MIN(20, lev / 2); 
+	 * 3.0.0:   good = MIN(75, lev + 10);      great = MIN(20, lev / 2);
 	 * 3.3.0:	good = (lev + 2) * 3;          great = MIN(lev / 4 + lev, 50);
      * 3.4.0:   good = (2 * lev) + 5
      * 3.4 was in between 3.0 and 3.3, 3.5 attempts to keep the same
      * area under the curve as 3.4, but make the generation chances
      * flatter.  This depresses good items overall since more items
-     * are created deeper. 
+     * are created deeper.
      * This change is meant to go in conjunction with the changes
      * to ego item allocation levels. (-fizzix)
 	 */
@@ -823,7 +823,7 @@ int apply_magic(struct object *obj, int lev, bool allow_artifacts, bool good,
 
 		/* Get two rolls if forced great */
 		if (great) rolls = 2;
-        
+
         /* Give some extra rolls for uniques and acq scrolls */
         if (extra_roll) rolls += 2;
 
@@ -949,9 +949,9 @@ static struct object_kind *get_obj_num_by_kind(int level, bool good, int tval)
 
 	/* No appropriate items of that tval */
 	if (!total) return NULL;
-	
+
 	value = randint0(total);
-	
+
 	for (item = 1; item < z_info->k_max; item++)
 		if (objkind_byid(item)->tval == tval) {
 			if (value < objects[ind + item]) break;
@@ -985,10 +985,10 @@ struct object_kind *get_obj_num(int level, bool good, int tval)
 
 	/* Pick an object */
 	ind = level * z_info->k_max;
-	
+
 	if (tval)
 		return get_obj_num_by_kind(level, good, tval);
-	
+
 	if (!good) {
 		value = randint0(obj_total[level]);
 		for (item = 1; item < z_info->k_max; item++) {
@@ -1104,7 +1104,7 @@ void acquirement(int y1, int x1, int level, int num, bool great)
 /*** Make a gold item ***/
 
 /**
- * Get a money kind by name, or level-appropriate 
+ * Get a money kind by name, or level-appropriate
  */
 struct object_kind *money_kind(const char *name, int value)
 {
@@ -1142,7 +1142,7 @@ struct object *make_gold(int lev, char *coin_type)
 	s32b avg = (18 * lev)/10 + 18;
 	s32b spread = lev + 10;
 	s32b value = rand_spread(avg, spread);
-	struct object *new_gold = mem_zalloc(sizeof(*new_gold)); 
+	struct object *new_gold = mem_zalloc(sizeof(*new_gold));
 
 	/* Increase the range to infinite, moving the average to 110% */
 	while (one_in_(100) && value * 10 <= SHRT_MAX)

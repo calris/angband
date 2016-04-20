@@ -244,7 +244,7 @@ static const struct player_flag_record player_flag_table[RES_ROWS * 4] = {
 	{ "rCold",	-1,					-1,				ELEM_COLD,	TMD_OPP_COLD },
 	{ "rPois",	-1,					-1,				ELEM_POIS,	TMD_OPP_POIS },
 	{ "rLite",	-1,					-1,				ELEM_LIGHT,	-1 },
-	{ "rDark",	-1,					-1,				ELEM_DARK,	-1 },	
+	{ "rDark",	-1,					-1,				ELEM_DARK,	-1 },
 	{ "Sound",	-1,					-1,				ELEM_SOUND,	-1 },
 	{ "Shard",	-1,					-1,				ELEM_SHARD,	-1 },
 
@@ -256,31 +256,31 @@ static const struct player_flag_record player_flag_table[RES_ROWS * 4] = {
 	{ "pBlnd",	-1,					OF_PROT_BLIND,	-1,			-1 },
 	{ "pConf",	-1,					OF_PROT_CONF,	-1,			TMD_OPP_CONF },
 	{ "pStun",	-1,					OF_PROT_STUN,	-1,			-1 },
-	{ "HLife",	-1,					OF_HOLD_LIFE,	-1, 		-1 },
+	{ "HLife",	-1,					OF_HOLD_LIFE,	-1,		-1 },
 
-	{ "Regen",	-1,					OF_REGEN,		-1, 		-1 },
+	{ "Regen",	-1,					OF_REGEN,		-1,		-1 },
 	{ "  ESP",	-1,					OF_TELEPATHY,	-1,			TMD_TELEPATHY },
 	{ "Invis",	-1,					OF_SEE_INVIS,	-1,			TMD_SINVIS },
-	{ "FrAct",	-1,					OF_FREE_ACT,	-1, 		-1 },
+	{ "FrAct",	-1,					OF_FREE_ACT,	-1,		-1 },
 	{ "Feath",	-1,					OF_FEATHER,		-1,			-1 },
-	{ "S.Dig",	-1,					OF_SLOW_DIGEST,	-1, 		-1 },
-	{ "ImpHP",	-1,					OF_IMPAIR_HP,	-1, 		-1 },
+	{ "S.Dig",	-1,					OF_SLOW_DIGEST,	-1,		-1 },
+	{ "ImpHP",	-1,					OF_IMPAIR_HP,	-1,		-1 },
 	{ " Fear",	-1,					OF_AFRAID,		-1,			TMD_AFRAID },
-	{ "Aggrv",	-1,					OF_AGGRAVATE,	-1, 		-1 },
+	{ "Aggrv",	-1,					OF_AGGRAVATE,	-1,		-1 },
 
-	{ "Stea.",	OBJ_MOD_STEALTH,	-1,				-1, 		-1 },
-	{ "Sear.",	OBJ_MOD_SEARCH,		-1,				-1, 		-1 },
+	{ "Stea.",	OBJ_MOD_STEALTH,	-1,				-1,		-1 },
+	{ "Sear.",	OBJ_MOD_SEARCH,		-1,				-1,		-1 },
 	{ "Infra",	OBJ_MOD_INFRA,		-1,				-1,			TMD_SINFRA },
-	{ "Tunn.",	OBJ_MOD_TUNNEL,		-1,				-1, 		-1 },
+	{ "Tunn.",	OBJ_MOD_TUNNEL,		-1,				-1,		-1 },
 	{ "Speed",	OBJ_MOD_SPEED,		-1,				-1,			 TMD_FAST },
-	{ "Blows",	OBJ_MOD_BLOWS,		-1,				-1, 		-1 },
-	{ "Shots",	OBJ_MOD_SHOTS,		-1,				-1, 		-1 },
-	{ "Might",	OBJ_MOD_MIGHT,		-1,				-1, 		-1 },
-	{ "Light",	OBJ_MOD_LIGHT,		-1,				-1, 		-1 },
+	{ "Blows",	OBJ_MOD_BLOWS,		-1,				-1,		-1 },
+	{ "Shots",	OBJ_MOD_SHOTS,		-1,				-1,		-1 },
+	{ "Might",	OBJ_MOD_MIGHT,		-1,				-1,		-1 },
+	{ "Light",	OBJ_MOD_LIGHT,		-1,				-1,		-1 },
 };
 
 static void display_resistance_panel(const struct player_flag_record *rec,
-									size_t size, const region *bounds) 
+									size_t size, const region *bounds)
 {
 	size_t i;
 	int j;
@@ -325,7 +325,7 @@ static void display_resistance_panel(const struct player_flag_record *rec,
 
 				/* Timed flags only in the player column */
 				if (rec[i].tmd_flag >= 0) {
-	 				timed = player->timed[rec[i].tmd_flag] ? true : false;
+					timed = player->timed[rec[i].tmd_flag] ? true : false;
 					/* There has to be one special case... */
 					if ((rec[i].tmd_flag == TMD_AFRAID) &&
 						(player->timed[TMD_TERROR]))
@@ -544,7 +544,7 @@ static void display_player_sust_info(void)
 				if (c == '.') c = 's';
 			}
 
-			if ((c == '.') && obj && 
+			if ((c == '.') && obj &&
 				!object_flag_is_known(obj, sustain_flag(stat)))
 				c = '?';
 
@@ -1200,7 +1200,7 @@ void do_cmd_change_name(void)
 					}
 					break;
 				}
-				
+
 				case 'h':
 				case ARROW_LEFT:
 				case ' ':
@@ -1214,13 +1214,13 @@ void do_cmd_change_name(void)
 			}
 		} else if (ke.type == EVT_MOUSE) {
 			if (ke.mouse.button == 1) {
-				/* Flip through the screens */			
+				/* Flip through the screens */
 				mode = (mode + 1) % INFO_SCREENS;
 			} else if (ke.mouse.button == 2) {
 				/* exit the screen */
 				more = false;
 			} else {
-				/* Flip backwards through the screens */			
+				/* Flip backwards through the screens */
 				mode = (mode - 1) % INFO_SCREENS;
 			}
 		}

@@ -28,4 +28,3 @@ ROOM("Greater vault",		44,		66,		greater_vault)
 ROOM("Lesser vault (new)",	22,		22,		lesser_vault)
 ROOM("Medium vault (new)",	22,		33,		medium_vault)
 ROOM("Greater vault (new)",	44,		66,		greater_vault)
-

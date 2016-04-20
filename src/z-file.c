@@ -382,7 +382,7 @@ ang_file *file_open(const char *fname, file_mode mode, file_type ftype)
 	path_parse(buf, sizeof(buf), fname);
 
 	switch (mode) {
-		case MODE_WRITE: { 
+		case MODE_WRITE: {
 			if (ftype == FTYPE_SAVE) {
 				/* open only if the file does not exist */
 				int fd;
@@ -730,8 +730,8 @@ ang_dir *my_dopen(const char *dirname)
 {
 	WIN32_FIND_DATA fd;
 	HANDLE h;
-   	ang_dir *dir;
-	
+	ang_dir *dir;
+
 	/* Try to open it */
 	h = FindFirstFile(format("%s\\*", dirname), &fd);
 
@@ -844,7 +844,7 @@ bool my_dread(ang_dir *dir, char *fname, size_t len)
 		if (!entry) return false;
 
 		path_build(path, sizeof path, dir->dirname, entry->d_name);
-            
+
 		/* Check to see if it exists */
 		if (stat(path, &filedata) != 0)
 			continue;
@@ -876,4 +876,3 @@ void my_dclose(ang_dir *dir)
 
 #endif /* HAVE_DIRENT_H */
 #endif /* WINDOWS */
-

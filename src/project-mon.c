@@ -670,7 +670,7 @@ static void project_monster_handler_OLD_CLONE(project_monster_handler_context_t 
 	context->mon->hp = context->mon->maxhp;
 
 	/* Speed up */
-	mon_inc_timed(context->mon, MON_TMD_FAST, 50, MON_TMD_FLG_NOTIFY, 
+	mon_inc_timed(context->mon, MON_TMD_FAST, 50, MON_TMD_FLG_NOTIFY,
 				  context->id);
 
 	/* Attempt to clone. */
@@ -696,7 +696,7 @@ static void project_monster_handler_OLD_POLY(project_monster_handler_context_t *
 static void project_monster_handler_OLD_HEAL(project_monster_handler_context_t *context)
 {
 	/* Wake up */
-	mon_clear_timed(context->mon, MON_TMD_SLEEP, MON_TMD_FLG_NOMESSAGE, 
+	mon_clear_timed(context->mon, MON_TMD_SLEEP, MON_TMD_FLG_NOMESSAGE,
 					context->id);
 
 	/* Heal */
@@ -1003,8 +1003,8 @@ static void project_m_apply_side_effects(project_monster_handler_context_t *cont
  * Note that this routine can handle "no damage" attacks (like teleport) by
  * taking a zero damage, and can even take parameters to attacks (like
  * confuse) by accepting a "damage", using it to calculate the effect, and
- * then setting the damage to zero.  Note that actual damage should be already 
- * adjusted for distance from the "epicenter" when passed in, but other effects 
+ * then setting the damage to zero.  Note that actual damage should be already
+ * adjusted for distance from the "epicenter" when passed in, but other effects
  * may be influenced by r.
  *
  * Note that "polymorph" is dangerous, since a failure in "place_monster()"'
@@ -1179,4 +1179,3 @@ void project_m(int who, int r, int y, int x, int dam, int typ, int flg,
 	/* Return "Anything seen?" */
 	*was_obvious = !!obvious;
 }
-

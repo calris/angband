@@ -17,7 +17,7 @@
  *    are included in all such copies.  Other copyrights may also apply.
  *
  * This file contains various utility functions for dungeon generation - mostly
- * for finding appropriate grids for some purposes, or placing things. 
+ * for finding appropriate grids for some purposes, or placing things.
  */
 
 #include "angband.h"
@@ -360,7 +360,7 @@ void new_player_spot(struct chunk *c, struct player *p)
  * \param c current chunk
  * \param y
  * \param x co-ordinates
- * \return the number of walls 
+ * \return the number of walls
  */
 static int next_to_walls(struct chunk *c, int y, int x)
 {
@@ -742,5 +742,3 @@ void vault_monsters(struct chunk *c, int y1, int x1, int depth, int num)
 		}
     }
 }
-
-

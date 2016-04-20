@@ -318,7 +318,7 @@ static void object_id_set_aware(struct object *obj)
 
 	/* Jewelry with fixed bonuses gets more info now */
 	if (tval_is_jewelry(obj)) {
-		if (!randcalc_varies(obj->kind->to_h)) 
+		if (!randcalc_varies(obj->kind->to_h))
 			obj->known->to_h = 1;
 		if (!randcalc_varies(obj->kind->to_d))
 			obj->known->to_d = 1;
@@ -392,7 +392,7 @@ bool object_check_for_ident(struct object *obj)
 		 (object_was_sensed(obj) && obj->to_a == 0)) &&
 	    (object_effect_is_known(obj) || !object_effect(obj)))
 	{
-		/* In addition to knowing the pval flags, it is necessary to know 
+		/* In addition to knowing the pval flags, it is necessary to know
 		 * the modifiers to know everything */
 		int i;
 		for (i = 0; i < OBJ_MOD_MAX; i++)
@@ -570,7 +570,7 @@ void object_know_all_but_flavor(struct object *obj)
 
 
 /**
- * Mark as object as fully known, a.k.a identified. 
+ * Mark as object as fully known, a.k.a identified.
  *
  * \param obj is the object to mark as identified
  */
@@ -861,7 +861,7 @@ void object_notice_on_wield(struct object *obj)
 
 	/* special case FA, needed for mages wielding gloves */
 	if (player_has(player, PF_CUMBER_GLOVE) && obj->tval == TV_GLOVES &&
-		(obj->modifiers[OBJ_MOD_DEX] <= 0) && 
+		(obj->modifiers[OBJ_MOD_DEX] <= 0) &&
 		!kf_has(obj->kind->kind_flags, KF_SPELLS_OK))
 		of_on(obvious_mask, OF_FREE_ACT);
 
@@ -1287,7 +1287,7 @@ obj_pseudo_t object_pseudo(const struct object *obj)
 
 	/* FA on gloves is obvious to mage casters */
 	if (player_has(player, PF_CUMBER_GLOVE) && obj->tval == TV_GLOVES &&
-		(obj->modifiers[OBJ_MOD_DEX] <= 0) && 
+		(obj->modifiers[OBJ_MOD_DEX] <= 0) &&
 		!kf_has(obj->kind->kind_flags, KF_SPELLS_OK))
 		of_on(f2, OF_FREE_ACT);
 
@@ -1427,7 +1427,7 @@ void sense_inventory(void)
 	struct object *obj;
 	char o_name[80];
 	unsigned int rate;
-	
+
 	/* No ID when confused in a bad state */
 	if (player->timed[TMD_CONFUSED]) return;
 
@@ -1458,7 +1458,7 @@ void sense_inventory(void)
 		assert(obj->known);
 		/* Valid tval codes only */
 		if (!tval_is_weapon(obj) && !tval_is_armor(obj)) continue;
-		
+
 		/* It is known, no information needed */
 		if (object_is_known(obj)) continue;
 
@@ -1516,13 +1516,13 @@ void sense_inventory(void)
 		/* Set ignore flag as appropriate */
 		if (!equipped)
 			player->upkeep->notice |= PN_IGNORE;
-		
+
 		/* Update the gear */
 		player->upkeep->update |= (PU_INVEN);
 
 		/* Combine the pack (later) */
 		player->upkeep->notice |= (PN_COMBINE);
-		
+
 		/* Redraw stuff */
 		player->upkeep->redraw |= (PR_INVEN | PR_EQUIP);
 	}
