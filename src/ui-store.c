@@ -720,7 +720,7 @@ static void store_examine(struct store_context *ctx, int item)
 
 	char header[120];
 
-	textblock *tb;
+	struct textblock *tb;
 	region area = { 0, 0, 0, 0 };
 
 	if (item < 0) return;

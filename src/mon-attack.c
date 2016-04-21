@@ -383,7 +383,7 @@ bool make_attack_spell(struct monster *mon)
  * and which also do at least 20 damage, or, sometimes, N damage.
  * This is used only to determine "cuts" and "stuns".
  */
-static int monster_critical(random_value dice, int rlev, int dam)
+static int monster_critical(struct random_value dice, int rlev, int dam)
 {
 	int max = 0;
 	int total = randcalc(dice, rlev, MAXIMISE);
@@ -487,7 +487,7 @@ bool make_attack_normal(struct monster *mon, struct player *p)
 		/* Extract the attack infomation */
 		int effect = mon->race->blow[ap_cnt].effect;
 		int method = mon->race->blow[ap_cnt].method;
-		random_value dice = mon->race->blow[ap_cnt].dice;
+		struct random_value dice = mon->race->blow[ap_cnt].dice;
 
 		/* Hack -- no more attacks */
 		if (!method) break;

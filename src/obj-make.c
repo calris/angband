@@ -705,7 +705,7 @@ static void apply_magic_armour(struct object *obj, int level, int power)
  * Wipe an object clean and make it a standard object of the specified kind.
  */
 void object_prep(struct object *obj, struct object_kind *k, int lev,
-				 aspect rand_aspect)
+		enum aspect rand_aspect)
 {
 	int i;
 

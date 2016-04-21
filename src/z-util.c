@@ -23,7 +23,7 @@
 /**
  * Convenient storage of the program name
  */
-char *argv0 = NULL;
+char *argv0;
 
 /**
  * Hook for platform-specific wide character handling
@@ -38,10 +38,14 @@ size_t (*text_mbcs_hook)(wchar_t *dest, const char *src, int n) = NULL;
 size_t utf8_strlen(char *s)
 {
 	size_t i = 0, j = 0;
+
 	while (s[i]) {
-		if ((s[i] & 0xc0) != 0x80) j++;
+		if ((s[i] & 0xc0) != 0x80)
+			j++;
+
 		i++;
 	}
+
 	return j;
 }
 
@@ -83,10 +87,9 @@ int my_stricmp(const char *s1, const char *s2)
 	/* Just loop */
 	while (true) {
 		/* We've reached the end of both strings simultaneously */
-		if ((*s1 == 0) && (*s2 == 0)) {
+		if ((*s1 == 0) && (*s2 == 0))
 			/* We're still here, so s1 and s2 are equal */
-			return (0);
-		}
+			return 0;
 
 		ch1 = toupper((unsigned char) *s1);
 		ch2 = toupper((unsigned char) *s2);
@@ -116,9 +119,15 @@ int my_strnicmp(const char *a, const char *b, int n)
 	for (s1 = a, s2 = b; n > 0; s1++, s2++, n--) {
 		z1 = toupper((unsigned char)*s1);
 		z2 = toupper((unsigned char)*s2);
-		if (z1 < z2) return (-1);
-		if (z1 > z2) return (1);
-		if (!z1) return (0);
+
+		if (z1 < z2)
+			return -1;
+
+		if (z1 > z2)
+			return 1;
+
+		if (!z1)
+			return 0;
 	}
 
 	return 0;
@@ -137,21 +146,26 @@ char *my_stristr(const char *string, const char *pattern)
 
 	for (start = (char *)string; *start != 0; start++) {
 		/* Find start of pattern in string */
-		for ( ; ((*start != 0) && (toupper((unsigned char)*start) != toupper((unsigned char)*pattern))); start++)
-			;
+		while ((*start != 0) &&
+		       (toupper((unsigned char)*start) !=
+			toupper((unsigned char)*pattern))) {
+			start++;
+			}
+
 		if (*start == 0)
 			return NULL;
 
 		pptr = (const char *)pattern;
 		sptr = (const char *)start;
 
-		while (toupper((unsigned char)*sptr) == toupper((unsigned char)*pptr)) {
+		while (toupper((unsigned char) *sptr) ==
+		       toupper((unsigned char) *pptr)) {
 			sptr++;
 			pptr++;
 
 			/* If end of pattern then pattern was found */
 			if (*pptr == 0)
-				return (start);
+				return start;
 		}
 	}
 
@@ -175,10 +189,12 @@ size_t my_strcpy(char *buf, const char *src, size_t bufsize)
 	size_t ret = len;
 
 	/* Paranoia */
-	if (bufsize == 0) return ret;
+	if (bufsize == 0)
+		return ret;
 
 	/* Truncate */
-	if (len >= bufsize) len = bufsize - 1;
+	if (len >= bufsize)
+		len = bufsize - 1;
 
 	/* Copy the string and terminate it */
 	(void)memcpy(buf, src, len);
@@ -206,13 +222,12 @@ size_t my_strcat(char *buf, const char *src, size_t bufsize)
 	size_t dlen = strlen(buf);
 
 	/* Is there room left in the buffer? */
-	if (dlen < bufsize - 1) {
+	if (dlen < bufsize - 1)
 		/* Append as much as possible  */
 		return (dlen + my_strcpy(buf + dlen, src, bufsize - dlen));
-	} else {
-		/* Return without appending */
-		return (dlen + strlen(src));
-	}
+
+	/* Return without appending */
+	return (dlen + strlen(src));
 }
 
 /**
@@ -244,7 +259,8 @@ bool suffix(const char *s, const char *t)
 	size_t slen = strlen(s);
 
 	/* Check for incompatible lengths */
-	if (tlen > slen) return (false);
+	if (tlen > slen)
+		return false;
 
 	/* Compare "t" to the end of "s" */
 	return (!strcmp(s + slen - tlen, t));
@@ -257,14 +273,14 @@ bool suffix(const char *s, const char *t)
 bool prefix(const char *s, const char *t)
 {
 	/* Scan "t" */
-	while (*t)
-	{
+	while (*t) {
 		/* Compare content and length */
-		if (*t++ != *s++) return (false);
+		if (*t++ != *s++)
+			return false;
 	}
 
 	/* Matched, we have a prefix */
-	return (true);
+	return true;
 }
 
 
@@ -274,29 +290,28 @@ bool prefix(const char *s, const char *t)
 bool prefix_i(const char *s, const char *t)
 {
 	/* Scan "t" */
-	while (*t)
-	{
+	while (*t) {
 		if (toupper((unsigned char)*t) != toupper((unsigned char)*s))
-			return (false);
-		else
-		{
-			t++;
-			s++;
-		}
+			return false;
+
+		t++;
+		s++;
 	}
 
 	/* Matched, we have a prefix */
-	return (true);
+	return true;
 }
 
 /**
  * Rewrite string s in-place "skipping" every occurrence of character c except
  * those preceded by character e
  */
-void strskip(char *s, const char c, const char e) {
+void strskip(char *s, const char c, const char e)
+{
 	char *in = s;
 	char *out = s;
 	bool escapeseen = false;
+
 	while (*in) {
 		if ((*in != c) && ((*in != e) || escapeseen)) {
 			if (escapeseen) {
@@ -304,6 +319,7 @@ void strskip(char *s, const char c, const char e) {
 				*out = e;
 				out++;
 			}
+
 			*out = *in;
 			out++;
 			escapeseen = false;
@@ -316,8 +332,10 @@ void strskip(char *s, const char c, const char e) {
 			out++;
 			escapeseen = false;
 		}
+
 		in++;
 	}
+
 	*out = 0;
 }
 
@@ -325,10 +343,12 @@ void strskip(char *s, const char c, const char e) {
  * Rewrite string s in-place removing escape character c
  * note that pairs of c will leave one instance of c in out
  */
-void strescape(char *s, const char c) {
+void strescape(char *s, const char c)
+{
 	char *in = s;
 	char *out = s;
 	bool escapenext = false;
+
 	while (*in) {
 		if (*in != c || escapenext) {
 			*out = *in;
@@ -339,19 +359,23 @@ void strescape(char *s, const char c) {
 		}
 		in++;
 	}
+
 	*out = 0;
 }
 
 /**
  * returns true if string only contains spaces
  */
-bool contains_only_spaces(const char* s){
-	char spaces[]=" \t";
-	while(*s){
-		if(strchr(spaces,*s)!=NULL)
+bool contains_only_spaces(const char *s)
+{
+	char spaces[] = " \t";
+
+	while (*s) {
+		if (strchr(spaces, *s) != NULL)
 			return false;
 		s++;
 	}
+
 	return true;
 }
 
@@ -360,19 +384,18 @@ bool contains_only_spaces(const char* s){
  */
 bool is_a_vowel(int ch)
 {
-	switch (tolower((unsigned char) ch))
-	{
-		case 'a':
-		case 'e':
-		case 'i':
-		case 'o':
-		case 'u':
+	switch (tolower((unsigned char) ch)) {
+	case 'a':
+	case 'e':
+	case 'i':
+	case 'o':
+	case 'u':
 		{
-			return (true);
+			return true;
 		}
 	}
 
-	return (false);
+	return false;
 }
 
 /**
@@ -398,10 +421,11 @@ void (*plog_aux)(const char *) = NULL;
 void plog(const char *str)
 {
 	/* Use the "alternative" function if possible */
-	if (plog_aux) (*plog_aux)(str);
-
-	/* Just do a labeled fprintf to stderr */
-	else (void)(fprintf(stderr, "%s: %s\n", argv0 ? argv0 : "?", str));
+	if (plog_aux)
+		(*plog_aux)(str);
+	else
+		/* Just do a labeled fprintf to stderr */
+		(void)(fprintf(stderr, "%s: %s\n", argv0 ? argv0 : "?", str));
 }
 
 
@@ -419,10 +443,12 @@ void (*quit_aux)(const char *) = NULL;
 void quit(const char *str)
 {
 	/* Attempt to use the aux function */
-	if (quit_aux) (*quit_aux)(str);
+	if (quit_aux)
+		(*quit_aux)(str);
 
 	/* Success */
-	if (!str) exit(EXIT_SUCCESS);
+	if (!str)
+		exit(EXIT_SUCCESS);
 
 	/* Send the string to plog() */
 	plog(str);
@@ -438,7 +464,8 @@ int mean(int *nums, int size)
 {
 	int i, total = 0;
 
-	for(i = 0; i < size; i++) total += nums[i];
+	for (i = 0; i < size; i++)
+		total += nums[i];
 
 	return total / size;
 }
@@ -448,13 +475,12 @@ int mean(int *nums, int size)
  */
 int variance(int *nums, int size)
 {
-	int i, avg, total = 0;
+	int delta, i, avg, total = 0;
 
 	avg = mean(nums, size);
 
-	for(i = 0; i < size; i++)
-	{
-		int delta = nums[i] - avg;
+	for (i = 0; i < size; i++) {
+		delta = nums[i] - avg;
 		total += delta * delta;
 	}
 
@@ -472,8 +498,7 @@ u32b djb2_hash(const char *str)
 	u32b hash = 5381;
 	int c = *str;
 
-	while (c)
-	{
+	while (c) {
 		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 		c = *++str;
 	}

@@ -1438,7 +1438,7 @@ void display_object_recall(struct object *obj)
 {
 	char header[120];
 
-	textblock *tb = object_info(obj, OINFO_NONE);
+	struct textblock *tb = object_info(obj, OINFO_NONE);
 	object_desc(header, sizeof(header), obj, ODESC_PREFIX | ODESC_FULL);
 
 	clear_from(0);
@@ -1472,7 +1472,7 @@ void display_object_kind_recall(struct object_kind *kind)
 void display_object_recall_interactive(struct object *obj)
 {
 	char header[120];
-	textblock *tb;
+	struct textblock *tb;
 
 	event_signal(EVENT_MESSAGE_FLUSH);
 
@@ -1489,7 +1489,7 @@ void textui_obj_examine(void)
 {
 	char header[120];
 
-	textblock *tb;
+	struct textblock *tb;
 	region area = { 0, 0, 0, 0 };
 
 	struct object *obj;

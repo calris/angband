@@ -20,7 +20,6 @@
 #include "z-util.h"
 #include "z-virt.h"
 
-
 /**
  * Here is some information about the routines in this file.
  *
@@ -129,7 +128,6 @@
  * the first "i" characters of "txt", left justified.
  */
 
-
 /**
  * Basic "vararg" format function.
  *
@@ -202,6 +200,17 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 	/* Resulting string */
 	char tmp[1024];
 
+	/* Temporary storage for various types of arguments */
+	int iarg;
+	long larg;
+	unsigned long ularg;
+	unsigned int uiarg;
+	double darg;
+	void *vptrarg;
+	const wchar_t *wcharg;
+	const char *charg;
+	char arg2[1024];
+
 	assert(max);
 	assert(fmt);
 
@@ -214,12 +223,14 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 	/* Scan the format string */
 	while (true) {
 		/* All done */
-		if (!*s) break;
+		if (!*s)
+			break;
 
 		/* Normal character */
 		if (*s != '%') {
 			/* Check total length */
-			if (n == max-1) break;
+			if (n == max-1)
+				break;
 
 			/* Save the character */
 			buf[n++] = *s++;
@@ -234,7 +245,8 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 		/* Pre-process "%%" */
 		if (*s == '%') {
 			/* Check total length */
-			if (n == max-1) break;
+			if (n == max-1)
+				break;
 
 			/* Save the percent */
 			buf[n++] = '%';
@@ -263,7 +275,6 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 			continue;
 		}
 
-
 		/* Begin the "aux" string */
 		q = 0;
 
@@ -280,7 +291,7 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 				buf[0] = '\0';
 
 				/* Return "error" */
-				return (0);
+				return 0;
 			}
 
 			/* Error -- format sequence may be too long */
@@ -289,7 +300,7 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 				buf[0] = '\0';
 
 				/* Return "error" */
-				return (0);
+				return 0;
 			}
 
 			/* Handle "alphabetic" or "non-alphabetic"chars */
@@ -305,11 +316,17 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 					/* Save the character */
 					aux[q++] = *s++;
 
-					/* Stop processing the format sequence */
+					/*
+					 * Stop processing the format
+					 * sequence
+					 */
 					break;
 				}
 			} else {
-				/* Hack -- Handle 'star' (for "variable length" argument) */
+				/*
+				 * Hack -- Handle 'star' (for "variable length"
+				 * argument)
+				 */
 				if (*s == '*') {
 					int arg;
 
@@ -317,15 +334,22 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 					arg = va_arg(vp, int);
 
 					/* Hack -- append the "length" */
-					snprintf(aux + q, sizeof(aux) - q, "%d", arg);
+					snprintf(aux + q,
+						 sizeof(aux) - q,
+						 "%d",
+						 arg);
 
 					/* Hack -- accept the "length" */
-					while (aux[q]) q++;
+					while (aux[q])
+						q++;
 
 					/* Skip the "*" */
 					s++;
 				} else {
-					/* Save the normal character (digits, "-", "+", ".", etc) */
+					/*
+					 * Save the normal character
+					 * (digits, "-", "+", ".", etc)
+					 */
 					aux[q++] = *s++;
 				}
 			}
@@ -339,199 +363,176 @@ size_t vstrnfmt(char *buf, size_t max, const char *fmt, va_list vp)
 
 		/* Process the "format" symbol */
 		switch (aux[q - 1]) {
-			/* Simple Character -- standard format */
-			case 'c':
-			{
-				int arg;
+		/* Simple Character -- standard format */
+		case 'c':
+			/* Get the next argument */
+			iarg = va_arg(vp, int);
 
+			/* Format the argument */
+			snprintf(tmp, sizeof(tmp), aux, iarg);
+
+			/* Done */
+			break;
+
+		/* Signed Integers -- standard format */
+		case 'd':
+		case 'i':
+			if (do_long) {
 				/* Get the next argument */
-				arg = va_arg(vp, int);
+				larg = va_arg(vp, long);
 
 				/* Format the argument */
-				snprintf(tmp, sizeof(tmp), aux, arg);
-
-				/* Done */
-				break;
-			}
-
-			/* Signed Integers -- standard format */
-			case 'd': case 'i':
-			{
-				if (do_long) {
-					long arg;
-
-					/* Get the next argument */
-					arg = va_arg(vp, long);
-
-					/* Format the argument */
-					snprintf(tmp, sizeof(tmp), aux, arg);
-				} else {
-					int arg;
-
-					/* Get the next argument */
-					arg = va_arg(vp, int);
-
-					/* Format the argument */
-					snprintf(tmp, sizeof(tmp), aux, arg);
-				}
-
-				/* Done */
-				break;
-			}
-
-			/* Unsigned Integers -- various formats */
-			case 'u': case 'o': case 'x': case 'X':
-			{
-				if (do_long) {
-					unsigned long arg;
-
-					/* Get the next argument */
-					arg = va_arg(vp, unsigned long);
-
-					/* Format the argument */
-					snprintf(tmp, sizeof(tmp), aux, arg);
-				} else {
-					unsigned int arg;
-
-					/* Get the next argument */
-					arg = va_arg(vp, unsigned int);
-
-					/* Format the argument */
-					snprintf(tmp, sizeof(tmp), aux, arg);
-				}
-
-				/* Done */
-				break;
-			}
-
-			/* Floating Point -- various formats */
-			case 'f':
-			case 'e': case 'E':
-			case 'g': case 'G':
-			{
-				double arg;
-
+				snprintf(tmp, sizeof(tmp), aux, larg);
+			} else {
 				/* Get the next argument */
-				arg = va_arg(vp, double);
+				iarg = va_arg(vp, int);
 
 				/* Format the argument */
-				snprintf(tmp, sizeof(tmp), aux, arg);
-
-				/* Done */
-				break;
+				snprintf(tmp, sizeof(tmp), aux, iarg);
 			}
 
-			/* Pointer -- implementation varies */
-			case 'p':
-			{
-				void *arg;
+			/* Done */
+			break;
 
+		/* Unsigned Integers -- various formats */
+		case 'u':
+		case 'o':
+		case 'x':
+		case 'X':
+			if (do_long) {
 				/* Get the next argument */
-				arg = va_arg(vp, void*);
+				ularg = va_arg(vp, unsigned long);
 
 				/* Format the argument */
-				snprintf(tmp, sizeof(tmp), aux, arg);
+				snprintf(tmp, sizeof(tmp), aux, ularg);
+			} else {
+				/* Get the next argument */
+				uiarg = va_arg(vp, unsigned int);
 
-				/* Done */
-				break;
+				/* Format the argument */
+				snprintf(tmp, sizeof(tmp), aux, uiarg);
 			}
 
-			/* String */
-			case 's':
-			{
-				if (do_long) {
-					const wchar_t *arg;
-					char arg2[1024];
+			/* Done */
+			break;
 
-					/* XXX There is a big bug here: if one
-					 * passes "%.0s" to strnfmt, then really we
-					 * should not dereference the arg at all.
-					 * But it does.  See bug #666.
-					 */
+		/* Floating Point -- various formats */
+		case 'f':
+		case 'e':
+		case 'E':
+		case 'g':
+		case 'G':
+			/* Get the next argument */
+			darg = va_arg(vp, double);
 
-					/* Get the next argument */
-					arg = va_arg(vp, const wchar_t *);
+			/* Format the argument */
+			snprintf(tmp, sizeof(tmp), aux, darg);
 
-					/* Hack -- convert NULL to EMPTY */
-					if (!arg) arg = L"";
+			/* Done */
+			break;
 
-					/* Prevent buffer overflows and convert string to char */
-					/* this really should use a wcstombs type function */
-					len = wcslen(arg);
-					if (len >= 768) {
-						len = 767;
-					}
-					for (i = 0; i < len; ++i) {
-						arg2[i] = (char)arg[i];
-					}
-					arg2[len] = '\0';
+		/* Pointer -- implementation varies */
+		case 'p':
+			/* Get the next argument */
+			vptrarg = va_arg(vp, void*);
 
-					/* Remove the l from aux, since we no longer have wchar_t
-					 * as input */
-					aux[q-2] = 's';
-					aux[q-1] = '\0';
+			/* Format the argument */
+			snprintf(tmp, sizeof(tmp), aux, vptrarg);
 
-					/* Format the argument */
-					snprintf(tmp, sizeof(tmp), aux, arg2);
+			/* Done */
+			break;
 
-					/* Done */
-					break;
-				} else {
-					const char *arg;
-					char arg2[1024];
+		/* String */
+		case 's':
+			if (do_long) {
+				/* XXX There is a big bug here: if one
+				 * passes "%.0s" to strnfmt, then really we
+				 * should not dereference the arg at all.
+				 * But it does.  See bug #666.
+				 */
 
-					/* XXX There is a big bug here: if one
-					 * passes "%.0s" to strnfmt, then really we
-					 * should not dereference the arg at all.
-					 * But it does.  See bug #666.
-					 */
+				/* Get the next argument */
+				wcharg = va_arg(vp, const wchar_t *);
 
-					/* Get the next argument */
-					arg = va_arg(vp, const char *);
+				/* Hack -- convert NULL to EMPTY */
+				if (!wcharg)
+					wcharg = L"";
 
-					/* Hack -- convert NULL to EMPTY */
-					if (!arg) arg = "";
+				/*
+				 * Prevent buffer overflows and convert
+				 * string to char. This really should use a
+				 * wcstombs type function
+				 */
+				len = wcslen(wcharg);
 
-					/* Prevent buffer overflows */
-					(void)my_strcpy(arg2, arg, sizeof(arg2));
+				if (len >= 768)
+					len = 767;
 
-					/* Format the argument */
-					snprintf(tmp, sizeof(tmp), aux, arg2);
+				for (i = 0; i < len; ++i)
+					arg2[i] = (char)wcharg[i];
 
-					/* Done */
-					break;
-				}
+				arg2[len] = '\0';
+
+				/*
+				 * Remove the l from aux, since we no longer
+				 * have wchar_t as input
+				 */
+				aux[q-2] = 's';
+				aux[q-1] = '\0';
+
+				/* Format the argument */
+				snprintf(tmp, sizeof(tmp), aux, arg2);
+			} else {
+				/*
+				 * XXX There is a big bug here: if one
+				 * passes "%.0s" to strnfmt, then really we
+				 * should not dereference the arg at all.
+				 * But it does.  See bug #666.
+				 */
+
+				/* Get the next argument */
+				charg = va_arg(vp, const char *);
+
+				/* Hack -- convert NULL to EMPTY */
+				if (!charg)
+					charg = "";
+
+				/* Prevent buffer overflows */
+				(void)my_strcpy(arg2, charg, sizeof(arg2));
+
+				/* Format the argument */
+				snprintf(tmp, sizeof(tmp), aux, arg2);
 			}
 
-			/* Oops */
-			default:
-			{
-				/* Error -- illegal format char */
-				buf[0] = '\0';
+			/* Done */
+			break;
 
-				/* Return "error" */
-				return (0);
-			}
+		/* Oops */
+		default:
+			/* Error -- illegal format char */
+			buf[0] = '\0';
+
+			/* Return "error" */
+			return 0;
 		}
 
 		/* Now append "tmp" to "buf" */
 		for (q = 0; tmp[q]; q++) {
 			/* Check total length */
-			if (n == max-1) break;
+			if (n == (max - 1))
+				break;
 
 			/* Save the character */
 			buf[n++] = tmp[q];
 		}
 	}
 
-
 	/* Terminate buffer */
 	buf[n] = '\0';
 
 	/* Return length */
-	return (n);
+	return n;
 }
-
 
 /**
  * Add a formatted string to the end of a string
@@ -543,7 +544,8 @@ void strnfcat(char *str, size_t max, size_t *end, const char *fmt, ...)
 	va_list vp;
 
 	/* Paranoia */
-	if (*end >= max) return;
+	if (*end >= max)
+		return;
 
 	/* Begin the Varargs Stuff */
 	va_start(vp, fmt);
@@ -558,10 +560,8 @@ void strnfcat(char *str, size_t max, size_t *end, const char *fmt, ...)
 	*end += len;
 }
 
-
-static char *format_buf = NULL;
-static size_t format_len = 0;
-
+static char *format_buf;
+static size_t format_len;
 
 /**
  * Do a vstrnfmt (see above) into a (growable) static buffer.
@@ -577,7 +577,8 @@ char *vformat(const char *fmt, va_list vp)
 	}
 
 	/* Null format yields last result */
-	if (!fmt) return (format_buf);
+	if (!fmt)
+		return format_buf;
 
 	/* Keep going until successful */
 	while (1) {
@@ -590,7 +591,8 @@ char *vformat(const char *fmt, va_list vp)
 		va_end(args);
 
 		/* Success */
-		if (len < format_len-1) break;
+		if (len < format_len-1)
+			break;
 
 		/* Grow the buffer */
 		format_len = format_len * 2;
@@ -598,14 +600,13 @@ char *vformat(const char *fmt, va_list vp)
 	}
 
 	/* Return the new buffer */
-	return (format_buf);
+	return format_buf;
 }
 
 void vformat_kill(void)
 {
 	mem_free(format_buf);
 }
-
 
 /**
  * Do a vstrnfmt (see above) into a buffer of a given size.
@@ -626,9 +627,8 @@ size_t strnfmt(char *buf, size_t max, const char *fmt, ...)
 	va_end(vp);
 
 	/* Return the number of bytes written */
-	return (len);
+	return len;
 }
-
 
 /**
  * Do a vstrnfmt() into (see above) into a (growable) static buffer.
@@ -651,11 +651,8 @@ char *format(const char *fmt, ...)
 	va_end(vp);
 
 	/* Return the result */
-	return (res);
+	return res;
 }
-
-
-
 
 /**
  * Vararg interface to plog()
@@ -677,8 +674,6 @@ void plog_fmt(const char *fmt, ...)
 	/* Call plog */
 	plog(res);
 }
-
-
 
 /**
  * Vararg interface to quit()

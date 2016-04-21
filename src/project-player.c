@@ -37,7 +37,7 @@
  * \param dam_aspect is the calc we want (min, avg, max, random).
  * \param resist is the degree of resistance (-1 = vuln, 3 = immune).
  */
-int adjust_dam(struct player *p, int type, int dam, aspect dam_aspect, int resist)
+int adjust_dam(struct player *p, int type, int dam, enum aspect dam_aspect, int resist)
 {
 	int i, denom = 0;
 

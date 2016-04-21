@@ -38,17 +38,15 @@ struct textblock {
 	size_t size;
 };
 
-
-
 /**
  * Create a new textblock object and return it.
  */
-textblock *textblock_new(void)
+struct textblock *textblock_new(void)
 {
-	textblock *tb = mem_zalloc(sizeof *tb);
+	struct textblock *tb = mem_zalloc(sizeof(*tb));
 
 	tb->size = TEXTBLOCK_LEN_INITIAL;
-	tb->text = mem_zalloc(tb->size * sizeof *tb->text);
+	tb->text = mem_zalloc(tb->size * sizeof(*tb->text));
 	tb->attrs = mem_zalloc(tb->size);
 
 	return tb;
@@ -57,7 +55,7 @@ textblock *textblock_new(void)
 /**
  * Free a textblock object.
  */
-void textblock_free(textblock *tb)
+void textblock_free(struct textblock *tb)
 {
 	mem_free(tb->text);
 	mem_free(tb->attrs);
@@ -71,20 +69,22 @@ void textblock_free(textblock *tb)
  * \param tb is the textblock we need to resize.
  * \param additional_size is how many characters we want to add.
  */
-void textblock_resize_if_needed(textblock *tb, size_t additional_size)
+void textblock_resize_if_needed(struct textblock *tb, size_t additional_size)
 {
 	size_t remaining = tb->size - tb->strlen;
 
 	/* If we need more room, reallocate it */
 	if (remaining < additional_size) {
 		tb->size = TEXTBLOCK_LEN_INCR(tb->strlen + additional_size);
-		tb->text = mem_realloc(tb->text, tb->size * sizeof *tb->text);
+		tb->text = mem_realloc(tb->text, tb->size * sizeof(*tb->text));
 		tb->attrs = mem_realloc(tb->attrs, tb->size);
 	}
 }
 
-static void textblock_vappend_c(textblock *tb, byte attr, const char *fmt,
-		va_list vp)
+static void textblock_vappend_c(struct textblock *tb,
+				byte attr,
+				const char *fmt,
+				va_list vp)
 {
 	size_t temp_len = TEXTBLOCK_LEN_INITIAL;
 	char *temp_space = mem_zalloc(temp_len);
@@ -101,18 +101,22 @@ static void textblock_vappend_c(textblock *tb, byte attr, const char *fmt,
 		VA_COPY(args, vp);
 		len = vstrnfmt(temp_space, temp_len, fmt, args);
 		va_end(args);
-		if (len < temp_len - 1) {
+
+		if (len < temp_len - 1)
 			/* Not using all space, therefore it completed */
 			break;
-		}
 
 		temp_len = TEXTBLOCK_LEN_INCR(temp_len);
-		temp_space = mem_realloc(temp_space, temp_len * sizeof *temp_space);
+		temp_space = mem_realloc(temp_space,
+					 temp_len * sizeof(*temp_space));
 	}
 
 	/* Get extent of addition in wide chars */
 	new_length = text_mbstowcs(NULL, temp_space, 0);
-	assert(new_length >= 0); /* If this fails, the string was badly formed */
+
+	/* If this fails, the string was badly formed */
+	assert(new_length >= 0);
+
 	textblock_resize_if_needed(tb, new_length);
 
 	/* Convert to wide chars, into the text block buffer */
@@ -125,7 +129,7 @@ static void textblock_vappend_c(textblock *tb, byte attr, const char *fmt,
 /**
  * Add a graphics tile to a text block.
  */
-void textblock_append_pict(textblock *tb, byte attr, int c)
+void textblock_append_pict(struct textblock *tb, byte attr, int c)
 {
 	textblock_resize_if_needed(tb, 1);
 	tb->text[tb->strlen] = (wchar_t)c;
@@ -145,18 +149,19 @@ void textblock_append_pict(textblock *tb, byte attr, int c)
  * \param tb is the textblock we are appending to.
  * \param utf8_string is the C string that is encoded as UTF-8.
  */
-void textblock_append_utf8(textblock *tb, const char *utf8_string)
+void textblock_append_utf8(struct textblock *tb, const char *utf8_string)
 {
 	size_t i;
 	size_t new_length = strlen(utf8_string);
 
 	textblock_resize_if_needed(tb, new_length);
 
-	/* Append each UTF-8 char one at a time, so we don't trigger any
-	 * conversions (which would require multiple bytes). */
-	for (i = 0; i < new_length; i++) {
+	/*
+	 * Append each UTF-8 char one at a time, so we don't trigger any
+	 * conversions (which would require multiple bytes).
+	 */
+	for (i = 0; i < new_length; i++)
 		tb->text[tb->strlen + i] = (wchar_t)utf8_string[i];
-	}
 
 	memset(tb->attrs + tb->strlen, COLOUR_WHITE, new_length);
 	tb->strlen += new_length;
@@ -165,26 +170,24 @@ void textblock_append_utf8(textblock *tb, const char *utf8_string)
 /**
  * Add text to a text block, formatted.
  */
-void textblock_append(textblock *tb, const char *fmt, ...)
+void textblock_append(struct textblock *tb, const char *fmt, ...)
 {
 	va_list vp;
+
 	va_start(vp, fmt);
-
 	textblock_vappend_c(tb, COLOUR_WHITE, fmt, vp);
-
 	va_end(vp);
 }
 
 /**
  * Add coloured text to a text block, formatted.
  */
-void textblock_append_c(textblock *tb, byte attr, const char *fmt, ...)
+void textblock_append_c(struct textblock *tb, byte attr, const char *fmt, ...)
 {
 	va_list vp;
+
 	va_start(vp, fmt);
-
 	textblock_vappend_c(tb, attr, fmt, vp);
-
 	va_end(vp);
 
 }
@@ -192,7 +195,7 @@ void textblock_append_c(textblock *tb, byte attr, const char *fmt, ...)
 /**
  * Return a pointer to the text inputted thus far.
  */
-const wchar_t *textblock_text(textblock *tb)
+const wchar_t *textblock_text(struct textblock *tb)
 {
 	return tb->text;
 }
@@ -200,7 +203,7 @@ const wchar_t *textblock_text(textblock *tb)
 /**
  * Return a pointer to the text attrs.
  */
-const byte *textblock_attrs(textblock *tb)
+const byte *textblock_attrs(struct textblock *tb)
 {
 	return tb->attrs;
 }
@@ -210,7 +213,10 @@ static void new_line(size_t **line_starts, size_t **line_lengths,
 		size_t start, size_t len)
 {
 	if (*cur_line == *n_lines) {
-		/* this number is not arbitrary: it's the height of a "standard" term */
+		/*
+		 * This number is not arbitrary: it's the height of a
+		 * "standard" term
+		 */
 		(*n_lines) += 24;
 
 		*line_starts = mem_realloc(*line_starts,
@@ -226,8 +232,8 @@ static void new_line(size_t **line_starts, size_t **line_lengths,
 }
 
 /**
- * Given a certain width, split a textblock into wrapped lines of text. Trailing
- * empty lines are trimmed.
+ * Given a certain width, split a textblock into wrapped lines of text.
+ * Trailing empty lines are trimmed.
  *
  * \param tb The textblock to wrap.
  * \param line_starts On return, an array (indexed by line number) of character
@@ -237,22 +243,25 @@ static void new_line(size_t **line_starts, size_t **line_lengths,
  * \param width The maximum permitted width of each line.
  * \return Number of lines in output.
  */
-size_t textblock_calculate_lines(textblock *tb, size_t **line_starts, size_t **line_lengths, size_t width)
+size_t textblock_calculate_lines(struct textblock *tb,
+				 size_t **line_starts,
+				 size_t **line_lengths,
+				 size_t width)
 {
 	const wchar_t *text = NULL;
 	size_t text_offset = 0;
 	size_t alloc_lines = 0;
 	size_t total_lines = 0;
-	size_t current_line_index = 0;
-	size_t current_line_length = 0;
-	size_t breaking_char_offset = 0;
+	size_t curr_line_idx = 0;
+	size_t curr_line_len = 0;
+	size_t break_char_off = 0;
 
-	if (tb == NULL || line_starts == NULL || line_lengths == NULL || width == 0)
+	if (!tb || !line_starts || !line_lengths || !width)
 		return 0;
 
 	text = textblock_text(tb);
 
-	if (text == NULL || tb->strlen == 0)
+	if (!text || !tb->strlen)
 		return 0;
 
 	/* Start a line, since we have at least one. */
@@ -260,52 +269,74 @@ size_t textblock_calculate_lines(textblock *tb, size_t **line_starts, size_t **l
 
 	while (text_offset < tb->strlen) {
 		if (text[text_offset] == L'\n') {
-			(*line_lengths)[current_line_index] = current_line_length;
-			new_line(line_starts, line_lengths, &alloc_lines, &total_lines, text_offset + 1, 0);
-			current_line_index++;
-			current_line_length = 0;
-		}
-		else if (text[text_offset] == L' ') {
-			breaking_char_offset = text_offset;
-			current_line_length++;
-		}
-		else {
-			current_line_length++;
+			(*line_lengths)[curr_line_idx] = curr_line_len;
+
+			new_line(line_starts,
+				 line_lengths,
+				 &alloc_lines,
+				 &total_lines,
+				 text_offset + 1,
+				 0);
+
+			curr_line_idx++;
+			curr_line_len = 0;
+		} else if (text[text_offset] == L' ') {
+			break_char_off = text_offset;
+			curr_line_len++;
+		} else {
+			curr_line_len++;
 		}
 
-		if (current_line_length == width) {
-			/* We're out of space on the line and need to break it. */
+		if (curr_line_len == width) {
+			/*
+			 * We're out of space on the line and need to
+			 * break it.
+			 */
+			size_t const curr_line_start = (*line_starts)[curr_line_idx];
+			size_t next_line_start_off = 0;
+			size_t adj_line_len = 0;
 
-			size_t const current_line_start = (*line_starts)[current_line_index];
-			size_t next_line_start_offset = 0;
-			size_t adjusted_line_length = 0;
-
-			if (breaking_char_offset > current_line_start) {
-				/* If we found a breaking character on the current line, break
-				 * there and start the next line on the next character. The loop
-				 * then backtracks to add the already-processed characters to
-				 * the next line. */
-				adjusted_line_length = breaking_char_offset - current_line_start;
-				next_line_start_offset = breaking_char_offset + 1;
-				text_offset = breaking_char_offset + 1;
-			}
-			else {
-				/* There was no breaking character on the current line, so we
-				 * just break at the current character. This can happen with a
-				 * word that takes up the whole line, for example. */
-				adjusted_line_length = width;
-				next_line_start_offset = text_offset + 1;
+			if (break_char_off > curr_line_start) {
+				/*
+				 * If we found a breaking character on the
+				 * current line, break there and start the
+				 * next line on the next character. The loop
+				 * then backtracks to add the already-
+				 * processed characters to the next line.
+				 */
+				adj_line_len = break_char_off - curr_line_start;
+				next_line_start_off = break_char_off + 1;
+				text_offset = break_char_off + 1;
+			} else {
+				/*
+				 * There was no breaking character on the
+				 * current line, so we just break at the
+				 * current character. This can happen with a
+				 * word that takes up the whole line, for
+				 * example.
+				 */
+				adj_line_len = width;
+				next_line_start_off = text_offset + 1;
 				text_offset++;
 			}
 
-			(*line_lengths)[current_line_index] = adjusted_line_length;
-			new_line(line_starts, line_lengths, &alloc_lines, &total_lines, next_line_start_offset, 0);
-			current_line_index++;
-			current_line_length = 0;
-		}
-		else {
-			/* There is still space on the line, so just add the character. */
-			(*line_lengths)[current_line_index] = current_line_length;
+			(*line_lengths)[curr_line_idx] = adj_line_len;
+
+			new_line(line_starts,
+				 line_lengths,
+				 &alloc_lines,
+				 &total_lines,
+				 next_line_start_off,
+				 0);
+
+			curr_line_idx++;
+			curr_line_len = 0;
+		} else {
+			/*
+			 * There is still space on the line, so just add the
+			 * character.
+			 */
+			(*line_lengths)[curr_line_idx] = curr_line_len;
 			text_offset++;
 		}
 	}
@@ -320,40 +351,45 @@ size_t textblock_calculate_lines(textblock *tb, size_t **line_starts, size_t **l
 /**
  * Output a textblock to file.
  */
-void textblock_to_file(textblock *tb, ang_file *f, int indent, int wrap_at)
+void textblock_to_file(struct textblock *tb,
+		       ang_file *f,
+		       int indent,
+		       int wrap_at)
 {
 	size_t *line_starts = NULL;
 	size_t *line_lengths = NULL;
-
 	size_t n_lines, i;
-
 	int width = wrap_at - indent;
+
 	assert(width > 0);
 
-	n_lines = textblock_calculate_lines(tb, &line_starts, &line_lengths, width);
+	n_lines = textblock_calculate_lines(tb,
+					    &line_starts,
+					    &line_lengths,
+					    width);
 
 	for (i = 0; i < n_lines; i++) {
-		/* For some reason, the %*c part of the format string was still
-		 * indenting, even when indent was zero */
+		/*
+		 * For some reason, the %*c part of the format string
+		 * was still indenting, even when indent was zero
+		 */
 		if (indent == 0)
-			file_putf(f, "%.*ls\n", line_lengths[i], tb->text + line_starts[i]);
+			file_putf(f,
+				  "%.*ls\n",
+				  line_lengths[i],
+				  tb->text + line_starts[i]);
 		else
-			file_putf(f, "%*c%.*ls\n", indent, ' ', line_lengths[i],
-					  tb->text + line_starts[i]);
+			file_putf(f,
+				  "%*c%.*ls\n",
+				  indent,
+				  ' ',
+				  line_lengths[i],
+				  tb->text + line_starts[i]);
 	}
 
 	mem_free(line_starts);
 	mem_free(line_lengths);
 }
-
-
-
-
-/**
- * ------------------------------------------------------------------------
- * text_out()
- * ------------------------------------------------------------------------ */
-
 
 /**
  * Function hook to output (colored) text to the screen or to a file.
@@ -364,24 +400,22 @@ void (*text_out_hook)(byte a, const char *str);
  * Hack -- Where to wrap the text when using text_out().  Use the default
  * value (for example the screen width) when 'text_out_wrap' is 0.
  */
-int text_out_wrap = 0;
+int text_out_wrap;
 
 /**
  * Hack -- Indentation for the text when using text_out().
  */
-int text_out_indent = 0;
+int text_out_indent;
 
 /**
  * Hack -- Padding after wrapping
  */
-int text_out_pad = 0;
-
+int text_out_pad;
 
 /**
  * Hack - the destination file for text_out_to_file.
  */
-ang_file *text_out_file = NULL;
-
+ang_file *text_out_file;
 
 /**
  * Write text to the given file and apply line-wrapping.
@@ -402,7 +436,7 @@ void text_out_to_file(byte a, const char *str)
 	char buf[1024];
 
 	/* Current position on the line */
-	static int pos = 0;
+	static int pos;
 
 	/* Wrap width */
 	int wrap = (text_out_wrap ? text_out_wrap : 75);
@@ -422,8 +456,10 @@ void text_out_to_file(byte a, const char *str)
 		int len = wrap - pos;
 		int l_space = -1;
 
-		/* In case we are already past the wrap point (which can happen with
-		 * punctuation at the end of the line), make sure we don't overrun.
+		/*
+		 * In case we are already past the wrap point (which can
+		 * happen with punctuation at the end of the line), make
+		 * sure we don't overrun.
 		 */
 		if (len < 0)
 			len = 0;
@@ -442,7 +478,8 @@ void text_out_to_file(byte a, const char *str)
 		/* Find length of line up to next newline or end-of-string */
 		while ((n < len) && !((s[n] == '\n') || (s[n] == '\0'))) {
 			/* Mark the most recent space in the string */
-			if (s[n] == ' ') l_space = n;
+			if (s[n] == ' ')
+				l_space = n;
 
 			/* Increment */
 			n++;
@@ -453,8 +490,13 @@ void text_out_to_file(byte a, const char *str)
 			/* If we are at the start of a new line */
 			if (pos == text_out_indent) {
 				len = n;
-			} else if ((s[0] == ' ') || (s[0] == ',') || (s[0] == '.')) {
-				/* HACK - Output punctuation at the end of the line */
+			} else if ((s[0] == ' ') ||
+				   (s[0] == ',') ||
+				   (s[0] == '.')) {
+				/*
+				 * HACK - Output punctuation at the end of
+				 * the line
+				 */
 				len = 1;
 			} else {
 				/* Begin a new line */
@@ -466,11 +508,12 @@ void text_out_to_file(byte a, const char *str)
 				continue;
 			}
 		} else {
-			/* Wrap at the newline */
-			if ((s[n] == '\n') || (s[n] == '\0')) len = n;
-
-			/* Wrap at the last space */
-			else len = l_space;
+			if ((s[n] == '\n') || (s[n] == '\0'))
+				/* Wrap at the newline */
+				len = n;
+			else
+				/* Wrap at the last space */
+				len = l_space;
 		}
 
 		/* Write that line to file */
@@ -481,10 +524,12 @@ void text_out_to_file(byte a, const char *str)
 		s += len;
 
 		/* If we are at the end of the string, end */
-		if (*s == '\0') return;
+		if (*s == '\0')
+			return;
 
 		/* Skip newlines */
-		if (*s == '\n') s++;
+		if (*s == '\n')
+			s++;
 
 		/* Begin a new line */
 		file_writec(text_out_file, '\n');
@@ -493,13 +538,10 @@ void text_out_to_file(byte a, const char *str)
 		pos = 0;
 
 		/* Skip whitespace */
-		while (*s == ' ') s++;
+		while (*s == ' ')
+			s++;
 	}
-
-	/* We are done */
-	return;
 }
-
 
 /**
  * Output text to the screen or to a file depending on the selected
@@ -522,7 +564,6 @@ void text_out(const char *fmt, ...)
 	/* Output now */
 	text_out_hook(COLOUR_WHITE, buf);
 }
-
 
 /**
  * Output text to the screen (in color) or to a file depending on the
@@ -562,23 +603,29 @@ void text_out_c(byte a, const char *fmt, ...)
  *
  * See text_out_e for an example of its use.
  */
-static bool next_section(const char *source, size_t init, const char **text,
-						 size_t *len, const char **tag, size_t *taglen,
-						 const char **end)
+static bool next_section(const char *source,
+			 size_t init,
+			 const char **text,
+			 size_t *len,
+			 const char **tag,
+			 size_t *taglen,
+			 const char **end)
 {
 	const char *next;
 
 	*tag = NULL;
 	*text = source + init;
-	if (*text[0] == '\0') return false;
+
+	if (*text[0] == '\0')
+		return false;
 
 	next = strchr(*text, '{');
-	while (next)
-	{
+
+	while (next) {
 		const char *s = next + 1;
 
 		while (*s && (isalpha((unsigned char) *s) ||
-					  isspace((unsigned char) *s)))
+			      isspace((unsigned char) *s)))
 			s++;
 
 		/* Woo!  valid opening tag thing */
@@ -587,7 +634,10 @@ static bool next_section(const char *source, size_t init, const char **text,
 
 			/* There's a closing thing, so it's valid. */
 			if (close) {
-				/* If this tag is at the start of the fragment */
+				/*
+				 * If this tag is at the start of the
+				 * fragment
+				 */
 				if (next == *text) {
 					*tag = *text + 1;
 					*taglen = s - *text - 1;
@@ -596,13 +646,19 @@ static bool next_section(const char *source, size_t init, const char **text,
 					*end = close + 3;
 					return true;
 				} else {
-					/* Otherwise return the chunk up to this */
+					/*
+					 * Otherwise return the chunk
+					 * up to this
+					 */
 					*len = next - *text;
 					*end = *text + *len;
 					return true;
 				}
 			} else {
-				/* No closing thing, therefore all one lump of text. */
+				/*
+				 * No closing thing, therefore all one lump
+				 * of text.
+				 */
 				*len = strlen(*text);
 				*end = *text + *len;
 				return true;
@@ -653,8 +709,8 @@ void text_out_e(const char *fmt, ...)
 
 	/* End the Varargs Stuff */
 	va_end(vp);
-
 	start = buf;
+
 	while (next_section(start, 0, &text, &textlen, &tag, &taglen, &next)) {
 		int a = -1;
 
@@ -669,7 +725,6 @@ void text_out_e(const char *fmt, ...)
 
 			memcpy(tagbuffer, tag, taglen);
 			tagbuffer[taglen] = '\0';
-
 			a = color_text_to_attr(tagbuffer);
 		}
 
@@ -683,7 +738,6 @@ void text_out_e(const char *fmt, ...)
 	}
 }
 
-
 /**
  * Write a text file from given input.
  *
@@ -694,7 +748,6 @@ errr text_lines_to_file(const char *path, text_writer writer)
 {
 	char new_fname[1024];
 	char old_fname[1024];
-
 	ang_file *new_file;
 
 	safe_setuid_grab();
@@ -705,6 +758,7 @@ errr text_lines_to_file(const char *path, text_writer writer)
 
 	/* Write new file */
 	new_file = file_open(new_fname, MODE_WRITE, FTYPE_TEXT);
+
 	if (!new_file) {
 		safe_setuid_drop();
 		return -1;
@@ -713,11 +767,11 @@ errr text_lines_to_file(const char *path, text_writer writer)
 	text_out_file = new_file;
 	writer(new_file);
 	text_out_file = NULL;
-
 	file_close(new_file);
 
 	/* Move files around */
 	strnfmt(old_fname, sizeof(old_fname), "%s.old", path);
+
 	if (!file_exists(path)) {
 		file_move(new_fname, path);
 	} else if (file_move(path, old_fname)) {

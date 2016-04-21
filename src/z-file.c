@@ -36,7 +36,7 @@
 # include <fcntl.h>
 #endif
 
-#if defined (HAVE_DIRENT_H) || defined (CYGWIN)
+#if defined(HAVE_DIRENT_H) || defined(CYGWIN)
 # include <sys/types.h>
 # include <dirent.h>
 #endif
@@ -46,9 +46,9 @@
 # include <sys/types.h>
 #endif
 
-#if defined (WINDOWS) && !defined (CYGWIN)
+#if defined(WINDOWS) && !defined(CYGWIN)
 # define my_mkdir(path, perms) mkdir(path)
-#elif defined(HAVE_MKDIR) || defined(MACH_O_CARBON) || defined (CYGWIN)
+#elif defined(HAVE_MKDIR) || defined(MACH_O_CARBON) || defined(CYGWIN)
 # define my_mkdir(path, perms) mkdir(path, perms)
 #else
 # define my_mkdir(path, perms) false
@@ -59,9 +59,6 @@
  */
 int player_uid;
 int player_egid;
-
-
-
 
 /**
  * Drop permissions
@@ -83,7 +80,6 @@ void safe_setuid_drop(void)
 #endif /* SETGID */
 }
 
-
 /**
  * Grab permissions
  */
@@ -103,9 +99,6 @@ void safe_setuid_grab(void)
 # endif
 #endif /* SETGID */
 }
-
-
-
 
 /**
  * Apply special system-specific processing before dealing with a filename.
@@ -136,20 +129,27 @@ static void path_process(char *buf, size_t len, size_t *cur_len,
 			int i;
 
 			/* Keep username a decent length */
-			if (s >= username + sizeof(user)) return;
+			if (s >= username + sizeof(user))
+				return;
 
-			for (i = 0; username < s; ++i) user[i] = *username++;
+			for (i = 0; username < s; ++i)
+				user[i] = *username++;
+
 			user[i] = '\0';
 			username = user;
 		}
 
 		/* Look up a user (or "current" user) */
 		pw = username[0] ? getpwnam(username) : getpwuid(getuid());
-		if (!pw) return;
+
+		if (!pw)
+			return;
 
 		/* Copy across */
 		strnfcat(buf, len, cur_len, "%s%s", pw->pw_dir, PATH_SEP);
-		if (s) strnfcat(buf, len, cur_len, "%s", s);
+
+		if (s)
+			strnfcat(buf, len, cur_len, "%s", s);
 	} else
 
 #endif /* defined(UNIX) */
@@ -197,9 +197,10 @@ size_t path_build(char *buf, size_t len, const char *base, const char *leaf)
 		return cur_len;
 	}
 
-
-	/* There is both a relative leafname and a base path from which it is
-	 * relative */
+	/*
+	 * There is both a relative leafname and a base path from which it is
+	 * relative
+	 */
 	path_process(buf, len, &cur_len, base);
 
 	if (!suffix(base, PATH_SEP)) {
@@ -231,12 +232,6 @@ size_t path_filename_index(const char *path)
 	return 0;
 }
 
-/**
- * ------------------------------------------------------------------------
- * File-handling API
- * ------------------------------------------------------------------------ */
-
-
 /* Some defines for compatibility between various build platforms */
 #ifndef S_IRUSR
 #define S_IRUSR S_IREAD
@@ -246,8 +241,10 @@ size_t path_filename_index(const char *path)
 #define S_IWUSR S_IWRITE
 #endif
 
-/* if the flag O_BINARY is not defined, it is not needed , but we still
- * need it defined so it will compile */
+/*
+ * If the flag O_BINARY is not defined, it is not needed , but we still
+ * need it defined so it will compile
+ */
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -258,16 +255,11 @@ FILE *fdopen(int handle, const char *mode);
 #endif
 
 /* Private structure to hold file pointers and useful info. */
-struct ang_file
-{
+struct ang_file {
 	FILE *fh;
 	char *fname;
 	file_mode mode;
 };
-
-
-
-/** Utility functions **/
 
 /**
  * Delete file 'fname'.
@@ -297,7 +289,6 @@ bool file_move(const char *fname, const char *newname)
 	return (rename(buf, aux) == 0);
 }
 
-
 /**
  * Decide whether a file exists or not.
  */
@@ -307,6 +298,7 @@ bool file_move(const char *fname, const char *newname)
 bool file_exists(const char *fname)
 {
 	struct stat st;
+
 	return (stat(fname, &st) == 0);
 }
 
@@ -321,8 +313,12 @@ bool file_exists(const char *fname)
 	my_strcpy(path, s, sizeof(path));
 
 	attrib = GetFileAttributes(path);
-	if (attrib == INVALID_FILE_NAME) return false;
-	if (attrib & FILE_ATTRIBUTE_DIRECTORY) return false;
+
+	if (attrib == INVALID_FILE_NAME)
+		return false;
+
+	if (attrib & FILE_ATTRIBUTE_DIRECTORY)
+		return false;
 
 	return true;
 }
@@ -333,8 +329,10 @@ bool file_exists(const char *fname)
 {
 	ang_file *f = file_open(fname, MODE_READ, 0);
 
-	if (f) file_close(f);
-	return (f ? true : false);
+	if (f)
+		file_close(f);
+
+	return f ? true : false;
 }
 
 #endif
@@ -348,22 +346,19 @@ bool file_newer(const char *first, const char *second)
 	struct stat stat1, stat2;
 
 	/* If the first doesn't exist, the first is not newer. */
-	if (stat(first, &stat1) != 0) return false;
+	if (stat(first, &stat1) != 0)
+		return false;
 
 	/* If the second doesn't exist, the first is always newer. */
-	if (stat(second, &stat2) != 0) return true;
+	if (stat(second, &stat2) != 0)
+		return true;
 
 	/* Compare modification times. */
-	return stat1.st_mtime > stat2.st_mtime ? true : false;
+	return (stat1.st_mtime > stat2.st_mtime ? true : false);
 #else /* HAVE_STAT */
 	return false;
 #endif /* !HAVE_STAT */
 }
-
-
-
-
-/** File-handle functions **/
 
 void (*file_open_hook)(const char *path, file_type ftype);
 
@@ -382,30 +377,35 @@ ang_file *file_open(const char *fname, file_mode mode, file_type ftype)
 	path_parse(buf, sizeof(buf), fname);
 
 	switch (mode) {
-		case MODE_WRITE: {
-			if (ftype == FTYPE_SAVE) {
-				/* open only if the file does not exist */
-				int fd;
-				fd = open(buf, O_CREAT | O_EXCL | O_WRONLY | O_BINARY, S_IRUSR | S_IWUSR);
-				if (fd < 0) {
-					/* there was some error */
-					f->fh = NULL;
-				} else {
-					f->fh = fdopen(fd, "wb");
-				}
-			} else {
-				f->fh = fopen(buf, "wb");
-			}
-			break;
+	case MODE_WRITE:
+		if (ftype == FTYPE_SAVE) {
+			/* open only if the file does not exist */
+			int fd;
+
+			fd = open(buf,
+				  O_CREAT | O_EXCL | O_WRONLY | O_BINARY,
+				  S_IRUSR | S_IWUSR);
+
+			/* Check for error */
+			if (fd < 0)
+				f->fh = NULL;
+			else
+				f->fh = fdopen(fd, "wb");
+		} else {
+			f->fh = fopen(buf, "wb");
 		}
-		case MODE_READ:
-			f->fh = fopen(buf, "rb");
-			break;
-		case MODE_APPEND:
-			f->fh = fopen(buf, "a+");
-			break;
-		default:
-			assert(0);
+		break;
+
+	case MODE_READ:
+		f->fh = fopen(buf, "rb");
+		break;
+
+	case MODE_APPEND:
+		f->fh = fopen(buf, "a+");
+		break;
+
+	default:
+		assert(0);
 	}
 
 	if (f->fh == NULL) {
@@ -422,7 +422,6 @@ ang_file *file_open(const char *fname, file_mode mode, file_type ftype)
 	return f;
 }
 
-
 /**
  * Close file handle 'f'.
  */
@@ -437,10 +436,6 @@ bool file_close(ang_file *f)
 	return true;
 }
 
-
-
-/** Locking functions **/
-
 /**
  * Lock a file using POSIX locks, on platforms where this is supported.
  */
@@ -448,6 +443,7 @@ void file_lock(ang_file *f)
 {
 #if defined(HAVE_FCNTL_H) && defined(UNIX)
 	struct flock lock;
+
 	lock.l_type = (f->mode == MODE_READ ? F_RDLCK : F_WRLCK);
 	lock.l_whence = SEEK_SET;
 	lock.l_start = 0;
@@ -464,6 +460,7 @@ void file_unlock(ang_file *f)
 {
 #if defined(HAVE_FCNTL_H) && defined(UNIX)
 	struct flock lock;
+
 	lock.l_type = F_UNLCK;
 	lock.l_whence = SEEK_SET;
 	lock.l_start = 0;
@@ -472,9 +469,6 @@ void file_unlock(ang_file *f)
 	fcntl(fileno(f->fh), F_SETLK, &lock);
 #endif /* HAVE_FCNTL_H && UNIX */
 }
-
-
-/** Byte-based IO and functions **/
 
 /**
  * Seek to location 'pos' in file 'f'.
@@ -527,15 +521,13 @@ bool file_write(ang_file *f, const char *buf, size_t n)
 	return fwrite(buf, 1, n, f->fh) == n;
 }
 
-/** Line-based IO **/
-
 /**
  * Read a line of text from file 'f' into buffer 'buf' of size 'n' bytes.
  *
  * Support both \r\n and \n as line endings, but not the outdated \r that used
  * to be used on Macs.  Replace non-printables with '?', and \ts with ' '.
  */
-#define TAB_COLUMNS 4
+#define TAB_COLS	4
 
 bool file_getl(ang_file *f, char *buf, size_t len)
 {
@@ -575,8 +567,10 @@ bool file_getl(ang_file *f, char *buf, size_t len)
 		/* Expand tabs */
 		if (c == '\t') {
 			/* Next tab stop */
-			size_t tabstop = ((i + TAB_COLUMNS) / TAB_COLUMNS) * TAB_COLUMNS;
-			if (tabstop >= len) break;
+			size_t tabstop = ((i + TAB_COLS) / TAB_COLS) * TAB_COLS;
+
+			if (tabstop >= len)
+				break;
 
 			/* Convert to spaces */
 			while (i < tabstop)
@@ -618,7 +612,8 @@ bool file_putf(ang_file *f, const char *fmt, ...)
 	va_list vp;
 	bool status;
 
-	if (!f) return false;
+	if (!f)
+		return false;
 
 	va_start(vp, fmt);
 	status = file_vputf(f, fmt, vp);
@@ -637,9 +632,11 @@ bool file_vputf(ang_file *f, const char *fmt, va_list vp)
 {
 	char buf[1024];
 
-	if (!f) return false;
+	if (!f)
+		return false;
 
 	(void)vstrnfmt(buf, sizeof(buf), fmt, vp);
+
 	return file_put(f, buf);
 }
 
@@ -648,6 +645,7 @@ bool dir_exists(const char *path)
 {
 	#ifdef HAVE_STAT
 	struct stat buf;
+
 	if (stat(path, &buf) != 0)
 		return false;
 	else if (buf.st_mode & S_IFDIR)
@@ -666,62 +664,61 @@ bool dir_create(const char *path)
 	char buf[512];
 
 	/* If the directory already exists then we're done */
-	if (dir_exists(path)) return true;
+	if (dir_exists(path))
+		return true;
 
 	#ifdef WINDOWS
 	/* If we're on windows, we need to skip past the "C:" part. */
-	if (isalpha(path[0]) && path[1] == ':') path += 2;
+	if (isalpha(path[0]) && path[1] == ':')
+		path += 2;
 	#endif
 
-	/* Iterate through the path looking for path segements. At each step,
-	 * create the path segment if it doesn't already exist. */
+	/*
+	 * Iterate through the path looking for path segements. At each step,
+	 * create the path segment if it doesn't already exist.
+	 */
 	for (ptr = path; *ptr; ptr++) {
 		if (*ptr == PATH_SEPC) {
 			/* Find the length of the parent path string */
 			size_t len = (size_t)(ptr - path);
 
 			/* Skip the initial slash */
-			if (len == 0) continue;
+			if (len == 0)
+				continue;
 
 			/* If this is a duplicate path separator, continue */
-			if (*(ptr - 1) == PATH_SEPC) continue;
+			if (*(ptr - 1) == PATH_SEPC)
+				continue;
 
 			/* We can't handle really big filenames */
-			if (len - 1 > 512) return false;
+			if (len - 1 > 512)
+				return false;
 
 			/* Create the parent path string, plus null-padding */
 			my_strcpy(buf, path, len + 1);
 
 			/* Skip if the parent exists */
-			if (dir_exists(buf)) continue;
+			if (dir_exists(buf))
+				continue;
 
 			/* The parent doesn't exist, so create it or fail */
-			if (my_mkdir(buf, 0755) != 0) return false;
+			if (my_mkdir(buf, 0755) != 0)
+				return false;
 		}
 	}
-	return my_mkdir(path, 0755) == 0 ? true : false;
+
+	return (my_mkdir(path, 0755) == 0 ? true : false);
 }
 
 #else /* HAVE_STAT */
 bool dir_create(const char *path) { return false; }
 #endif /* !HAVE_STAT */
 
-/**
- * ------------------------------------------------------------------------
- * Directory scanning API
- * ------------------------------------------------------------------------ */
-
-
-/*
- * For information on what these are meant to do, please read the header file.
- */
-
 #ifdef WINDOWS
 
 
 /* System-specific struct */
-struct ang_dir
-{
+struct ang_dir {
 	HANDLE h;
 	char *first_file;
 };
@@ -766,7 +763,9 @@ bool my_dread(ang_dir *dir, char *fname, size_t len)
 	/* Try the next file */
 	while (1) {
 		ok = FindNextFile(dir->h, &fd);
-		if (!ok) return false;
+
+		if (!ok)
+			return false;
 
 		/* Skip directories */
 		if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ||
@@ -800,8 +799,7 @@ void my_dclose(ang_dir *dir)
 #ifdef HAVE_DIRENT_H
 
 /* Define our ang_dir type */
-struct ang_dir
-{
+struct ang_dir {
 	DIR *d;
 	char *dirname;
 };
@@ -813,10 +811,13 @@ ang_dir *my_dopen(const char *dirname)
 
 	/* Try to open the directory */
 	d = opendir(dirname);
-	if (!d) return NULL;
+
+	if (!d)
+		return NULL;
 
 	/* Allocate memory for the handle */
 	dir = mem_zalloc(sizeof(ang_dir));
+
 	if (!dir) {
 		closedir(d);
 		return NULL;
@@ -841,9 +842,11 @@ bool my_dread(ang_dir *dir, char *fname, size_t len)
 	/* Try reading another entry */
 	while (1) {
 		entry = readdir(dir->d);
-		if (!entry) return false;
 
-		path_build(path, sizeof path, dir->dirname, entry->d_name);
+		if (!entry)
+			return false;
+
+		path_build(path, sizeof(path), dir->dirname, entry->d_name);
 
 		/* Check to see if it exists */
 		if (stat(path, &filedata) != 0)

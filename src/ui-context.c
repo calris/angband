@@ -663,7 +663,7 @@ int context_menu_object(struct object *obj)
 	char *labels;
 	char header[120];
 
-	textblock *tb;
+	struct textblock *tb;
 	region area = { 0, 0, 0, 0 };
 
 	bool allowed = true;

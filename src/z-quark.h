@@ -28,7 +28,6 @@
  */
 typedef size_t quark_t;
 
-
 /**
  * Return a quark for the string 'str'
  */
@@ -48,6 +47,5 @@ void quarks_init(void);
  * De-initialise the quarks package
  */
 void quarks_free(void);
-
 
 #endif /* !INCLUDED_Z_QUARK_H */

@@ -55,7 +55,7 @@ typedef struct effect_handler_context_s {
 	const int dir;
 	const int beam;
 	const int boost;
-	const random_value value;
+	const struct random_value value;
 	const int p1, p2, p3;
 	bool ident;
 } effect_handler_context_t;
@@ -4001,7 +4001,7 @@ bool effect_handler_WONDER(effect_handler_context_t *context)
 	int p1 = 0, p2 = 0, p3 = 0;
 	int beam = context->beam;
 	effect_handler_f handler = NULL;
-	random_value value = { 0, 0, 0, 0 };
+	struct random_value value = { 0, 0, 0, 0 };
 	bool *ident = mem_zalloc(sizeof(*ident));
 
 	context->ident = true;
@@ -4538,7 +4538,7 @@ bool effect_do(struct effect *effect, struct object *obj, bool *ident,
 {
 	bool completed = false;
 	effect_handler_f handler;
-	random_value value = { 0, 0, 0, 0 };
+	struct random_value value = { 0, 0, 0, 0 };
 
 	do {
 		int random_choices = 0, leftover = 0;

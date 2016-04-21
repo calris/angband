@@ -48,6 +48,6 @@ extern int stats_db_stmt_prep(sqlite3_stmt **sql_stmt, char *sql_str);
 extern int stats_db_bind_ints(sqlite3_stmt *sql_stmt, int num_cols, 
 							  int offset, ...);
 extern int stats_db_bind_rv(sqlite3_stmt *sql_stmt, int col,
-							random_value rv);
+		struct random_value rv);
 
 #endif /* STATS_DB_H */

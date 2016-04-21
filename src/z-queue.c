@@ -19,39 +19,53 @@
 #include <stdlib.h>
 #include "z-queue.h"
 
-struct queue *q_new(size_t size) {
-    struct queue *q = (struct queue*)malloc(sizeof(struct queue));
-    q->data = (uintptr_t*)malloc(sizeof(uintptr_t) * (size + 1));
-    q->size = size + 1;
-    q->head = 0;
-    q->tail = 0;
-    return q;
+struct queue *q_new(size_t size)
+{
+	struct queue *q = (struct queue *)malloc(sizeof(struct queue));
+
+	q->data = (uintptr_t *)malloc(sizeof(uintptr_t) * (size + 1));
+	q->size = size + 1;
+	q->head = 0;
+	q->tail = 0;
+
+	return q;
 }
 
-int q_len(struct queue *q) {
-    int len;
-    if (q->tail >= q->head) {
-        len = q->tail - q->head;
-    } else {
-        len = q->size - q->head + q->tail;
-    }
-    return len;
+int q_len(struct queue *q)
+{
+	int len;
+
+	if (q->tail >= q->head)
+		len = q->tail - q->head;
+	else
+		len = q->size - q->head + q->tail;
+
+	return len;
 }
 
-void q_push(struct queue *q, uintptr_t item) {
-    q->data[q->tail] = item;
-    q->tail = (q->tail + 1) % q->size;
-    if (q->tail == q->head) abort();
+void q_push(struct queue *q, uintptr_t item)
+{
+	q->data[q->tail] = item;
+	q->tail = (q->tail + 1) % q->size;
+
+	if (q->tail == q->head)
+		abort();
 }
 
-uintptr_t q_pop(struct queue *q) {
-    uintptr_t item = q->data[q->head];
-    if (q->head == q->tail) abort();
-    q->head = (q->head + 1) % q->size;
-    return item;
+uintptr_t q_pop(struct queue *q)
+{
+	uintptr_t item = q->data[q->head];
+
+	if (q->head == q->tail)
+		abort();
+
+	q->head = (q->head + 1) % q->size;
+
+	return item;
 }
 
-void q_free(struct queue *q) {
-    free(q->data);
-    free(q);
+void q_free(struct queue *q)
+{
+	free(q->data);
+	free(q);
 }

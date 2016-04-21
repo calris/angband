@@ -170,7 +170,7 @@ int test_evaluate(void *state)
 	int value = 0;
 	expression_t *expression = expression_new();
 	dice_t *new = dice_new();
-	random_value v;
+	struct random_value v;
 
 	expression_set_base_value(expression, test_evaluate_base);
 	require(expression_add_operations_string(expression, "* 3 - 1") > 0);

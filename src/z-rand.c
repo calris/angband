@@ -50,7 +50,7 @@
 #define MAT0NEG(t, v) (v ^ (v << (-(t))))
 #define Identity(v) (v)
 
-u32b state_i = 0;
+u32b state_i;
 u32b STATE[RAND_DEG] = {0, 0, 0, 0, 0, 0, 0, 0,
 						0, 0, 0, 0, 0, 0, 0, 0,
 						0, 0, 0, 0, 0, 0, 0, 0,
@@ -65,13 +65,15 @@ u32b z0, z1, z2;
 #define newV0 STATE[(state_i + 31) & 0x0000001fU]
 #define newV1 STATE[state_i]
 
-static u32b WELLRNG1024a (void){
+static u32b WELLRNG1024a(void)
+{
 	z0      = VRm1;
-	z1      = Identity(V0) ^ MAT0POS (8, VM1);
-	z2      = MAT0NEG (-19, VM2) ^ MAT0NEG(-14,VM3);
+	z1      = Identity(V0) ^ MAT0POS(8, VM1);
+	z2      = MAT0NEG(-19, VM2) ^ MAT0NEG(-14, VM3);
 	newV1   = z1 ^ z2;
-	newV0   = MAT0NEG (-11,z0) ^ MAT0NEG(-7,z1) ^ MAT0NEG(-13,z2);
+	newV0   = MAT0NEG(-11, z0) ^ MAT0NEG(-7, z1) ^ MAT0NEG(-13, z2);
 	state_i = (state_i + 31) & 0x0000001fU;
+
 	return STATE[state_i];
 }
 /* end WELL RNG */
@@ -80,7 +82,6 @@ static u32b WELLRNG1024a (void){
  * Simple RNG, implemented with a linear congruent algorithm.
  */
 #define LCRNG(X) ((X) * 1103515245 + 12345)
-
 
 /**
  * Whether to use the simple RNG or not.
@@ -92,8 +93,8 @@ bool Rand_quick = true;
  */
 u32b Rand_value;
 
-static bool rand_fixed = false;
-static u32b rand_fixval = 0;
+static bool rand_fixed;
+static u32b rand_fixval;
 
 /**
  * Initialize the complex RNG using a new seed.
@@ -149,7 +150,6 @@ void Rand_init(void)
 	}
 }
 
-
 /**
  * Extract a "random" number from 0 to m - 1, via division.
  *
@@ -169,7 +169,8 @@ u32b Rand_div(u32b m)
 	assert(m <= 0x10000000);
 
 	/* Hack -- simple case */
-	if (m <= 1) return (0);
+	if (m <= 1)
+		return 0;
 
 	if (rand_fixed)
 		return (rand_fixval * 1000 * (m - 1)) / (100 * 1000);
@@ -188,7 +189,8 @@ u32b Rand_div(u32b m)
 			r = ((r >> 4) & 0x0FFFFFFF) / n;
 
 			/* Done */
-			if (r < m) break;
+			if (r < m)
+				break;
 		}
 	} else {
 		/* Use a complex RNG */
@@ -200,14 +202,14 @@ u32b Rand_div(u32b m)
 			r = ((r >> 4) & 0x0FFFFFFF) / n;
 
 			/* Done */
-			if (r < m) break;
+			if (r < m)
+				break;
 		}
 	}
 
 	/* Use the value */
-	return (r);
+	return r;
 }
-
 
 /**
  * The number of entries in the "Rand_normal_table"
@@ -260,7 +262,6 @@ static s16b Rand_normal_table[RANDNOR_NUM] = {
 	32765, 32765, 32765, 32766, 32766, 32766, 32766, 32767,
 };
 
-
 /**
  * Generate a random integer number of NORMAL distribution
  *
@@ -283,12 +284,12 @@ static s16b Rand_normal_table[RANDNOR_NUM] = {
 s16b Rand_normal(int mean, int stand)
 {
 	s16b tmp, offset;
-
 	s16b low = 0;
 	s16b high = RANDNOR_NUM;
 
 	/* Paranoia */
-	if (stand < 1) return (mean);
+	if (stand < 1)
+		return mean;
 
 	/* Roll for probability */
 	tmp = (s16b)randint0(32768);
@@ -298,23 +299,22 @@ s16b Rand_normal(int mean, int stand)
 		int mid = (low + high) >> 1;
 
 		/* Move right if forced */
-		if (Rand_normal_table[mid] < tmp) {
+		if (Rand_normal_table[mid] < tmp)
 			low = mid + 1;
-		} else {
+		else
 			high = mid;
-		}
 	}
 
 	/* Convert the index into an offset */
 	offset = (s16b)((long)stand * (long)low / RANDNOR_STD);
 
 	/* One half should be negative */
-	if (one_in_(2)) return (mean - offset);
+	if (one_in_(2))
+		return (mean - offset);
 
 	/* One half should be positive */
 	return (mean + offset);
 }
-
 
 /**
  * Generates damage for "2d6" style dice rolls
@@ -324,32 +324,38 @@ int damroll(int num, int sides)
 	int i;
 	int sum = 0;
 
-	if (sides <= 0) return 0;
+	if (sides <= 0)
+		return 0;
 
 	for (i = 0; i < num; i++)
 		sum += randint1(sides);
+
 	return sum;
 }
-
-
 
 /**
  * Calculation helper function for damroll
  */
-int damcalc(int num, int sides, aspect dam_aspect)
+int damcalc(int num, int sides, enum aspect dam_aspect)
 {
 	switch (dam_aspect) {
-		case MAXIMISE:
-		case EXTREMIFY: return num * sides;
-		case RANDOMISE: return damroll(num, sides);
-		case MINIMISE: return num;
-		case AVERAGE: return num * (sides + 1) / 2;
+	case MAXIMISE:
+	case EXTREMIFY:
+		return num * sides;
+
+	case RANDOMISE:
+		return damroll(num, sides);
+
+	case MINIMISE:
+		return num;
+
+	case AVERAGE:
+		return (num * (sides + 1) / 2);
 	}
 
 	assert(0 && "Should never reach here");
 	return 0;
 }
-
 
 /**
  * Generates a random signed long integer X where `A` <= X <= `B`.
@@ -359,12 +365,13 @@ int damcalc(int num, int sides, aspect dam_aspect)
  */
 int rand_range(int A, int B)
 {
-	if (A == B) return A;
+	if (A == B)
+		return A;
+
 	assert(A < B);
 
-	return A + (s32b)Rand_div(1 + B - A);
+	return (A + (s32b)Rand_div(1 + B - A));
 }
-
 
 /**
  * Perform division, possibly rounding up or down depending on the size of the
@@ -374,10 +381,12 @@ static int simulate_division(int dividend, int divisor)
 {
 	int quotient  = dividend / divisor;
 	int remainder = dividend % divisor;
-	if (randint0(divisor) < remainder) quotient++;
+
+	if (randint0(divisor) < remainder)
+		quotient++;
+
 	return quotient;
 }
-
 
 /**
  * Help determine an "enchantment bonus" for an object.
@@ -423,7 +432,8 @@ s16b m_bonus(int max, int level)
 	int bonus, stand, value;
 
 	/* Make sure level is reasonable */
-	if (level >= MAX_RAND_DEPTH) level = MAX_RAND_DEPTH - 1;
+	if (level >= MAX_RAND_DEPTH)
+		level = MAX_RAND_DEPTH - 1;
 
 	/* The bonus approaches max as level approaches MAX_RAND_DEPTH */
 	bonus = simulate_division(max * level, MAX_RAND_DEPTH);
@@ -443,47 +453,53 @@ s16b m_bonus(int max, int level)
 		return value;
 }
 
-
 /**
  * Calculation helper function for m_bonus
  */
-s16b m_bonus_calc(int max, int level, aspect bonus_aspect)
+s16b m_bonus_calc(int max, int level, enum aspect bonus_aspect)
 {
 	switch (bonus_aspect) {
-		case EXTREMIFY:
-		case MAXIMISE:  return max;
-		case RANDOMISE: return m_bonus(max, level);
-		case MINIMISE:  return 0;
-		case AVERAGE:   return max * level / MAX_RAND_DEPTH;
+	case EXTREMIFY:
+	case MAXIMISE:
+		return max;
+
+	case RANDOMISE:
+		return m_bonus(max, level);
+
+	case MINIMISE:
+		return 0;
+
+	case AVERAGE:
+		return max * level / MAX_RAND_DEPTH;
 	}
 
 	assert(0 && "Should never reach here");
 	return 0;
 }
 
-
 /**
  * Calculation helper function for random_value structs
  */
-int randcalc(random_value v, int level, aspect rand_aspect)
+int randcalc(struct random_value v, int level, enum aspect rand_aspect)
 {
 	if (rand_aspect == EXTREMIFY) {
 		int min = randcalc(v, level, MINIMISE);
 		int max = randcalc(v, level, MAXIMISE);
-		return abs(min) > abs(max) ? min : max;
+
+		return (abs(min) > abs(max) ? min : max);
 
 	} else {
 		int dmg   = damcalc(v.dice, v.sides, rand_aspect);
 		int bonus = m_bonus_calc(v.m_bonus, level, rand_aspect);
-		return v.base + dmg + bonus;
+
+		return (v.base + dmg + bonus);
 	}
 }
-
 
 /**
  * Test to see if a value is within a random_value's range
  */
-bool randcalc_valid(random_value v, int test)
+bool randcalc_valid(struct random_value v, int test)
 {
 	if (test < randcalc(v, 0, MINIMISE))
 		return false;
@@ -496,7 +512,7 @@ bool randcalc_valid(random_value v, int test)
 /**
  * Test to see if a random_value actually varies
  */
-bool randcalc_varies(random_value v)
+bool randcalc_varies(struct random_value v)
 {
 	return randcalc(v, 0, MINIMISE) != randcalc(v, 0, MAXIMISE);
 }
@@ -507,8 +523,6 @@ void rand_fix(u32b val)
 	rand_fixval = val;
 }
 
-int getpid(void);
-
 /**
  * Another simple RNG that does not use any of the above state
  * (so can be used without disturbing the game's RNG state)
@@ -516,8 +530,9 @@ int getpid(void);
 u32b Rand_simple(u32b m)
 {
 	static time_t seed;
-	time_t v;
-	v = time(NULL);
+	time_t v = time(NULL);
+
 	seed = LCRNG(seed) + ((v << 16) ^ v ^ getpid());
-	return (seed%m);
+
+	return (seed % m);
 }

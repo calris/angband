@@ -21,32 +21,19 @@
 
 #include "h-basic.h"
 
-
-/**
- * ------------------------------------------------------------------------
- * Available variables
- * ------------------------------------------------------------------------ */
-
-
 /**
  * The name of the program.
  */
 extern char *argv0;
 
-
 /**
  * Aux functions
  */
 extern size_t (*text_mbcs_hook)(wchar_t *dest, const char *src, int n);
+
 extern void (*plog_aux)(const char *);
+
 extern void (*quit_aux)(const char *);
-
-
-/**
- * ------------------------------------------------------------------------
- * Available Functions
- * ------------------------------------------------------------------------ */
-
 
 /**
  * Return "s" (or not) depending on whether n is singular.
@@ -56,8 +43,8 @@ extern void (*quit_aux)(const char *);
 /**
  * Return the verb form matching the given count
  */
-#define VERB_AGREEMENT(count, singular, plural)    (((count) == 1) ? (singular) : (plural))
-
+#define VERB_AGREEMENT(count, singular, plural) \
+		(((count) == 1) ? (singular) : (plural))
 
 /**
  * Count the number of characters in a UTF-8 encoded string
@@ -119,8 +106,11 @@ void my_strcap(char *buf);
  * Test equality, prefix, suffix
  */
 extern bool streq(const char *s, const char *t);
+
 extern bool prefix(const char *s, const char *t);
+
 extern bool prefix_i(const char *s, const char *t);
+
 extern bool suffix(const char *s, const char *t);
 
 #define streq(s, t)		(!strcmp(s, t))
@@ -129,18 +119,18 @@ extern bool suffix(const char *s, const char *t);
  * Skip occurrences of a characters
  */
 extern void strskip(char *s, const char c, const char e);
+
 extern void strescape(char *s, const char c);
 
 /**
  * Determines if a string is "empty"
  */
-bool contains_only_spaces(const char* s);
+bool contains_only_spaces(const char *s);
 
 /**
  * Check if a char is a vowel
  */
 bool is_a_vowel(int ch);
-
 
 /**
  * Allow override of the multi-byte to wide char conversion
@@ -173,6 +163,7 @@ u32b djb2_hash(const char *str);
  * Mathematical functions
  */
 int mean(int *nums, int size);
+
 int variance(int *nums, int size);
 
 #endif /* INCLUDED_Z_UTIL_H */

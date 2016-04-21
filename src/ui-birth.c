@@ -883,7 +883,7 @@ int edit_text(char *buffer, int buflen) {
 		struct keypress ke;
 
 		region area = { 1, HIST_INSTRUCT_ROW + 1, 71, 5 };
-		textblock *tb = textblock_new();
+		struct textblock *tb = textblock_new();
 
 		size_t *line_starts = NULL, *line_lengths = NULL;
 		size_t n_lines;

@@ -72,7 +72,7 @@ bool project_o(int who, int r, int y, int x, int dam, int typ,
 			   const struct object *protected_obj);
 void project_m(int who, int r, int y, int x, int dam, int typ, int flg,
                bool *did_hit, bool *was_obvious);
-int adjust_dam(struct player *p, int type, int dam, aspect dam_aspect, int resist);
+int adjust_dam(struct player *p, int type, int dam, enum aspect dam_aspect, int resist);
 bool project_p(int who, int r, int y, int x, int dam, int typ);
 
 
@@ -85,7 +85,7 @@ bool projectable(struct chunk *c, int y1, int x1, int y2, int x2, int flg);
 bool gf_force_obvious(int type);
 int gf_color(int type);
 int gf_num(int type);
-random_value gf_denom(int type);
+struct random_value gf_denom(int type);
 const char *gf_desc(int type);
 const char *gf_blind_desc(int type);
 int gf_name_to_idx(const char *name);

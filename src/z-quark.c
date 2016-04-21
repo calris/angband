@@ -23,7 +23,7 @@
 
 static char **quarks;
 static size_t nr_quarks = 1;
-static size_t alloc_quarks = 0;
+static size_t alloc_quarks;
 
 #define QUARKS_INIT	16
 
@@ -55,7 +55,7 @@ const char *quark_str(quark_t q)
 void quarks_init(void)
 {
 	alloc_quarks = QUARKS_INIT;
-	quarks = mem_zalloc(alloc_quarks * sizeof(char*));
+	quarks = mem_zalloc(alloc_quarks * sizeof(char *));
 }
 
 void quarks_free(void)

@@ -87,17 +87,21 @@ typedef enum expression_input_e {
 static expression_operator_t expression_operator_from_token(const char *token)
 {
 	switch (token[0]) {
-		case '+':
-			return OPERATOR_ADD;
-		case '-':
-			return OPERATOR_SUB;
-		case '*':
-			return OPERATOR_MUL;
-		case '/':
-			return OPERATOR_DIV;
-		case 'n':
-		case 'N':
-			return OPERATOR_NEG;
+	case '+':
+		return OPERATOR_ADD;
+
+	case '-':
+		return OPERATOR_SUB;
+
+	case '*':
+		return OPERATOR_MUL;
+
+	case '/':
+		return OPERATOR_DIV;
+
+	case 'n':
+	case 'N':
+		return OPERATOR_NEG;
 	}
 
 	return OPERATOR_NONE;
@@ -109,15 +113,17 @@ static expression_operator_t expression_operator_from_token(const char *token)
 static expression_input_t expression_input_for_operator(expression_operator_t operator)
 {
 	switch (operator) {
-		case OPERATOR_NONE:
-			return EXPRESSION_INPUT_INVALID;
-		case OPERATOR_ADD:
-		case OPERATOR_SUB:
-		case OPERATOR_MUL:
-		case OPERATOR_DIV:
-			return EXPRESSION_INPUT_NEEDS_OPERANDS;
-		case OPERATOR_NEG:
-			return EXPRESSION_INPUT_UNARY_OPERATOR;
+	case OPERATOR_NONE:
+		return EXPRESSION_INPUT_INVALID;
+
+	case OPERATOR_ADD:
+	case OPERATOR_SUB:
+	case OPERATOR_MUL:
+	case OPERATOR_DIV:
+		return EXPRESSION_INPUT_NEEDS_OPERANDS;
+
+	case OPERATOR_NEG:
+		return EXPRESSION_INPUT_UNARY_OPERATOR;
 	}
 
 	return EXPRESSION_INPUT_INVALID;
@@ -137,8 +143,7 @@ expression_t *expression_new(void)
 	expression->base_value = NULL;
 	expression->operation_count = 0;
 	expression->operations_size = EXPRESSION_ALLOC_SIZE;
-	expression->operations = mem_zalloc(expression->operations_size *
-										sizeof(expression_operation_t));
+	expression->operations = mem_zalloc(expression->operations_size * sizeof(expression_operation_t));
 
 	if (expression->operations == NULL) {
 		mem_free(expression);
@@ -184,8 +189,7 @@ expression_t *expression_copy(const expression_t *source)
 		return copy;
 	}
 
-	copy->operations = mem_zalloc(copy->operations_size *
-								  sizeof(expression_operation_t));
+	copy->operations = mem_zalloc(copy->operations_size * sizeof(expression_operation_t));
 
 	if (copy->operations == NULL && source->operations != NULL) {
 		mem_free(copy);
@@ -204,7 +208,7 @@ expression_t *expression_copy(const expression_t *source)
  * Set the base value function that the operations operate on.
  */
 void expression_set_base_value(expression_t *expression,
-							   expression_base_value_f function)
+			       expression_base_value_f function)
 {
 	expression->base_value = function;
 }
@@ -223,23 +227,28 @@ s32b expression_evaluate(expression_t const * const expression)
 
 	for (i = 0; i < expression->operation_count; i++) {
 		switch (expression->operations[i].operator) {
-			case OPERATOR_ADD:
-				value += expression->operations[i].operand;
-				break;
-			case OPERATOR_SUB:
-				value -= expression->operations[i].operand;
-				break;
-			case OPERATOR_MUL:
-				value *= expression->operations[i].operand;
-				break;
-			case OPERATOR_DIV:
-				value /= expression->operations[i].operand;
-				break;
-			case OPERATOR_NEG:
-				value = -value;
-				break;
-			default:
-				break;
+		case OPERATOR_ADD:
+			value += expression->operations[i].operand;
+			break;
+
+		case OPERATOR_SUB:
+			value -= expression->operations[i].operand;
+			break;
+
+		case OPERATOR_MUL:
+			value *= expression->operations[i].operand;
+			break;
+
+		case OPERATOR_DIV:
+			value /= expression->operations[i].operand;
+			break;
+
+		case OPERATOR_NEG:
+			value = -value;
+			break;
+
+		default:
+			break;
 		}
 	}
 
@@ -250,13 +259,14 @@ s32b expression_evaluate(expression_t const * const expression)
  * Add an operation to an expression, allocating more memory as needed.
  */
 static void expression_add_operation(expression_t *expression,
-									 const expression_operation_t operation)
+				     const expression_operation_t operation)
 {
 	size_t count = 0;
 
 	if (expression->operation_count >= expression->operations_size) {
 		expression->operations_size += EXPRESSION_ALLOC_SIZE;
-		expression->operations = mem_realloc(expression->operations, expression->operations_size * sizeof(expression_operation_t));
+		expression->operations = mem_realloc(expression->operations,
+						     expression->operations_size * sizeof(expression_operation_t));
 	}
 
 	expression->operations[expression->operation_count] = operation;
@@ -275,22 +285,25 @@ static void expression_add_operation(expression_t *expression,
  *
  * \param expression is an initialized expression object.
  * \param string is the string to be parsed.
- * \return The number of operations added to the expression or an error (expression_err_e).
+ * \return The number of operations added to the expression or an error
+ * (expression_err_e).
  */
 s16b expression_add_operations_string(expression_t *expression,
-									  const char *string)
+				      const char *string)
 {
 	char *parse_string;
 	expression_operation_t operations[EXPRESSION_MAX_OPERATIONS];
 	size_t count = 0, i = 0;
 	char *token = NULL;
-	expression_operator_t parsed_operator = OPERATOR_NONE;
-	expression_operator_t current_operator = OPERATOR_NONE;
-	expression_input_t current_input = EXPRESSION_INPUT_INVALID;
+	expression_operator_t parsed_op = OPERATOR_NONE;
+	expression_operator_t curr_op = OPERATOR_NONE;
+	expression_input_t curr_in = EXPRESSION_INPUT_INVALID;
 	int state = EXPRESSION_STATE_START;
 
-	/* The named initializers are left commented out for when this all goes
-	 * to C99. */
+	/*
+	 * The named initializers are left commented out for when this
+	 * all goes to C99.
+	 */
 	static int state_table[EXPRESSION_STATE_MAX][EXPRESSION_INPUT_MAX] = {
 		/*[EXPRESSION_STATE_START] = */{
 			/*[EXPRESSION_INPUT_INVALID] = */			EXPRESSION_ERR_INVALID_OPERATOR,
@@ -331,11 +344,10 @@ s16b expression_add_operations_string(expression_t *expression,
 		s16b value = strtol(token, &end, 0);
 
 		if (end == token) {
-			parsed_operator = expression_operator_from_token(token);
-			current_input = expression_input_for_operator(parsed_operator);
-			state = state_table[state][current_input];
-		}
-		else {
+			parsed_op = expression_operator_from_token(token);
+			curr_in = expression_input_for_operator(parsed_op);
+			state = state_table[state][curr_in];
+		} else {
 			state = state_table[state][EXPRESSION_INPUT_VALUE];
 		}
 
@@ -344,28 +356,29 @@ s16b expression_add_operations_string(expression_t *expression,
 			/* An error occurred, according to the state table. */
 			string_free(parse_string);
 			return state;
-		}
-		else if (state == EXPRESSION_STATE_START) {
-			/* Flush the operation, since we are restarting or using a
-			 * unary operator. */
-			operations[count].operator = parsed_operator;
+		} else if (state == EXPRESSION_STATE_START) {
+			/*
+			 * Flush the operation, since we are restarting or
+			 * using a unary operator.
+			 */
+			operations[count].operator = parsed_op;
 			operations[count].operand = 0;
 			count++;
-		}
-		else if (state == EXPRESSION_STATE_OPERATOR) {
-			/* Remember the operator, since we found an operator which needs
-			 * operands. */
-			current_operator = parsed_operator;
-		}
-		else if (state == EXPRESSION_STATE_OPERAND) {
+		} else if (state == EXPRESSION_STATE_OPERATOR) {
+			/*
+			 * Remember the operator, since we found an operator
+			 * which needs operands.
+			 */
+			curr_op = parsed_op;
+		} else if (state == EXPRESSION_STATE_OPERAND) {
 			/* Try to catch divide by zero. */
-			if (current_operator == OPERATOR_DIV && value == 0) {
+			if (curr_op == OPERATOR_DIV && value == 0) {
 				string_free(parse_string);
 				return EXPRESSION_ERR_DIVIDE_BY_ZERO;
 			}
 
 			/* Flush the operator and operand pair. */
-			operations[count].operator = current_operator;
+			operations[count].operator = curr_op;
 			operations[count].operand = value;
 			count++;
 		}
@@ -377,9 +390,8 @@ s16b expression_add_operations_string(expression_t *expression,
 		token = strtok(NULL, EXPRESSION_DELIMITER);
 	}
 
-	for (i = 0; i < count; i++) {
+	for (i = 0; i < count; i++)
 		expression_add_operation(expression, operations[i]);
-	}
 
 	string_free(parse_string);
 	return count;
@@ -406,8 +418,11 @@ bool expression_test_copy(const expression_t *a, const expression_t *b)
 		return false;
 
 	for (i = 0; i < a->operation_count; i++) {
-		success &= (a->operations[i].operand == b->operations[i].operand);
-		success &= (a->operations[i].operator == b->operations[i].operator);
+		success &= (a->operations[i].operand ==
+			    b->operations[i].operand);
+
+		success &= (a->operations[i].operator ==
+			    b->operations[i].operator);
 	}
 
 	return success;

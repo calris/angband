@@ -856,7 +856,7 @@ s16b place_monster(struct chunk *c, int y, int x, struct monster *mon,
  * \param race is the race of the monster in question.
  * \param hp_aspect is the hp calc we want (min, max, avg, random).
  */
-int mon_hp(const struct monster_race *race, aspect hp_aspect)
+int mon_hp(const struct monster_race *race, enum aspect hp_aspect)
 {
 	int std_dev = (((race->avg_hp * 10) / 8) + 5) / 10;
 

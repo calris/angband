@@ -123,7 +123,7 @@ static void display_area(const wchar_t *text, const byte *attrs,
 /**
  * Plonk a textblock on the screen in a certain bounding box.
  */
-void textui_textblock_place(textblock *tb, region orig_area, const char *header)
+void textui_textblock_place(struct textblock *tb, region orig_area, const char *header)
 {
 	/* xxx on resize this should be recalculated */
 	region area = region_calculate(orig_area);
@@ -153,7 +153,7 @@ void textui_textblock_place(textblock *tb, region orig_area, const char *header)
 /**
  * Show a textblock interactively
  */
-void textui_textblock_show(textblock *tb, region orig_area, const char *header)
+void textui_textblock_show(struct textblock *tb, region orig_area, const char *header)
 {
 	/* xxx on resize this should be recalculated */
 	region area = region_calculate(orig_area);

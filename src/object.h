@@ -138,11 +138,11 @@ struct object_kind {
 	int tval;					/**< General object type (see TV_ macros) */
 	int sval;					/**< Object sub-type  */
 
-	random_value pval;			/* Item extra-parameter */
+	struct random_value pval;			/* Item extra-parameter */
 
-	random_value to_h;			/**< Bonus to hit */
-	random_value to_d;			/**< Bonus to damage */
-	random_value to_a;			/**< Bonus to armor */
+	struct random_value to_h;			/**< Bonus to hit */
+	struct random_value to_d;			/**< Bonus to damage */
+	struct random_value to_a;			/**< Bonus to armor */
 	int ac;					/**< Base armor */
 
 	int dd;					/**< Damage dice */
@@ -154,7 +154,7 @@ struct object_kind {
 	bitflag flags[OF_SIZE];					/**< Flags */
 	bitflag kind_flags[KF_SIZE];			/**< Kind flags */
 
-	random_value modifiers[OBJ_MOD_MAX];
+	struct random_value modifiers[OBJ_MOD_MAX];
 	struct element_info el_info[ELEM_MAX];
 
 	struct brand *brands;
@@ -171,11 +171,11 @@ struct object_kind {
 	struct effect *effect;	/**< Effect this item produces (effects.c) */
 	int power;				/**< Power of the item's effect */
 	char *effect_msg;
-	random_value time;		/**< Recharge time (rods/activation) */
-	random_value charge;	/**< Number of charges (staves/wands) */
+	struct random_value time;		/**< Recharge time (rods/activation) */
+	struct random_value charge;	/**< Number of charges (staves/wands) */
 
 	int gen_mult_prob;		/**< Probability of generating more than one */
-	random_value stack_size;/**< Number to generate */
+	struct random_value stack_size;/**< Number to generate */
 
 	struct flavor *flavor;	/**< Special object flavor (or zero) */
 
@@ -247,7 +247,7 @@ struct artifact {
 	struct activation *activation;	/**< Artifact activation */
 	char *alt_msg;
 
-	random_value time;	/**< Recharge time (if appropriate) */
+	struct random_value time;	/**< Recharge time (if appropriate) */
 };
 
 /**
@@ -281,7 +281,7 @@ struct ego_item {
 	bitflag flags_off[OF_SIZE];		/**< Flags to remove */
 	bitflag kind_flags[KF_SIZE];	/**< Kind flags */
 
-	random_value modifiers[OBJ_MOD_MAX];
+	struct random_value modifiers[OBJ_MOD_MAX];
 	int min_modifiers[OBJ_MOD_MAX];
 	struct element_info el_info[ELEM_MAX];
 
@@ -297,9 +297,9 @@ struct ego_item {
 
 	struct ego_poss_item *poss_items;
 
-	random_value to_h;		/* Extra to-hit bonus */
-	random_value to_d;		/* Extra to-dam bonus */
-	random_value to_a;		/* Extra to-ac bonus */
+	struct random_value to_h;		/* Extra to-hit bonus */
+	struct random_value to_d;		/* Extra to-dam bonus */
+	struct random_value to_a;		/* Extra to-ac bonus */
 
 	int min_to_h;			/* Minimum to-hit value */
 	int min_to_d;			/* Minimum to-dam value */
@@ -307,7 +307,7 @@ struct ego_item {
 
 	struct effect *effect;	/**< Effect this item produces (effects.c) */
 	char *effect_msg;
-	random_value time;		/**< Recharge time (rods/activation) */
+	struct random_value time;		/**< Recharge time (rods/activation) */
 
 	bool everseen;			/* Do not spoil ignore menus */
 };
@@ -392,7 +392,7 @@ struct object {
 	struct effect *effect;	/**< Effect this item produces (effects.c) */
 	char *effect_msg;
 	struct activation *activation;	/**< Artifact activation, if applicable */
-	random_value time;	/**< Recharge time (rods/activation) */
+	struct random_value time;	/**< Recharge time (rods/activation) */
 	s16b timeout;		/* Timeout Counter */
 
 	byte number;		/* Number of items */

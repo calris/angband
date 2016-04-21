@@ -18,7 +18,6 @@
 
 #include "z-bitflag.h"
 
-
 /**
  * Tests if a flag is "on" in a bitflag set.
  *
@@ -30,11 +29,13 @@ bool flag_has(const bitflag *flags, const size_t size, const int flag)
 	const size_t flag_offset = FLAG_OFFSET(flag);
 	const int flag_binary = FLAG_BINARY(flag);
 
-	if (flag == FLAG_END) return false;
+	if (flag == FLAG_END)
+		return false;
 
 	assert(flag_offset < size);
 
-	if (flags[flag_offset] & flag_binary) return true;
+	if (flags[flag_offset] & flag_binary)
+		return true;
 
 	return false;
 }
@@ -45,20 +46,26 @@ bool flag_has_dbg(const bitflag *flags, const size_t size, const int flag,
 	const size_t flag_offset = FLAG_OFFSET(flag);
 	const int flag_binary = FLAG_BINARY(flag);
 
-	if (flag == FLAG_END) return false;
+	if (flag == FLAG_END)
+		return false;
 
 	if (flag_offset >= size) {
 		quit_fmt("Error in flag_has(%s, %s): FlagID[%d] Size[%u] FlagOff[%u] FlagBV[%d]\n",
-		         fi, fl, flag, (unsigned int) size, (unsigned int) flag_offset, flag_binary);
+			 fi,
+			 fl,
+			 flag,
+			 (unsigned int)size,
+			 (unsigned int)flag_offset,
+			 flag_binary);
 	}
 
 	assert(flag_offset < size);
 
-	if (flags[flag_offset] & flag_binary) return true;
+	if (flags[flag_offset] & flag_binary)
+		return true;
 
 	return false;
 }
-
 
 /**
  * Interates over the flags which are "on" in a bitflag set.
@@ -77,12 +84,12 @@ int flag_next(const bitflag *flags, const size_t size, const int flag)
 		flag_offset = FLAG_OFFSET(f);
 		flag_binary = FLAG_BINARY(f);
 
-		if (flags[flag_offset] & flag_binary) return f;
+		if (flags[flag_offset] & flag_binary)
+			return f;
 	}
 
 	return FLAG_END;
 }
-
 
 /**
  * Tests a bitfield for emptiness.
@@ -95,11 +102,11 @@ bool flag_is_empty(const bitflag *flags, const size_t size)
 	size_t i;
 
 	for (i = 0; i < size; i++)
-		if (flags[i] > 0) return false;
+		if (flags[i] > 0)
+			return false;
 
 	return true;
 }
-
 
 /**
  * Tests a bitfield for fullness.
@@ -112,11 +119,11 @@ bool flag_is_full(const bitflag *flags, const size_t size)
 	size_t i;
 
 	for (i = 0; i < size; i++)
-		if (flags[i] != (bitflag) -1) return false;
+		if (flags[i] != (bitflag) -1)
+			return false;
 
 	return true;
 }
-
 
 /**
  * Tests two bitfields for intersection.
@@ -124,17 +131,18 @@ bool flag_is_full(const bitflag *flags, const size_t size)
  * true is returned when any flag is set in both `flags1` and `flags2`, and
  * false otherwise. The size of the bitfields is supplied in `size`.
  */
-bool flag_is_inter(const bitflag *flags1, const bitflag *flags2,
-				   const size_t size)
+bool flag_is_inter(const bitflag *flags1,
+		   const bitflag *flags2,
+		   const size_t size)
 {
 	size_t i;
 
 	for (i = 0; i < size; i++)
-		if (flags1[i] & flags2[i]) return true;
+		if (flags1[i] & flags2[i])
+			return true;
 
 	return false;
 }
-
 
 /**
  * Test if one bitfield is a subset of another.
@@ -142,17 +150,18 @@ bool flag_is_inter(const bitflag *flags1, const bitflag *flags2,
  * true is returned when every set flag in `flags2` is also set in `flags1`,
  * and false otherwise. The size of the bitfields is supplied in `size`.
  */
-bool flag_is_subset(const bitflag *flags1, const bitflag *flags2,
-					const size_t size)
+bool flag_is_subset(const bitflag *flags1,
+		    const bitflag *flags2,
+		    const size_t size)
 {
 	size_t i;
 
 	for (i = 0; i < size; i++)
-		if (~flags1[i] & flags2[i]) return false;
+		if (~flags1[i] & flags2[i])
+			return false;
 
 	return true;
 }
-
 
 /**
  * Tests two bitfields for equality.
@@ -165,7 +174,6 @@ bool flag_is_equal(const bitflag *flags1, const bitflag *flags2,
 {
 	return (!memcmp(flags1, flags2, size * sizeof(bitflag)));
 }
-
 
 /**
  * Sets one bitflag in a bitfield.
@@ -181,33 +189,42 @@ bool flag_on(bitflag *flags, const size_t size, const int flag)
 
 	assert(flag_offset < size);
 
-	if (flags[flag_offset] & flag_binary) return false;
+	if (flags[flag_offset] & flag_binary)
+		return false;
 
 	flags[flag_offset] |= flag_binary;
 
 	return true;
 }
 
-bool flag_on_dbg(bitflag *flags, const size_t size, const int flag,
-				 const char *fi, const char *fl)
+bool flag_on_dbg(bitflag *flags,
+		 const size_t size,
+		 const int flag,
+		 const char *fi,
+		 const char *fl)
 {
 	const size_t flag_offset = FLAG_OFFSET(flag);
 	const int flag_binary = FLAG_BINARY(flag);
 
 	if (flag_offset >= size) {
 		quit_fmt("Error in flag_on(%s, %s): FlagID[%d] Size[%u] FlagOff[%u] FlagBV[%d]\n",
-		         fi, fl, flag, (unsigned int) size, (unsigned int) flag_offset, flag_binary);
+			 fi,
+			 fl,
+			 flag,
+			 (unsigned int) size,
+			 (unsigned int) flag_offset,
+			 flag_binary);
 	}
 
 	assert(flag_offset < size);
 
-	if (flags[flag_offset] & flag_binary) return false;
+	if (flags[flag_offset] & flag_binary)
+		return false;
 
 	flags[flag_offset] |= flag_binary;
 
 	return true;
 }
-
 
 /**
  * Clears one flag in a bitfield.
@@ -223,13 +240,13 @@ bool flag_off(bitflag *flags, const size_t size, const int flag)
 
 	assert(flag_offset < size);
 
-	if (!(flags[flag_offset] & flag_binary)) return false;
+	if (!(flags[flag_offset] & flag_binary))
+		return false;
 
 	flags[flag_offset] &= ~flag_binary;
 
 	return true;
 }
-
 
 /**
  * Clears all flags in a bitfield.
@@ -241,7 +258,6 @@ void flag_wipe(bitflag *flags, const size_t size)
 	memset(flags, 0, size * sizeof(bitflag));
 }
 
-
 /**
  * Sets all flags in a bitfield.
  *
@@ -251,7 +267,6 @@ void flag_setall(bitflag *flags, const size_t size)
 {
 	memset(flags, 255, size * sizeof(bitflag));
 }
-
 
 /**
  * Negates all flags in a bitfield.
@@ -266,7 +281,6 @@ void flag_negate(bitflag *flags, const size_t size)
 		flags[i] = ~flags[i];
 }
 
-
 /**
  * Copies one bitfield into another.
  *
@@ -277,7 +291,6 @@ void flag_copy(bitflag *flags1, const bitflag *flags2, const size_t size)
 {
 	memcpy(flags1, flags2, size * sizeof(bitflag));
 }
-
 
 /**
  * Computes the union of two bitfields.
@@ -293,14 +306,14 @@ bool flag_union(bitflag *flags1, const bitflag *flags2, const size_t size)
 
 	for (i = 0; i < size; i++) {
 		/* !flag_is_subset() */
-		if (~flags1[i] & flags2[i]) delta = true;
+		if (~flags1[i] & flags2[i])
+			delta = true;
 
 		flags1[i] |= flags2[i];
 	}
 
 	return delta;
 }
-
 
 /**
  * Computes the union of one bitfield and the complement of another.
@@ -316,14 +329,14 @@ bool flag_comp_union(bitflag *flags1, const bitflag *flags2, const size_t size)
 
 	for (i = 0; i < size; i++) {
 		/* no equivalent fn */
-		if (!(~flags1[i] & ~flags2[i])) delta = true;
+		if (!(~flags1[i] & ~flags2[i]))
+			delta = true;
 
 		flags1[i] |= ~flags2[i];
 	}
 
 	return delta;
 }
-
 
 /**
  * Computes the intersection of two bitfields.
@@ -339,7 +352,8 @@ bool flag_inter(bitflag *flags1, const bitflag *flags2, const size_t size)
 
 	for (i = 0; i < size; i++) {
 		/* !flag_is_equal() */
-		if (!(flags1[i] == flags2[i])) delta = true;
+		if (!(flags1[i] == flags2[i]))
+			delta = true;
 
 		flags1[i] &= flags2[i];
 	}
@@ -347,7 +361,6 @@ bool flag_inter(bitflag *flags1, const bitflag *flags2, const size_t size)
 	return delta;
 
 }
-
 
 /**
  * Computes the difference of two bitfields.
@@ -363,17 +376,14 @@ bool flag_diff(bitflag *flags1, const bitflag *flags2, const size_t size)
 
 	for (i = 0; i < size; i++) {
 		/* flag_is_inter() */
-		if (flags1[i] & flags2[i]) delta = true;
+		if (flags1[i] & flags2[i])
+			delta = true;
 
 		flags1[i] &= ~flags2[i];
 	}
 
 	return delta;
 }
-
-
-
-
 
 /**
  * Tests if any of multiple bitflags are set in a bitfield.
@@ -412,7 +422,6 @@ bool flags_test(const bitflag *flags, const size_t size, ...)
 	return delta;
 }
 
-
 /**
  * Tests if all of the multiple bitflags are set in a bitfield.
  *
@@ -450,7 +459,6 @@ bool flags_test_all(const bitflag *flags, const size_t size, ...)
 	return delta;
 }
 
-
 /**
  * Clears multiple bitflags in a bitfield.
  *
@@ -478,7 +486,8 @@ bool flags_clear(bitflag *flags, const size_t size, ...)
 		assert(flag_offset < size);
 
 		/* flag_has() */
-		if (flags[flag_offset] & flag_binary) delta = true;
+		if (flags[flag_offset] & flag_binary)
+			delta = true;
 
 		/* flag_off() */
 		flags[flag_offset] &= ~flag_binary;
@@ -488,7 +497,6 @@ bool flags_clear(bitflag *flags, const size_t size, ...)
 
 	return delta;
 }
-
 
 /**
  * Sets multiple bitflags in a bitfield.
@@ -517,7 +525,8 @@ bool flags_set(bitflag *flags, const size_t size, ...)
 		assert(flag_offset < size);
 
 		/* !flag_has() */
-		if (!(flags[flag_offset] & flag_binary)) delta = true;
+		if (!(flags[flag_offset] & flag_binary))
+			delta = true;
 
 		/* flag_on() */
 		flags[flag_offset] |= flag_binary;
@@ -527,7 +536,6 @@ bool flags_set(bitflag *flags, const size_t size, ...)
 
 	return delta;
 }
-
 
 /**
  * Wipes a bitfield, and then sets multiple bitflags.
@@ -552,7 +560,6 @@ void flags_init(bitflag *flags, const size_t size, ...)
 
 	va_end(args);
 }
-
 
 /**
  * Computes the intersection of a bitfield and multiple bitflags.

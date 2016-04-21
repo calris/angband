@@ -71,37 +71,37 @@ typedef struct monster_lore
 extern struct monster_lore *l_list;
 
 void get_attack_colors(int melee_colors[RBE_MAX], int spell_colors[RSF_MAX]);
-void lore_append_kills(textblock *tb, const struct monster_race *race,
+void lore_append_kills(struct textblock *tb, const struct monster_race *race,
 					   const struct monster_lore *lore,
 					   const bitflag known_flags[RF_SIZE]);
-void lore_append_flavor(textblock *tb, const struct monster_race *race,
+void lore_append_flavor(struct textblock *tb, const struct monster_race *race,
 						bool append_utf8);
-void lore_append_movement(textblock *tb, const struct monster_race *race,
+void lore_append_movement(struct textblock *tb, const struct monster_race *race,
 						  const struct monster_lore *lore,
 						  bitflag known_flags[RF_SIZE]);
-void lore_append_toughness(textblock *tb, const struct monster_race *race,
+void lore_append_toughness(struct textblock *tb, const struct monster_race *race,
 						   const struct monster_lore *lore,
 						   bitflag known_flags[RF_SIZE]);
-void lore_append_exp(textblock *tb, const struct monster_race *race,
+void lore_append_exp(struct textblock *tb, const struct monster_race *race,
 					 const struct monster_lore *lore,
 					 bitflag known_flags[RF_SIZE]);
-void lore_append_drop(textblock *tb, const struct monster_race *race,
+void lore_append_drop(struct textblock *tb, const struct monster_race *race,
 					  const struct monster_lore *lore,
 					  bitflag known_flags[RF_SIZE]);
-void lore_append_abilities(textblock *tb, const struct monster_race *race,
+void lore_append_abilities(struct textblock *tb, const struct monster_race *race,
 						   const struct monster_lore *lore,
 						   bitflag known_flags[RF_SIZE]);
-void lore_append_awareness(textblock *tb, const struct monster_race *race,
+void lore_append_awareness(struct textblock *tb, const struct monster_race *race,
 						   const struct monster_lore *lore,
 						   bitflag known_flags[RF_SIZE]);
-void lore_append_friends(textblock *tb, const struct monster_race *race,
+void lore_append_friends(struct textblock *tb, const struct monster_race *race,
 						 const struct monster_lore *lore,
 						 bitflag known_flags[RF_SIZE]);
-void lore_append_spells(textblock *tb, const struct monster_race *race,
+void lore_append_spells(struct textblock *tb, const struct monster_race *race,
 						const struct monster_lore *lore,
 						bitflag known_flags[RF_SIZE],
 						const int spell_colors[RSF_MAX]);
-void lore_append_attack(textblock *tb, const struct monster_race *race,
+void lore_append_attack(struct textblock *tb, const struct monster_race *race,
 						const struct monster_lore *lore,
 						bitflag known_flags[RF_SIZE],
 						const int melee_colors[RBE_MAX]);

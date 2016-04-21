@@ -37,12 +37,12 @@
  * The result will be base + XdY + BONUS, where m_bonus is used in a
  * tricky way to determine BONUS.
  */
-typedef struct random {
+struct random_value {
 	int base;
 	int dice;
 	int sides;
 	int m_bonus;
-} random_value;
+};
 
 /**
  * The number of 32-bit integers worth of seed state.
@@ -52,13 +52,13 @@ typedef struct random {
 /**
  * Random aspects used by damcalc, m_bonus_calc, and ranvals
  */
-typedef enum {
+enum aspect {
 	MINIMISE,
 	AVERAGE,
 	MAXIMISE,
 	EXTREMIFY,
 	RANDOMISE
-} aspect;
+};
 
 
 /**
@@ -147,7 +147,7 @@ int damroll(int num, int sides);
 /**
  * Calculation helper function for damroll
  */
-int damcalc(int num, int sides, aspect dam_aspect);
+int damcalc(int num, int sides, enum aspect dam_aspect);
 
 /**
  * Generates a random signed long integer X where "A <= X <= B"
@@ -166,23 +166,28 @@ s16b m_bonus(int max, int level);
 /**
  * Calculation helper function for m_bonus.
  */
-s16b m_bonus_calc(int max, int level, aspect bonus_aspect);
+s16b m_bonus_calc(int max, int level, enum aspect bonus_aspect);
 
 /**
  * Calculation helper function for random_value structs.
  */
-int randcalc(random_value v, int level, aspect rand_aspect);
+int randcalc(struct random_value v, int level, enum aspect rand_aspect);
 
 /**
  * Test to see if a value is within a random_value's range.
  */
-bool randcalc_valid(random_value v, int test);
+bool randcalc_valid(struct random_value v, int test);
 
 /**
  * Test to see if a random_value actually varies.
  */
-bool randcalc_varies(random_value v);
+bool randcalc_varies(struct random_value v);
 
 extern void rand_fix(u32b val);
+
+/**
+ * HACK: Used by Rand_simple() - need a platform wrapper for this
+ */
+int getpid(void);
 
 #endif /* INCLUDED_Z_RAND_H */

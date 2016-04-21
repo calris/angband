@@ -862,7 +862,7 @@ static int lore_insert_spell_description(int spell, const struct monster_race *r
  * \param attr is the attribute each list item will be drawn with.
  * \param conjunction is a string that is added before the last item.
  */
-static void lore_append_list(textblock *tb, const char *list[], int count,
+static void lore_append_list(struct textblock *tb, const char *list[], int count,
 							 byte attr, const char *conjunction)
 {
 	int i;
@@ -901,7 +901,7 @@ static void lore_append_list(textblock *tb, const char *list[], int count,
  * \param count is the number of items in the lists.
  * \param conjunction is a string that is added before the last item.
  */
-static void lore_append_spell_descriptions(textblock *tb,
+static void lore_append_spell_descriptions(struct textblock *tb,
 										   const char *name_list[],
 										   int color_list[], int damage_list[],
 										   int count, const char *conjunction)
@@ -941,7 +941,7 @@ static void lore_append_spell_descriptions(textblock *tb,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_kills(textblock *tb, const struct monster_race *race,
+void lore_append_kills(struct textblock *tb, const struct monster_race *race,
 					   const struct monster_lore *lore,
 					   const bitflag known_flags[RF_SIZE])
 {
@@ -1013,7 +1013,7 @@ void lore_append_kills(textblock *tb, const struct monster_race *race,
  * \param append_utf8 indicates if we should append the flavor text as UTF-8
  *        (which is preferred for spoiler files).
  */
-void lore_append_flavor(textblock *tb, const struct monster_race *race,
+void lore_append_flavor(struct textblock *tb, const struct monster_race *race,
 						bool append_utf8)
 {
 	assert(tb && race);
@@ -1037,7 +1037,7 @@ void lore_append_flavor(textblock *tb, const struct monster_race *race,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_movement(textblock *tb, const struct monster_race *race,
+void lore_append_movement(struct textblock *tb, const struct monster_race *race,
 						  const struct monster_lore *lore,
 						  bitflag known_flags[RF_SIZE])
 {
@@ -1149,7 +1149,7 @@ void lore_append_movement(textblock *tb, const struct monster_race *race,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_toughness(textblock *tb, const struct monster_race *race,
+void lore_append_toughness(struct textblock *tb, const struct monster_race *race,
 						   const struct monster_lore *lore,
 						   bitflag known_flags[RF_SIZE])
 {
@@ -1212,7 +1212,7 @@ void lore_append_toughness(textblock *tb, const struct monster_race *race,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_exp(textblock *tb, const struct monster_race *race,
+void lore_append_exp(struct textblock *tb, const struct monster_race *race,
 					 const struct monster_lore *lore,
 					 bitflag known_flags[RF_SIZE])
 {
@@ -1277,7 +1277,7 @@ void lore_append_exp(textblock *tb, const struct monster_race *race,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_drop(textblock *tb, const struct monster_race *race,
+void lore_append_drop(struct textblock *tb, const struct monster_race *race,
 					  const struct monster_lore *lore,
 					  bitflag known_flags[RF_SIZE])
 {
@@ -1345,7 +1345,7 @@ void lore_append_drop(textblock *tb, const struct monster_race *race,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_abilities(textblock *tb, const struct monster_race *race,
+void lore_append_abilities(struct textblock *tb, const struct monster_race *race,
 						   const struct monster_lore *lore,
 						   bitflag known_flags[RF_SIZE])
 {
@@ -1511,7 +1511,7 @@ void lore_append_abilities(textblock *tb, const struct monster_race *race,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_awareness(textblock *tb, const struct monster_race *race,
+void lore_append_awareness(struct textblock *tb, const struct monster_race *race,
 						   const struct monster_lore *lore,
 						   bitflag known_flags[RF_SIZE])
 {
@@ -1544,7 +1544,7 @@ void lore_append_awareness(textblock *tb, const struct monster_race *race,
  * \param known_flags is the preprocessed bitfield of race flags known to the
  *        player.
  */
-void lore_append_friends(textblock *tb, const struct monster_race *race,
+void lore_append_friends(struct textblock *tb, const struct monster_race *race,
 						 const struct monster_lore *lore,
 						 bitflag known_flags[RF_SIZE])
 {
@@ -1579,7 +1579,7 @@ void lore_append_friends(textblock *tb, const struct monster_race *race,
  * \param spell_colors is a list of colors that is associated with each
  *        RSF_ spell.
  */
-void lore_append_spells(textblock *tb, const struct monster_race *race,
+void lore_append_spells(struct textblock *tb, const struct monster_race *race,
 						const struct monster_lore *lore,
 						bitflag known_flags[RF_SIZE],
 						const int spell_colors[RSF_MAX])
@@ -1794,7 +1794,7 @@ void lore_append_spells(textblock *tb, const struct monster_race *race,
  * \param melee_colors is a list of colors that is associated with each
  *        RBE_ effect.
  */
-void lore_append_attack(textblock *tb, const struct monster_race *race,
+void lore_append_attack(struct textblock *tb, const struct monster_race *race,
 						const struct monster_lore *lore,
 						bitflag known_flags[RF_SIZE],
 						const int melee_colors[RBE_MAX])
@@ -1835,7 +1835,7 @@ void lore_append_attack(textblock *tb, const struct monster_race *race,
 
 	/* Describe each melee attack */
 	for (i = 0; i < z_info->mon_blows_max; i++) {
-		random_value dice;
+		struct random_value dice;
 		const char *method_str = NULL;
 		const char *effect_str = NULL;
 

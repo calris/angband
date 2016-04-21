@@ -812,7 +812,7 @@ static enum parser_error parse_monster_drop_artifact(struct parser *p) {
 static enum parser_error parse_monster_friends(struct parser *p) {
 	struct monster_race *r = parser_priv(p);
 	struct monster_friends *f;
-	struct random number;
+	struct random_value number;
 
 	if (!r)
 		return PARSE_ERROR_MISSING_RECORD_HEADER;
@@ -831,7 +831,7 @@ static enum parser_error parse_monster_friends(struct parser *p) {
 static enum parser_error parse_monster_friends_base(struct parser *p) {
 	struct monster_race *r = parser_priv(p);
 	struct monster_friends_base *f;
-	struct random number;
+	struct random_value number;
 
 	if (!r)
 		return PARSE_ERROR_MISSING_RECORD_HEADER;
@@ -1121,7 +1121,7 @@ static enum parser_error parse_lore_counts(struct parser *p) {
 static enum parser_error parse_lore_blow(struct parser *p) {
 	struct monster_lore *l = parser_priv(p);
 	int method, effect = 0, seen = 0, index = 0;
-	struct random dam;
+	struct random_value dam;
 
 	if (!l)
 		return PARSE_ERROR_MISSING_RECORD_HEADER;
@@ -1261,7 +1261,7 @@ static enum parser_error parse_lore_drop_artifact(struct parser *p) {
 static enum parser_error parse_lore_friends(struct parser *p) {
 	struct monster_lore *l = parser_priv(p);
 	struct monster_friends *f;
-	struct random number;
+	struct random_value number;
 
 	if (!l)
 		return PARSE_ERROR_MISSING_RECORD_HEADER;
@@ -1280,7 +1280,7 @@ static enum parser_error parse_lore_friends(struct parser *p) {
 static enum parser_error parse_lore_friends_base(struct parser *p) {
 	struct monster_lore *l = parser_priv(p);
 	struct monster_friends_base *f;
-	struct random number;
+	struct random_value number;
 
 	if (!l)
 		return PARSE_ERROR_MISSING_RECORD_HEADER;

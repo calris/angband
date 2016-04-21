@@ -65,7 +65,7 @@ struct parser_value {
 		int ival;
 		unsigned int uval;
 		char *sval;
-		random_value rval;
+		struct random_value rval;
 	} u;
 };
 
@@ -118,7 +118,7 @@ static void parser_freeold(struct parser *p) {
 	}
 }
 
-static bool parse_random(const char *str, random_value *bonus) {
+static bool parse_random(const char *str, struct random_value *bonus) {
 	bool negative = false;
 
 	char buffer[50];
@@ -569,7 +569,7 @@ const char *parser_getstr(struct parser *p, const char *name) {
 /**
  * Returns the random value named `name`. This symbol must exist.
  */
-struct random parser_getrand(struct parser *p, const char *name) {
+struct random_value parser_getrand(struct parser *p, const char *name) {
 	struct parser_value *v = parser_getval(p, name);
 	assert((v->spec.type & ~PARSE_T_OPT) == PARSE_T_RAND);
 	return v->u.rval;
@@ -742,7 +742,7 @@ bool find_value_arg(char *value_name, char *string, int *num)
  * \param name_and_value the value expression being matched
  * \return 0 if successful, otherwise an error value
  */
-errr grab_rand_value(random_value *value, const char **value_type, const char *name_and_value)
+errr grab_rand_value(struct random_value *value, const char **value_type, const char *name_and_value)
 {
 	int i = 0;
 	char value_name[80];

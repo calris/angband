@@ -137,7 +137,7 @@ static struct {
  *
  * ... output a list like "intelligence, fish, lens, prime, number.\n".
  */
-static void info_out_list(textblock *tb, const char *list[], size_t count)
+static void info_out_list(struct textblock *tb, const char *list[], size_t count)
 {
 	size_t i;
 
@@ -191,7 +191,7 @@ static size_t element_info_collect(const bool list[], const char *recepticle[])
 /**
  * Describe an item's curses.
  */
-static bool describe_curses(textblock *tb, const struct object *obj,
+static bool describe_curses(struct textblock *tb, const struct object *obj,
 		const bitflag flags[OF_SIZE])
 {
 	if (of_has(flags, OF_PERMA_CURSE))
@@ -210,7 +210,7 @@ static bool describe_curses(textblock *tb, const struct object *obj,
 /**
  * Describe stat modifications.
  */
-static bool describe_stats(textblock *tb, const struct object *obj,
+static bool describe_stats(struct textblock *tb, const struct object *obj,
 						   oinfo_detail_t mode)
 {
 	size_t count = 0, i;
@@ -259,7 +259,7 @@ static bool describe_stats(textblock *tb, const struct object *obj,
 /**
  * Describe immunities, resistances and vulnerabilities granted by an object.
  */
-static bool describe_elements(textblock *tb,
+static bool describe_elements(struct textblock *tb,
 							  const struct element_info el_info[])
 {
 	const char *i_descs[N_ELEMENTS(elements)];
@@ -306,7 +306,7 @@ static bool describe_elements(textblock *tb,
 /**
  * Describe protections granted by an object.
  */
-static bool describe_protects(textblock *tb, const bitflag flags[OF_SIZE])
+static bool describe_protects(struct textblock *tb, const bitflag flags[OF_SIZE])
 {
 	const char *p_descs[N_ELEMENTS(protect_flags)];
 	size_t count;
@@ -327,7 +327,7 @@ static bool describe_protects(textblock *tb, const bitflag flags[OF_SIZE])
 /**
  * Describe elements an object ignores.
  */
-static bool describe_ignores(textblock *tb, const struct element_info el_info[])
+static bool describe_ignores(struct textblock *tb, const struct element_info el_info[])
 {
 	const char *descs[N_ELEMENTS(elements)];
 	size_t i, count;
@@ -349,7 +349,7 @@ static bool describe_ignores(textblock *tb, const struct element_info el_info[])
 /**
  * Describe elements that damage or destroy an object.
  */
-static bool describe_hates(textblock *tb, const struct element_info el_info[])
+static bool describe_hates(struct textblock *tb, const struct element_info el_info[])
 {
 	const char *descs[N_ELEMENTS(elements)];
 	size_t i, count = 0;
@@ -372,7 +372,7 @@ static bool describe_hates(textblock *tb, const struct element_info el_info[])
 /**
  * Describe stat sustains.
  */
-static bool describe_sustains(textblock *tb, const bitflag flags[OF_SIZE])
+static bool describe_sustains(struct textblock *tb, const bitflag flags[OF_SIZE])
 {
 	const char *descs[N_ELEMENTS(sustain_flags)];
 	size_t count = flag_info_collect(sustain_flags, N_ELEMENTS(sustain_flags),
@@ -391,7 +391,7 @@ static bool describe_sustains(textblock *tb, const bitflag flags[OF_SIZE])
 /**
  * Describe miscellaneous powers.
  */
-static bool describe_misc_magic(textblock *tb, const bitflag flags[OF_SIZE])
+static bool describe_misc_magic(struct textblock *tb, const bitflag flags[OF_SIZE])
 {
 	size_t i;
 	bool printed = false;
@@ -415,7 +415,7 @@ static bool describe_misc_magic(textblock *tb, const bitflag flags[OF_SIZE])
 /**
  * Describe slays and brands on weapons
  */
-static bool describe_slays(textblock *tb, const struct object *obj)
+static bool describe_slays(struct textblock *tb, const struct object *obj)
 {
 	struct slay *s = obj->known->slays;
 
@@ -443,7 +443,7 @@ static bool describe_slays(textblock *tb, const struct object *obj)
 /**
  * Describe slays and brands on weapons
  */
-static bool describe_brands(textblock *tb, const struct object *obj)
+static bool describe_brands(struct textblock *tb, const struct object *obj)
 {
 	struct brand *b = obj->known->brands;
 
@@ -711,7 +711,7 @@ static int obj_known_blows(const struct object *obj, int max_num,
 /**
  * Describe blows.
  */
-static bool describe_blows(textblock *tb, const struct object *obj)
+static bool describe_blows(struct textblock *tb, const struct object *obj)
 {
 	int i;
 	struct blow_info blow_info[STAT_RANGE * 2]; /* (Very) theoretical max */
@@ -922,7 +922,7 @@ static bool obj_known_damage(const struct object *obj, int *normal_damage,
 /**
  * Describe damage.
  */
-static bool describe_damage(textblock *tb, const struct object *obj)
+static bool describe_damage(struct textblock *tb, const struct object *obj)
 {
 	bool nonweap_slay = false;
 	int normal_damage;
@@ -1050,7 +1050,7 @@ static void obj_known_misc_combat(const struct object *obj, bool *thrown_effect,
 /**
  * Describe combat advantages.
  */
-static bool describe_combat(textblock *tb, const struct object *obj)
+static bool describe_combat(struct textblock *tb, const struct object *obj)
 {
 	struct object *bow = equipped_item_by_slot_name(player, "shooting");
 	bool weapon = tval_is_melee_weapon(obj);
@@ -1148,7 +1148,7 @@ static bool obj_known_digging(struct object *obj, int deciturns[])
 /**
  * Describe objects that can be used for digging.
  */
-static bool describe_digger(textblock *tb, const struct object *obj)
+static bool describe_digger(struct textblock *tb, const struct object *obj)
 {
 	int i;
 	int deciturns[DIGGING_MAX];
@@ -1243,7 +1243,7 @@ static bool obj_known_light(const struct object *obj, oinfo_detail_t mode, int *
 /**
  * Describe things that look like lights.
  */
-static bool describe_light(textblock *tb, const struct object *obj,
+static bool describe_light(struct textblock *tb, const struct object *obj,
 		oinfo_detail_t mode)
 {
 	int rad = 0;
@@ -1293,7 +1293,7 @@ static bool obj_known_effect(const struct object *obj, struct effect **effect,
 								 bool *aimed, int *min_recharge,
 								 int *max_recharge, int *failure_chance)
 {
-	random_value timeout = {0, 0, 0, 0};
+	struct random_value timeout = {0, 0, 0, 0};
 
 	*effect = 0;
 	*min_recharge = 0;
@@ -1336,7 +1336,7 @@ static bool obj_known_effect(const struct object *obj, struct effect **effect,
 /**
  * Describe an object's effect, if any.
  */
-static bool describe_effect(textblock *tb, const struct object *obj,
+static bool describe_effect(struct textblock *tb, const struct object *obj,
 		bool only_artifacts, bool subjective)
 {
 	char desc[200];
@@ -1393,7 +1393,7 @@ static bool describe_effect(textblock *tb, const struct object *obj,
 		while (effect) {
 			char *next_char = desc;
 			int roll = 0;
-			random_value value = { 0, 0, 0, 0 };
+			struct random_value value = { 0, 0, 0, 0 };
 			char dice_string[20];
 			int boost, level = obj->kind->level;
 
@@ -1605,7 +1605,7 @@ static bool describe_effect(textblock *tb, const struct object *obj,
 /**
  * Describe an item's origin
  */
-static bool describe_origin(textblock *tb, const struct object *obj, bool terse)
+static bool describe_origin(struct textblock *tb, const struct object *obj, bool terse)
 {
 	char loot_spot[80];
 	char name[80];
@@ -1668,7 +1668,7 @@ static bool describe_origin(textblock *tb, const struct object *obj, bool terse)
  * \param ego is whether we're describing an ego template (as opposed to a
  * real object)
  */
-static void describe_flavor_text(textblock *tb, const struct object *obj,
+static void describe_flavor_text(struct textblock *tb, const struct object *obj,
 	bool ego)
 {
 	/* Display the known artifact or object description */
@@ -1697,7 +1697,7 @@ static void describe_flavor_text(textblock *tb, const struct object *obj,
 /**
  * Describe random properties that an ego item may have
  */
-static bool describe_ego(textblock *tb, const struct ego_item *ego)
+static bool describe_ego(struct textblock *tb, const struct ego_item *ego)
 {
 	int i, num = 3;
 
@@ -1721,7 +1721,7 @@ static bool describe_ego(textblock *tb, const struct ego_item *ego)
 /**
  * Output object information
  */
-static textblock *object_info_out(const struct object *obj, int mode)
+static struct textblock *object_info_out(const struct object *obj, int mode)
 {
 	bitflag flags[OF_SIZE];
 	struct element_info el_info[N_ELEMENTS(elements)];
@@ -1731,7 +1731,7 @@ static textblock *object_info_out(const struct object *obj, int mode)
 	bool terse = mode & OINFO_TERSE ? true : false;
 	bool subjective = mode & OINFO_SUBJ ? true : false;
 	bool ego = mode & OINFO_EGO ? true : false;
-	textblock *tb = textblock_new();
+	struct textblock *tb = textblock_new();
 	const struct object *known_obj = obj->known ? obj->known : obj;
 
 	/* Unaware objects get simple descriptions */
@@ -1798,7 +1798,7 @@ static textblock *object_info_out(const struct object *obj, int mode)
  *
  * returns true if anything is printed.
  */
-textblock *object_info(const struct object *obj, oinfo_detail_t mode)
+struct textblock *object_info(const struct object *obj, oinfo_detail_t mode)
 {
 	mode |= OINFO_SUBJ;
 	return object_info_out(obj, mode);
@@ -1807,7 +1807,7 @@ textblock *object_info(const struct object *obj, oinfo_detail_t mode)
 /**
  * Provide information on an ego-item type
  */
-textblock *object_info_ego(struct ego_item *ego)
+struct textblock *object_info_ego(struct ego_item *ego)
 {
 	struct object_kind *kind = NULL;
 	struct object obj = { 0 };
@@ -1840,7 +1840,7 @@ textblock *object_info_ego(struct ego_item *ego)
  */
 void object_info_chardump(ang_file *f, const struct object *obj, int indent, int wrap)
 {
-	textblock *tb = object_info_out(obj, OINFO_TERSE | OINFO_SUBJ);
+	struct textblock *tb = object_info_out(obj, OINFO_TERSE | OINFO_SUBJ);
 	textblock_to_file(tb, f, indent, wrap);
 	textblock_free(tb);
 }
@@ -1854,7 +1854,7 @@ void object_info_chardump(ang_file *f, const struct object *obj, int indent, int
  */
 void object_info_spoil(ang_file *f, const struct object *obj, int wrap)
 {
-	textblock *tb = object_info_out(obj, OINFO_NONE);
+	struct textblock *tb = object_info_out(obj, OINFO_NONE);
 	textblock_to_file(tb, f, 0, wrap);
 	textblock_free(tb);
 }

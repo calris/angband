@@ -34,7 +34,7 @@
  * \param tb is the textblock we are placing the title into.
  * \param race is the monster race we are describing.
  */
-void lore_title(textblock *tb, const struct monster_race *race)
+void lore_title(struct textblock *tb, const struct monster_race *race)
 {
 	byte standard_attr, optional_attr;
 	wchar_t standard_char, optional_char;
@@ -85,7 +85,7 @@ void lore_title(textblock *tb, const struct monster_race *race)
  *        information without subjective information and monster flavor,
  *        while `false` only shows what the player knows.
  */
-void lore_description(textblock *tb, const struct monster_race *race,
+void lore_description(struct textblock *tb, const struct monster_race *race,
 					  const struct monster_lore *original_lore, bool spoilers)
 {
 	struct monster_lore mutable_lore;
@@ -168,7 +168,7 @@ void lore_description(textblock *tb, const struct monster_race *race,
 void lore_show_interactive(const struct monster_race *race,
 						   const struct monster_lore *lore)
 {
-	textblock *tb;
+	struct textblock *tb;
 	assert(race && lore);
 
 	event_signal(EVENT_MESSAGE_FLUSH);
@@ -192,7 +192,7 @@ void lore_show_subwindow(const struct monster_race *race,
 						 const struct monster_lore *lore)
 {
 	int y;
-	textblock *tb;
+	struct textblock *tb;
 
 	assert(race && lore);
 

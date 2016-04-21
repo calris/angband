@@ -53,7 +53,7 @@
  * \param max_width_result is returned with the width needed to format the list
  * without truncation.
  */
-static void monster_list_format_section(const monster_list_t *list, textblock *tb, monster_list_section_t section, int lines_to_display, int max_width, const char *prefix, bool show_others, size_t *max_width_result)
+static void monster_list_format_section(const monster_list_t *list, struct textblock *tb, monster_list_section_t section, int lines_to_display, int max_width, const char *prefix, bool show_others, size_t *max_width_result)
 {
 	int remaining_monster_total = 0;
 	int line_count = 0;
@@ -204,7 +204,7 @@ static void monster_list_format_section(const monster_list_t *list, textblock *t
  * without truncation.
  * \return true if further formatting should be bypassed.
  */
-static bool monster_list_format_special(const monster_list_t *list, textblock *tb, int max_lines, int max_width, size_t *max_height_result, size_t *max_width_result)
+static bool monster_list_format_special(const monster_list_t *list, struct textblock *tb, int max_lines, int max_width, size_t *max_height_result, size_t *max_width_result)
 {
 	if (player->timed[TMD_IMAGE] > 0) {
 		/* Hack - message needs newline to calculate width properly. */
@@ -244,7 +244,7 @@ static bool monster_list_format_special(const monster_list_t *list, textblock *t
  * \param max_width_result is returned with the width needed to format the list
  * without truncation.
  */
-static void monster_list_format_textblock(const monster_list_t *list, textblock *tb, int max_lines, int max_width, size_t *max_height_result, size_t *max_width_result)
+static void monster_list_format_textblock(const monster_list_t *list, struct textblock *tb, int max_lines, int max_width, size_t *max_height_result, size_t *max_width_result)
 {
 	int header_lines = 1;
 	int lines_remaining;
@@ -341,7 +341,7 @@ void monster_list_get_glyphs(monster_list_t *list)
  */
 void monster_list_show_subwindow(int height, int width)
 {
-	textblock *tb;
+	struct textblock *tb;
 	monster_list_t *list;
 	int i;
 
@@ -380,7 +380,7 @@ void monster_list_show_subwindow(int height, int width)
  */
 void monster_list_show_interactive(int height, int width)
 {
-	textblock *tb;
+	struct textblock *tb;
 	monster_list_t *list;
 	size_t max_width = 0, max_height = 0;
 	int safe_height, safe_width;

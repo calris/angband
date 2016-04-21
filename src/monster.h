@@ -140,7 +140,7 @@ struct monster_blow {
 
 	int method;			/* Method (RBM_*) */
 	int effect;			/* Effect (RBE_*) */
-	random_value dice;	/* Damage dice */
+	struct random_value dice;	/* Damage dice */
 	int times_seen;		/* Sightings of the blow (lore only) */
 };
 
@@ -170,7 +170,7 @@ struct monster_spell {
 	char *lore_desc;		/* Description of the attack used in lore text */
 	int hit;				/* To-hit level for the attack */
 	struct effect *effect;	/* Effect(s) of the spell */
-	random_value power;		/* Relative power of the spell */
+	struct random_value power;		/* Relative power of the spell */
 };
 
 

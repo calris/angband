@@ -484,7 +484,7 @@ bool spell_needs_aim(int spell_index)
 }
 
 static size_t append_random_value_string(char *buffer, size_t size,
-										 random_value *rv)
+		struct random_value *rv)
 {
 	size_t offset = 0;
 
@@ -508,7 +508,7 @@ static size_t append_random_value_string(char *buffer, size_t size,
 static void spell_append_value_info(int spell_index, char *p, size_t len)
 {
 	const struct class_spell *spell = spell_by_index(spell_index);
-	random_value rv;
+	struct random_value rv;
 	const char *type = NULL;
 	const char *special = NULL;
 	size_t offset = 0;

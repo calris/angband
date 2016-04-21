@@ -28,11 +28,9 @@ struct loc {
 
 struct loc loc(int x, int y);
 
-
 /**
  * Defines a (value, name) pairing.  Variable names used are historical.
  */
-typedef struct grouper grouper;
 struct grouper {
 	int tval;
 	const char *name;
@@ -48,9 +46,13 @@ struct point_set {
 };
 
 struct point_set *point_set_new(int initial_size);
+
 void point_set_dispose(struct point_set *ps);
+
 void add_to_point_set(struct point_set *ps, int y, int x);
+
 int point_set_size(struct point_set *ps);
+
 int point_set_contains(struct point_set *ps, int y, int x);
 
 #endif /* !INCLUDED_ZTYPE_H */

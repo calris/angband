@@ -50,7 +50,7 @@
  * without truncation.
  */
 static void object_list_format_section(const object_list_t *list,
-									   textblock *tb,
+									   struct textblock *tb,
 									   object_list_section_t section,
 									   int lines_to_display, int max_width,
 									   const char *prefix, bool show_others,
@@ -194,7 +194,7 @@ static void object_list_format_section(const object_list_t *list,
  * without truncation.
  * \return true if further formatting should be bypassed.
  */
-static bool object_list_format_special(const object_list_t *list, textblock *tb,
+static bool object_list_format_special(const object_list_t *list, struct textblock *tb,
 									   int max_lines, int max_width,
 									   size_t *max_height_result,
 									   size_t *max_width_result)
@@ -222,7 +222,7 @@ static bool object_list_format_special(const object_list_t *list, textblock *tb,
  * without truncation.
  */
 static void object_list_format_textblock(const object_list_t *list,
-										 textblock *tb, int max_lines,
+										 struct textblock *tb, int max_lines,
 										 int max_width,
 										 size_t *max_height_result,
 										 size_t *max_width_result)
@@ -303,7 +303,7 @@ static void object_list_format_textblock(const object_list_t *list,
  */
 void object_list_show_subwindow(int height, int width)
 {
-	textblock *tb;
+	struct textblock *tb;
 	object_list_t *list;
 
 	if (height < 1 || width < 1)
@@ -332,7 +332,7 @@ void object_list_show_subwindow(int height, int width)
  */
 void object_list_show_interactive(int height, int width)
 {
-	textblock *tb;
+	struct textblock *tb;
 	object_list_t *list;
 	size_t max_width = 0, max_height = 0;
 	int safe_height, safe_width;

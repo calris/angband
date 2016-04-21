@@ -14,17 +14,21 @@
 
 #include "h-basic.h"
 
-
 /**
  * Replacements for malloc() and friends that die on failure.
  */
 void *mem_alloc(size_t len);
+
 void *mem_zalloc(size_t len);
+
 void mem_free(void *p);
+
 void *mem_realloc(void *p, size_t len);
 
 char *string_make(const char *str);
+
 void string_free(char *str);
+
 char *string_append(char *s1, const char *s2);
 
 enum {

@@ -342,7 +342,7 @@ bool ego_has_ignore_type(struct ego_item *ego, ignore_type_t itype)
  * use zero (players don't consider an item with a positive bonus to be bad
  * even if the base kind has a higher positive bonus).
  */
-static int cmp_object_trait(int bonus, random_value base)
+static int cmp_object_trait(int bonus, struct random_value base)
 {
 	int amt = randcalc(base, 0, MINIMISE);
 	if (amt > 0) amt = 0;

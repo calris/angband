@@ -19,10 +19,13 @@
 #include "z-type.h"
 #include "z-virt.h"
 
-struct loc loc(int x, int y) {
+struct loc loc(int x, int y)
+{
 	struct loc p;
+
 	p.x = x;
 	p.y = y;
+
 	return p;
 }
 
@@ -32,9 +35,11 @@ struct loc loc(int x, int y) {
 struct point_set *point_set_new(int initial_size)
 {
 	struct point_set *ps = mem_alloc(sizeof(struct point_set));
+
 	ps->n = 0;
 	ps->allocated = initial_size;
 	ps->pts = mem_zalloc(sizeof(*(ps->pts)) * ps->allocated);
+
 	return ps;
 }
 
@@ -53,9 +58,11 @@ void add_to_point_set(struct point_set *ps, int y, int x)
 	ps->pts[ps->n].x = x;
 	ps->pts[ps->n].y = y;
 	ps->n++;
+
 	if (ps->n >= ps->allocated) {
 		ps->allocated *= 2;
-		ps->pts = mem_realloc(ps->pts, sizeof(*(ps->pts)) * ps->allocated);
+		ps->pts = mem_realloc(ps->pts,
+				      sizeof(*(ps->pts)) * ps->allocated);
 	}
 }
 
@@ -67,8 +74,10 @@ int point_set_size(struct point_set *ps)
 int point_set_contains(struct point_set *ps, int y, int x)
 {
 	int i;
+
 	for (i = 0; i < ps->n; i++)
 		if (ps->pts[i].x == x && ps->pts[i].y == y)
 			return 1;
+
 	return 0;
 }

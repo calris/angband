@@ -84,7 +84,7 @@ static void spoiler_underline(const char *str, char c)
 /**
  * The basic items categorized by type
  */
-static const grouper group_item[] =
+static const struct grouper group_item[] =
 {
 	{ TV_SHOT,		"Ammo" },
 	{ TV_ARROW,		  NULL },
@@ -308,7 +308,7 @@ static void spoil_obj_desc(const char *fname)
 /**
  * The artifacts categorized by type
  */
-static const grouper group_artifact[] =
+static const struct grouper group_artifact[] =
 {
 	{ TV_SWORD,         "Edged Weapons" },
 	{ TV_POLEARM,       "Polearms" },
@@ -576,7 +576,7 @@ static void spoil_mon_info(const char *fname)
 	int i, n;
 	u16b *who;
 	int count = 0;
-	textblock *tb = NULL;
+	struct textblock *tb = NULL;
 
 	/* Open the file */
 	path_build(buf, sizeof(buf), ANGBAND_DIR_USER, fname);

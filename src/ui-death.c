@@ -301,7 +301,7 @@ static void death_examine(const char *title, int row)
 	while (get_item(&obj, q, s, 0, NULL, (USE_INVEN | USE_QUIVER | USE_EQUIP | IS_HARMLESS))) {
 		char header[120];
 
-		textblock *tb;
+		struct textblock *tb;
 		region area = { 0, 0, 0, 0 };
 
 		tb = object_info(obj, OINFO_NONE);

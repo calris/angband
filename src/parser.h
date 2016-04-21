@@ -70,7 +70,7 @@ extern const char *parser_getsym(struct parser *p, const char *name);
 extern const char *parser_getstr(struct parser *p, const char *name);
 extern int parser_getint(struct parser *p, const char *name);
 extern unsigned int parser_getuint(struct parser *p, const char *name);
-extern struct random parser_getrand(struct parser *p, const char *name);
+extern struct random_value parser_getrand(struct parser *p, const char *name);
 extern wchar_t parser_getchar(struct parser *p, const char *name);
 extern int parser_getstate(struct parser *p, struct parser_state *s);
 extern void parser_setstate(struct parser *p, unsigned int col, const char *msg);
@@ -80,7 +80,7 @@ errr parse_file_quit_not_found(struct parser *p, const char *filename);
 errr parse_file(struct parser *p, const char *filename);
 void cleanup_parser(struct file_parser *fp);
 int lookup_flag(const char **flag_table, const char *flag_name);
-errr grab_rand_value(random_value *value, const char **value_type,
+errr grab_rand_value(struct random_value *value, const char **value_type,
 					 const char *name_and_value);
 errr grab_int_value(int *value, const char **value_type,
 					const char *name_and_value);

@@ -321,7 +321,7 @@ static const struct gf_type {
 	const char *desc;	/* text description */
 	const char *blind_desc;	/* text description (if blind) */
 	int num;			/* numerator for resistance */
-	random_value denom;	/* denominator for resistance */
+	struct random_value denom;	/* denominator for resistance */
 	bool force_obvious; /* */
 	byte color;			/* */
 } gf_table[] = {
@@ -381,9 +381,9 @@ int gf_num(int type)
 	return gf_table[type].num;
 }
 
-random_value gf_denom(int type)
+struct random_value gf_denom(int type)
 {
-	random_value rand = { 0, 0, 0, 0};
+	struct random_value rand = { 0, 0, 0, 0};
 	if (type < 0 || type >= GF_MAX)
 		return rand;
 

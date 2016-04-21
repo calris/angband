@@ -155,7 +155,7 @@ int stats_db_bind_ints(sqlite3_stmt *sql_stmt, int num_cols, int offset, ...) {
  * Utility function for binding a random_value to a parameter as TEXT.
  * Note optimization for storing values without randomness.
  */
-int stats_db_bind_rv(sqlite3_stmt *sql_stmt, int col, random_value rv) {
+int stats_db_bind_rv(sqlite3_stmt *sql_stmt, int col, struct random_value rv) {
 	char sql_buf[256];
 
 	if (rv.dice || rv.sides || rv.m_bonus) {

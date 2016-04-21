@@ -1197,7 +1197,7 @@ static void mon_lore(int oid)
 	int r_idx;
 	struct monster_race *race;
 	const struct monster_lore *lore;
-	textblock *tb;
+	struct textblock *tb;
 
 	r_idx = default_item_id(oid);
 
@@ -1332,7 +1332,7 @@ static void do_cmd_knowledge_monsters(const char *name, int row)
 /**
  * These are used for all the object sections
  */
-static const grouper object_text_order[] =
+static const struct grouper object_text_order[] =
 {
 	{TV_RING,			"Ring"			},
 	{TV_AMULET,			"Amulet"		},
@@ -1451,7 +1451,7 @@ static void desc_art_fake(int a_idx)
 
 	char header[120];
 
-	textblock *tb;
+	struct textblock *tb;
 	region area = { 0, 0, 0, 0 };
 
 	obj = find_artifact(&a_info[a_idx]);
@@ -1622,7 +1622,7 @@ static void desc_ego_fake(int oid)
 	int e_idx = default_item_id(oid);
 	struct ego_item *ego = &e_info[e_idx];
 
-	textblock *tb;
+	struct textblock *tb;
 	region area = { 0, 0, 0, 0 };
 
 	/* List ego flags */
@@ -1794,7 +1794,7 @@ static void desc_obj_fake(int k_idx)
 
 	char header[120];
 
-	textblock *tb;
+	struct textblock *tb;
 	region area = { 0, 0, 0, 0 };
 
 	/* Check for known artifacts, display them as artifacts */
@@ -2110,7 +2110,7 @@ static wchar_t *f_xchar(int oid)
 static void feat_lore(int oid)
 {
 	struct feature *feat = &f_info[oid];
-	textblock *tb = textblock_new();
+	struct textblock *tb = textblock_new();
 	char *title = string_make(feat->name);
 
 	if (feat->desc) {
@@ -2290,7 +2290,7 @@ static wchar_t *t_xchar(int oid)
 static void trap_lore(int oid)
 {
 	struct trap_kind *trap = &trap_info[oid];
-	textblock *tb = textblock_new();
+	struct textblock *tb = textblock_new();
 	char *title = string_make(trap->desc);
 
 	if (trap->text) {
@@ -3145,7 +3145,7 @@ void do_cmd_query_symbol(void)
 
 	/* Scan the monster memory */
 	while (1) {
-		textblock *tb;
+		struct textblock *tb;
 
 		/* Extract a race */
 		int r_idx = who[i];

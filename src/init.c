@@ -1026,7 +1026,7 @@ static enum parser_error parse_object_alloc(struct parser *p) {
 
 static enum parser_error parse_object_combat(struct parser *p) {
 	struct object_kind *k = parser_priv(p);
-	struct random hd = parser_getrand(p, "hd");
+	struct random_value hd = parser_getrand(p, "hd");
 	assert(k);
 
 	k->ac = parser_getint(p, "ac");
@@ -1708,7 +1708,7 @@ static enum parser_error parse_artifact_alloc(struct parser *p) {
 
 static enum parser_error parse_artifact_power(struct parser *p) {
 	struct artifact *a = parser_priv(p);
-	struct random hd = parser_getrand(p, "hd");
+	struct random_value hd = parser_getrand(p, "hd");
 	assert(a);
 
 	a->ac = parser_getint(p, "ac");
@@ -2525,9 +2525,9 @@ static enum parser_error parse_ego_item(struct parser *p) {
 }
 
 static enum parser_error parse_ego_combat(struct parser *p) {
-	struct random th = parser_getrand(p, "th");
-	struct random td = parser_getrand(p, "td");
-	struct random ta = parser_getrand(p, "ta");
+	struct random_value th = parser_getrand(p, "th");
+	struct random_value td = parser_getrand(p, "td");
+	struct random_value ta = parser_getrand(p, "ta");
 	struct ego_item *e = parser_priv(p);
 
 	if (!e)

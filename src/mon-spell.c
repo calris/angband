@@ -330,7 +330,7 @@ void unset_spells(bitflag *spells, bitflag *flags, bitflag *pflags,
  * \param dam_aspect is the damage calc required (min, avg, max, random)
  */
 static int nonhp_dam(const struct monster_spell *spell,
-					 const struct monster_race *race, aspect dam_aspect)
+					 const struct monster_race *race, enum aspect dam_aspect)
 {
 	int dam = 0;
 	struct effect *effect = spell->effect;
@@ -340,7 +340,7 @@ static int nonhp_dam(const struct monster_spell *spell,
 
 	/* Now add the damage for each effect */
 	while (effect) {
-		random_value rand;
+		struct random_value rand;
 		if (effect->dice) {
 			dice_roll(effect->dice, &rand);
 			dam += randcalc(rand, 0, dam_aspect);
@@ -382,7 +382,7 @@ int breath_dam(int element, int hp)
  * \param dam_aspect is the damage calc we want (min, max, avg, random).
  */
 static int mon_spell_dam(int index, int hp, const struct monster_race *race,
-						 aspect dam_aspect)
+		enum aspect dam_aspect)
 {
 	const struct monster_spell *spell = monster_spell_by_index(index);
 

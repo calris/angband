@@ -21,12 +21,6 @@
 #include "h-basic.h"
 
 /**
- * ------------------------------------------------------------------------
- * Permissions code
- * ------------------------------------------------------------------------ */
-
-
-/**
  * Player's user ID and group ID, respectively.
  *
  * Only relevant to POSIX systems that use main.c, and set there.
@@ -47,14 +41,8 @@ extern int player_egid;
  * cannot write to the system-wide files.
  */
 void safe_setuid_grab(void);
+
 void safe_setuid_drop(void);
-
-
-/**
- * ------------------------------------------------------------------------
- * Path building code
- * ------------------------------------------------------------------------ */
-
 
 /**
  * Concatenates "leaf" onto the end of "base", using system-specific path
@@ -68,15 +56,7 @@ size_t path_build(char *buf, size_t len, const char *base, const char *leaf);
  * Return the index of the filename in a path, using PATH_SEPC. If no path
  * separator is found, return 0.
  */
-size_t path_filename_index( const char *path );
-
-/**
- * ------------------------------------------------------------------------
- * File access code
- * ------------------------------------------------------------------------ */
-
-
-/** Data types **/
+size_t path_filename_index(const char *path);
 
 /**
  * An opaque file handle for Angband file handling.
@@ -86,8 +66,7 @@ typedef struct ang_file ang_file;
 /**
  * Specifies what kind of access is required to a file.  See file_open().
  */
-typedef enum
-{
+typedef enum {
 	MODE_WRITE,
 	MODE_READ,
 	MODE_APPEND
@@ -96,16 +75,12 @@ typedef enum
 /**
  * Specifies what kind of thing a file is, when writing.  See file_open().
  */
-typedef enum
-{
+typedef enum {
 	FTYPE_TEXT = 1,
 	FTYPE_SAVE,
 	FTYPE_RAW,
 	FTYPE_HTML
 } file_type;
-
-
-/** Utility functions **/
 
 /**
  * Returns true if `fname` exists (and is a file), false otherwise.
@@ -131,9 +106,6 @@ bool file_move(const char *fname, const char *newname);
  */
 bool file_newer(const char *first, const char *second);
 
-
-/** File handle creation **/
-
 /**
  * Open file `buf`, returning a file handler representing that file.
  *
@@ -151,12 +123,10 @@ bool file_newer(const char *first, const char *second);
  */
 ang_file *file_open(const char *buf, file_mode mode, file_type ftype);
 
-
 /**
  * Platform hook for file_open.  Used to set filetypes.
  */
 extern void (*file_open_hook)(const char *path, file_type ftype);
-
 
 /**
  * Attempt to close the file handle `f`.
@@ -164,9 +134,6 @@ extern void (*file_open_hook)(const char *path, file_type ftype);
  * Returns true if successful, false otherwise.
  */
 bool file_close(ang_file *f);
-
-
-/** File locking **/
 
 /**
  * Lock or unlock the file represented by `f` for writing.
@@ -176,9 +143,6 @@ bool file_close(ang_file *f);
  */
 void file_lock(ang_file *f);
 void file_unlock(ang_file *f);
-
-
-/** Line-based IO **/
 
 /**
  * Get a line of text from the file represented by `f`, placing it into `buf`
@@ -202,10 +166,8 @@ bool file_put(ang_file *f, const char *buf);
  * Format (using strnfmt) the given args, and then call file_put().
  */
 bool file_putf(ang_file *f, const char *fmt, ...);
+
 bool file_vputf(ang_file *f, const char *fmt, va_list vp);
-
-
-/** Byte-based IO */
 
 /**
  * Skip 'bytes' bytes.
@@ -242,14 +204,6 @@ bool file_readc(ang_file *f, byte *b);
  */
 bool file_writec(ang_file *f, byte b);
 
-
-
-/**
- * ------------------------------------------------------------------------
- * Directory code
- * ------------------------------------------------------------------------ */
-
-
 /**
  * Return whether or not a directory exists.
  */
@@ -266,7 +220,6 @@ bool dir_create(const char *dirname);
  * An opaque file handle for Angband directory handling.
  */
 typedef struct ang_dir ang_dir;
-
 
 /**
  * Opens a directory handle.

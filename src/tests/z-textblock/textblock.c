@@ -13,7 +13,7 @@ int teardown_tests(void *state) {
 }
 
 int test_alloc(void *state) {
-	textblock *tb = textblock_new();
+	struct textblock *tb = textblock_new();
 
 	require(tb);
 
@@ -23,7 +23,7 @@ int test_alloc(void *state) {
 }
 
 int test_append(void *state) {
-	textblock *tb = textblock_new();
+	struct textblock *tb = textblock_new();
 
 	require(!wcscmp(textblock_text(tb), L""));
 
@@ -37,7 +37,7 @@ int test_append(void *state) {
 }
 
 int test_colour(void *state) {
-	textblock *tb = textblock_new();
+	struct textblock *tb = textblock_new();
 
 	const char text[] = "two";
 	const byte attrs[] = { COLOUR_L_GREEN, COLOUR_L_GREEN, COLOUR_L_GREEN };	
@@ -50,7 +50,7 @@ int test_colour(void *state) {
 }
 
 int test_length(void *state) {
-	textblock *tb = textblock_new();
+	struct textblock *tb = textblock_new();
 
 	const char text[] = "1234567";
 	const wchar_t test_text[] = L"1234567";
