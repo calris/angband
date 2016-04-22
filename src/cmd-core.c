@@ -34,12 +34,7 @@
 
 errr (*cmd_get_hook)(cmd_context c);
 
-/**
- * ------------------------------------------------------------------------
- * A simple list of commands and their handling functions.
- * ------------------------------------------------------------------------ */
-struct command_info
-{
+struct command_info {
 	cmd_code cmd;
 	const char *verb;
 	cmd_handler_fn fn;
@@ -47,8 +42,7 @@ struct command_info
 	int auto_repeat_n;
 };
 
-static const struct command_info game_cmds[] =
-{
+static const struct command_info game_cmds[] = {
 	{ CMD_LOADFILE, "load a savefile", NULL, false, 0 },
 	{ CMD_NEWGAME, "start a new game", NULL, false, 0 },
 
@@ -114,6 +108,7 @@ static const struct command_info game_cmds[] =
 const char *cmd_verb(cmd_code cmd)
 {
 	size_t i;
+
 	for (i = 0; i < N_ELEMENTS(game_cmds); i++) {
 		if (game_cmds[i].cmd == cmd)
 			return game_cmds[i].verb;
@@ -135,27 +130,20 @@ static int cmd_idx(cmd_code code)
 	return CMD_ARG_NOT_PRESENT;
 }
 
-
-/**
- * ------------------------------------------------------------------------
- * The command queue.
- * ------------------------------------------------------------------------ */
-
 #define CMD_QUEUE_SIZE 20
 #define prev_cmd_idx(idx) ((idx + CMD_QUEUE_SIZE - 1) % CMD_QUEUE_SIZE)
 
-static int cmd_head = 0;
-static int cmd_tail = 0;
+static int cmd_head;
+static int cmd_tail;
 static struct command cmd_queue[CMD_QUEUE_SIZE];
 
-static bool repeat_prev_allowed = false;
-static bool repeating = false;
+static bool repeat_prev_allowed;
+static bool repeating;
 
 struct command *cmdq_peek(void)
 {
 	return &cmd_queue[prev_cmd_idx(cmd_head)];
 }
-
 
 /**
  * Insert the given command into the command queue.
@@ -163,8 +151,11 @@ struct command *cmdq_peek(void)
 errr cmdq_push_copy(struct command *cmd)
 {
 	/* If queue full, return error */
-	if (cmd_head + 1 == cmd_tail) return 1;
-	if (cmd_head + 1 == CMD_QUEUE_SIZE && cmd_tail == 0) return 1;
+	if (cmd_head + 1 == cmd_tail)
+		return 1;
+
+	if (cmd_head + 1 == CMD_QUEUE_SIZE && cmd_tail == 0)
+		return 1;
 
 	/* Insert command into queue. */
 	if (cmd->code != CMD_REPEAT) {
@@ -172,11 +163,15 @@ errr cmdq_push_copy(struct command *cmd)
 	} else {
 		int cmd_prev = cmd_head - 1;
 
-		if (!repeat_prev_allowed) return 1;
+		if (!repeat_prev_allowed)
+			return 1;
 
-		/* If we're repeating a command, we duplicate the previous command
-		   in the next command "slot". */
-		if (cmd_prev < 0) cmd_prev = CMD_QUEUE_SIZE - 1;
+		/*
+		 * If we're repeating a command, we duplicate the previous
+		 * command in the next command "slot".
+		 */
+		if (cmd_prev < 0)
+			cmd_prev = CMD_QUEUE_SIZE - 1;
 
 		if (cmd_queue[cmd_prev].code != CMD_NULL)
 			cmd_queue[cmd_head] = cmd_queue[cmd_prev];
@@ -184,7 +179,9 @@ errr cmdq_push_copy(struct command *cmd)
 
 	/* Advance point in queue, wrapping around at the end */
 	cmd_head++;
-	if (cmd_head == CMD_QUEUE_SIZE) cmd_head = 0;
+
+	if (cmd_head == CMD_QUEUE_SIZE)
+		cmd_head = 0;
 
 	return 0;
 }
@@ -198,10 +195,14 @@ void process_command(cmd_context ctx, struct command *cmd)
 	int oldrepeats = cmd->nrepeats;
 	int idx = cmd_idx(cmd->code);
 
-	/* Reset so that when selecting items, we look in the default location */
+	/*
+	 * Reset so that when selecting items, we look in the default
+	 * location
+	 */
 	player->upkeep->command_wrk = 0;
 
-	if (idx == -1) return;
+	if (idx == -1)
+		return;
 
 	/* Command repetition */
 	if (game_cmds[idx].repeat_allowed) {
@@ -213,8 +214,10 @@ void process_command(cmd_context ctx, struct command *cmd)
 		repeating = false;
 	}
 
-	/* The command gets to unset this if it isn't appropriate for
-	 * the user to repeat it. */
+	/*
+	 * The command gets to unset this if it isn't appropriate for
+	 * the user to repeat it.
+	 */
 	repeat_prev_allowed = true;
 
 	cmd->context = ctx;
@@ -241,6 +244,7 @@ bool cmdq_pop(cmd_context c)
 	} else if (cmd_head != cmd_tail) {
 		/* If we have a command ready, set it. */
 		cmd = &cmd_queue[cmd_tail++];
+
 		if (cmd_tail == CMD_QUEUE_SIZE)
 			cmd_tail = 0;
 	} else {
@@ -285,13 +289,9 @@ errr cmdq_push(cmd_code c)
  */
 void cmdq_execute(cmd_context ctx)
 {
-	while (cmdq_pop(ctx)) ;
+	while (cmdq_pop(ctx))
+		;
 }
-
-/**
- * ------------------------------------------------------------------------
- * Handling of repeated commands
- * ------------------------------------------------------------------------ */
 
 /**
  * Remove any pending repeats from the current command.
@@ -306,7 +306,7 @@ void cmd_cancel_repeat(void)
 		repeating = false;
 
 		/* Redraw the state (later) */
-		player->upkeep->redraw |= (PR_STATE);
+		player->upkeep->redraw |= PR_STATE;
 	}
 }
 
@@ -318,11 +318,14 @@ void cmd_set_repeat(int nrepeats)
 	struct command *cmd = &cmd_queue[prev_cmd_idx(cmd_tail)];
 
 	cmd->nrepeats = nrepeats;
-	if (nrepeats) repeating = true;
-	else repeating = false;
+
+	if (nrepeats)
+		repeating = true;
+	else
+		repeating = false;
 
 	/* Redraw the state (later) */
-	player->upkeep->redraw |= (PR_STATE);
+	player->upkeep->redraw |= PR_STATE;
 }
 
 /**
@@ -331,6 +334,7 @@ void cmd_set_repeat(int nrepeats)
 int cmd_get_nrepeats(void)
 {
 	struct command *cmd = &cmd_queue[prev_cmd_idx(cmd_tail)];
+
 	return cmd->nrepeats;
 }
 
@@ -344,18 +348,15 @@ void cmd_disable_repeat(void)
 }
 
 /**
- * ------------------------------------------------------------------------
- * Argument setting/getting generics
- * ------------------------------------------------------------------------ */
-
-/**
  * Set an argument of name 'arg' to data 'data'
  */
-static void cmd_set_arg(struct command *cmd, const char *name,
-						enum cmd_arg_type type, union cmd_arg_data data)
+static void cmd_set_arg(struct command *cmd,
+			const char *name,
+			enum cmd_arg_type type,
+			union cmd_arg_data data)
 {
 	size_t i;
-
+	struct cmd_arg *arg;
 	int first_empty = -1;
 	int idx = -1;
 
@@ -364,7 +365,8 @@ static void cmd_set_arg(struct command *cmd, const char *name,
 
 	/* Find an arg that either... */
 	for (i = 0; i < CMD_MAX_ARGS; i++) {
-		struct cmd_arg *arg = &cmd->arg[i];
+		arg = &cmd->arg[i];
+
 		if (!arg->name[0] && first_empty == -1)
 			first_empty = i;
 
@@ -381,14 +383,16 @@ static void cmd_set_arg(struct command *cmd, const char *name,
 
 	cmd->arg[idx].type = type;
 	cmd->arg[idx].data = data;
-	my_strcpy(cmd->arg[idx].name, name, sizeof cmd->arg[0].name);
+	my_strcpy(cmd->arg[idx].name, name, sizeof(cmd->arg[0].name));
 }
 
 /**
  * Get an argument with name 'arg'
  */
-static int cmd_get_arg(struct command *cmd, const char *arg,
-					   enum cmd_arg_type type, union cmd_arg_data *data)
+static int cmd_get_arg(struct command *cmd,
+		       const char *arg,
+		       enum cmd_arg_type type,
+		       union cmd_arg_data *data)
 {
 	size_t i;
 
@@ -403,14 +407,7 @@ static int cmd_get_arg(struct command *cmd, const char *arg,
 	}
 
 	return CMD_ARG_NOT_PRESENT;
- }
-
-
-
-/**
- * ------------------------------------------------------------------------
- * 'Choice' type
- * ------------------------------------------------------------------------ */
+}
 
 /**
  * XXX This type is a hack. The only places that use this are:
@@ -429,6 +426,7 @@ static int cmd_get_arg(struct command *cmd, const char *arg,
 void cmd_set_arg_choice(struct command *cmd, const char *arg, int choice)
 {
 	union cmd_arg_data data;
+
 	data.choice = choice;
 	cmd_set_arg(cmd, arg, arg_CHOICE, data);
 }
@@ -439,21 +437,24 @@ void cmd_set_arg_choice(struct command *cmd, const char *arg, int choice)
 int cmd_get_arg_choice(struct command *cmd, const char *arg, int *choice)
 {
 	union cmd_arg_data data;
-	int err;
+	int err = cmd_get_arg(cmd, arg, arg_CHOICE, &data);
 
-	if ((err = cmd_get_arg(cmd, arg, arg_CHOICE, &data)) == CMD_OK)
+	if (err == CMD_OK)
 		*choice = data.choice;
 
 	return err;
 }
 
-
 /**
  * Get a spell from the user, trying the command first but then prompting
  */
-int cmd_get_spell(struct command *cmd, const char *arg, int *spell,
-				  const char *verb, item_tester book_filter, const char *error,
-				  bool (*spell_filter)(int spell))
+int cmd_get_spell(struct command *cmd,
+		  const char *arg,
+		  int *spell,
+		  const char *verb,
+		  item_tester book_filter,
+		  const char *error,
+		  bool (*spell_filter)(int spell))
 {
 	struct object *book;
 
@@ -468,7 +469,11 @@ int cmd_get_spell(struct command *cmd, const char *arg, int *spell,
 	if (cmd_get_arg_item(cmd, "book", &book) == CMD_OK)
 		*spell = get_spell_from_book(verb, book, error, spell_filter);
 	else
-		*spell = get_spell(verb, book_filter, cmd->code, error, spell_filter);
+		*spell = get_spell(verb,
+				   book_filter,
+				   cmd->code,
+				   error,
+				   spell_filter);
 
 	if (*spell >= 0) {
 		cmd_set_arg_choice(cmd, arg, *spell);
@@ -479,16 +484,12 @@ int cmd_get_spell(struct command *cmd, const char *arg, int *spell,
 }
 
 /**
- * ------------------------------------------------------------------------
- * Strings
- * ------------------------------------------------------------------------ */
-
-/**
  * Set arg 'n' to given string
  */
 void cmd_set_arg_string(struct command *cmd, const char *arg, const char *str)
 {
 	union cmd_arg_data data;
+
 	data.string = string_make(str);
 	cmd_set_arg(cmd, arg, arg_STRING, data);
 }
@@ -499,9 +500,9 @@ void cmd_set_arg_string(struct command *cmd, const char *arg, const char *str)
 int cmd_get_arg_string(struct command *cmd, const char *arg, const char **str)
 {
 	union cmd_arg_data data;
-	int err;
+	int err = cmd_get_arg(cmd, arg, arg_STRING, &data);
 
-	if ((err = cmd_get_arg(cmd, arg, arg_STRING, &data)) == CMD_OK)
+	if (err == CMD_OK)
 		*str = data.string;
 
 	return err;
@@ -510,8 +511,12 @@ int cmd_get_arg_string(struct command *cmd, const char *arg, const char **str)
 /**
  * Get a string, first from the command or failing that prompt the user
  */
-int cmd_get_string(struct command *cmd, const char *arg, const char **str,
-				   const char *initial, const char *title, const char *prompt)
+int cmd_get_string(struct command *cmd,
+		   const char *arg,
+		   const char **str,
+		   const char *initial,
+		   const char *title,
+		   const char *prompt)
 {
 	char tmp[80] = "";
 
@@ -524,10 +529,11 @@ int cmd_get_string(struct command *cmd, const char *arg, const char **str,
 
 	/* Prompt properly */
 	if (initial)
-		my_strcpy(tmp, initial, sizeof tmp);
+		my_strcpy(tmp, initial, sizeof(tmp));
 
-	if (get_string(prompt, tmp, sizeof tmp)) {
+	if (get_string(prompt, tmp, sizeof(tmp))) {
 		cmd_set_arg_string(cmd, arg, tmp);
+
 		if (cmd_get_arg_string(cmd, arg, str) == CMD_OK)
 			return CMD_OK;
 	}
@@ -536,16 +542,12 @@ int cmd_get_string(struct command *cmd, const char *arg, const char **str,
 }
 
 /**
- * ------------------------------------------------------------------------
- * Directions
- * ------------------------------------------------------------------------ */
-
-/**
  * Set arg 'n' to given direction
  */
 void cmd_set_arg_direction(struct command *cmd, const char *arg, int dir)
 {
 	union cmd_arg_data data;
+
 	data.direction = dir;
 	cmd_set_arg(cmd, arg, arg_DIRECTION, data);
 }
@@ -556,9 +558,9 @@ void cmd_set_arg_direction(struct command *cmd, const char *arg, int dir)
 int cmd_get_arg_direction(struct command *cmd, const char *arg, int *dir)
 {
 	union cmd_arg_data data;
-	int err;
+	int err = cmd_get_arg(cmd, arg, arg_DIRECTION, &data);
 
-	if ((err = cmd_get_arg(cmd, arg, arg_DIRECTION, &data)) == CMD_OK)
+	if (err == CMD_OK)
 		*dir = data.direction;
 
 	return err;
@@ -567,8 +569,10 @@ int cmd_get_arg_direction(struct command *cmd, const char *arg, int *dir)
 /**
  * Get a direction, first from command or prompt otherwise
  */
-int cmd_get_direction(struct command *cmd, const char *arg, int *dir,
-					  bool allow_5)
+int cmd_get_direction(struct command *cmd,
+		      const char *arg,
+		      int *dir,
+		      bool allow_5)
 {
 	if (cmd_get_arg_direction(cmd, arg, dir) == CMD_OK) {
 		/* Validity check */
@@ -587,11 +591,6 @@ int cmd_get_direction(struct command *cmd, const char *arg, int *dir,
 }
 
 /**
- * ------------------------------------------------------------------------
- * Targets
- * ------------------------------------------------------------------------ */
-
-/**
  * XXX Should this be unified with the arg_DIRECTION type?
  *
  * XXX Should we abolish DIR_TARGET and instead pass a struct target which
@@ -604,6 +603,7 @@ int cmd_get_direction(struct command *cmd, const char *arg, int *dir,
 void cmd_set_arg_target(struct command *cmd, const char *arg, int target)
 {
 	union cmd_arg_data data;
+
 	data.direction = target;
 	cmd_set_arg(cmd, arg, arg_TARGET, data);
 }
@@ -614,9 +614,9 @@ void cmd_set_arg_target(struct command *cmd, const char *arg, int target)
 int cmd_get_arg_target(struct command *cmd, const char *arg, int *target)
 {
 	union cmd_arg_data data;
-	int err;
+	int err = cmd_get_arg(cmd, arg, arg_TARGET, &data);
 
-	if ((err = cmd_get_arg(cmd, arg, arg_TARGET, &data)) == CMD_OK)
+	if (err == CMD_OK)
 		*target = data.direction;
 
 	return err;
@@ -628,8 +628,8 @@ int cmd_get_arg_target(struct command *cmd, const char *arg, int *target)
 int cmd_get_target(struct command *cmd, const char *arg, int *target)
 {
 	if (cmd_get_arg_target(cmd, arg, target) == CMD_OK) {
-		if (*target != DIR_UNKNOWN &&
-				(*target != DIR_TARGET || target_okay()))
+		if ((*target != DIR_UNKNOWN) &&
+		    ((*target != DIR_TARGET) || target_okay()))
 			return CMD_OK;
 	}
 
@@ -641,21 +641,20 @@ int cmd_get_target(struct command *cmd, const char *arg, int *target)
 	return CMD_ARG_ABORTED;
 }
 
-/**
- * ------------------------------------------------------------------------
- * Points (presently unused)
- * ------------------------------------------------------------------------ */
-
 /*
- * XXX Use struct loc instead
+ * TODO: Use struct loc instead
  */
 
 /**
  * Set argument 'n' to point x,y
  */
-void cmd_set_arg_point(struct command *cmd, const char *arg, int x, int y)
+void cmd_set_arg_point(struct command *cmd,
+		       const char *arg,
+		       int x,
+		       int y)
 {
 	union cmd_arg_data data;
+
 	data.point = loc(x, y);
 	cmd_set_arg(cmd, arg, arg_POINT, data);
 }
@@ -666,9 +665,9 @@ void cmd_set_arg_point(struct command *cmd, const char *arg, int x, int y)
 int cmd_get_arg_point(struct command *cmd, const char *arg, int *x, int *y)
 {
 	union cmd_arg_data data;
-	int err;
+	int err = cmd_get_arg(cmd, arg, arg_POINT, &data);
 
-	if ((err = cmd_get_arg(cmd, arg, arg_POINT, &data)) == CMD_OK) {
+	if (err == CMD_OK) {
 		*x = data.point.x;
 		*y = data.point.y;
 	}
@@ -677,16 +676,12 @@ int cmd_get_arg_point(struct command *cmd, const char *arg, int *x, int *y)
 }
 
 /**
- * ------------------------------------------------------------------------
- * Item arguments
- * ------------------------------------------------------------------------ */
-
-/**
  * Set argument 'n' to 'item'
  */
 void cmd_set_arg_item(struct command *cmd, const char *arg, struct object *obj)
 {
 	union cmd_arg_data data;
+
 	data.obj = obj;
 	cmd_set_arg(cmd, arg, arg_ITEM, data);
 }
@@ -697,9 +692,9 @@ void cmd_set_arg_item(struct command *cmd, const char *arg, struct object *obj)
 int cmd_get_arg_item(struct command *cmd, const char *arg, struct object **obj)
 {
 	union cmd_arg_data data;
-	int err;
+	int err = cmd_get_arg(cmd, arg, arg_ITEM, &data);
 
-	if ((err = cmd_get_arg(cmd, arg, arg_ITEM, &data)) == CMD_OK)
+	if (err == CMD_OK)
 		*obj = data.obj;
 
 	return err;
@@ -708,9 +703,13 @@ int cmd_get_arg_item(struct command *cmd, const char *arg, struct object **obj)
 /**
  * Get an item, first from the command or try the UI otherwise
  */
-int cmd_get_item(struct command *cmd, const char *arg, struct object **obj,
-				 const char *prompt, const char *reject, item_tester filter,
-				 int mode)
+int cmd_get_item(struct command *cmd,
+		 const char *arg,
+		 struct object **obj,
+		 const char *prompt,
+		 const char *reject,
+		 item_tester filter,
+		 int mode)
 {
 	if (cmd_get_arg_item(cmd, arg, obj) == CMD_OK)
 		return CMD_OK;
@@ -724,16 +723,12 @@ int cmd_get_item(struct command *cmd, const char *arg, struct object **obj,
 }
 
 /**
- * ------------------------------------------------------------------------
- * Numbers, quantities
- * ------------------------------------------------------------------------ */
-
-/**
  * Set argument 'n' to 'number'
  */
 void cmd_set_arg_number(struct command *cmd, const char *arg, int amt)
 {
 	union cmd_arg_data data;
+
 	data.number = amt;
 	cmd_set_arg(cmd, arg, arg_NUMBER, data);
 }
@@ -744,9 +739,9 @@ void cmd_set_arg_number(struct command *cmd, const char *arg, int amt)
 int cmd_get_arg_number(struct command *cmd, const char *arg, int *amt)
 {
 	union cmd_arg_data data;
-	int err;
+	int err = cmd_get_arg(cmd, arg, arg_NUMBER, &data);
 
-	if ((err = cmd_get_arg(cmd, arg, arg_NUMBER, &data)) == CMD_OK)
+	if (err == CMD_OK)
 		*amt = data.number;
 
 	return err;
@@ -761,6 +756,7 @@ int cmd_get_quantity(struct command *cmd, const char *arg, int *amt, int max)
 		return CMD_OK;
 
 	*amt = get_quantity(NULL, max);
+
 	if (*amt > 0) {
 		cmd_set_arg_number(cmd, arg, *amt);
 		return CMD_OK;

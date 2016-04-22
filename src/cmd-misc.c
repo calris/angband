@@ -30,7 +30,6 @@
 #include "obj-util.h"
 #include "target.h"
 
-
 /**
  * Toggle wizard mode
  */
@@ -61,14 +60,11 @@ void do_cmd_wizard(void)
 	}
 
 	/* Update monsters */
-	player->upkeep->update |= (PU_MONSTERS);
+	player->upkeep->update |= PU_MONSTERS;
 
 	/* Redraw "title" */
-	player->upkeep->redraw |= (PR_TITLE);
+	player->upkeep->redraw |= PR_TITLE;
 }
-
-
-
 
 /**
  * Commit suicide
@@ -82,16 +78,13 @@ void do_cmd_suicide(struct command *cmd)
 	my_strcpy(player->died_from, "Quitting", sizeof(player->died_from));
 }
 
-
 /**
  * Mention the current version
  */
 void do_cmd_version(void)
 {
-	/* Silly message */
 	msg("You are playing %s.  Type '?' for more info.", buildver);
 }
-
 
 /**
  * Record the player's thoughts as a note.
@@ -103,26 +96,39 @@ void do_cmd_version(void)
  */
 void do_cmd_note(void)
 {
-	/* Allocate/Initialize strings to get and format user input. */
 	char tmp[70];
 	char note[90];
+
+	/* Initialize strings to get and format user input. */
 	my_strcpy(tmp, "", sizeof(tmp));
 	my_strcpy(note, "", sizeof(note));
 
 	/* Read a line of input from the user */
-	if (!get_string("Note: ", tmp, sizeof(tmp))) return;
+	if (!get_string("Note: ", tmp, sizeof(tmp)))
+		return;
 
 	/* Ignore empty notes */
-	if (!tmp[0] || (tmp[0] == ' ')) return;
+	if (!tmp[0] || (tmp[0] == ' '))
+		return;
 
 	/* Format the note correctly, supporting some cute /me commands */
 	if (strncmp(tmp, "/say ", 5) == 0)
-		strnfmt(note, sizeof(note), "-- %s says: \"%s\"", op_ptr->full_name,
-				&tmp[5]);
+		strnfmt(note,
+			sizeof(note),
+			"-- %s says: \"%s\"",
+			op_ptr->full_name,
+			&tmp[5]);
 	else if (strncmp(tmp, "/me", 3) == 0)
-		strnfmt(note, sizeof(note), "-- %s%s", op_ptr->full_name, &tmp[3]);
+		strnfmt(note,
+			sizeof(note),
+			"-- %s%s",
+			op_ptr->full_name,
+			&tmp[3]);
 	else
-		strnfmt(note, sizeof(note), "-- Note: %s", tmp);
+		strnfmt(note,
+			sizeof(note),
+			"-- Note: %s",
+			tmp);
 
 	/* Display the note (omitting the "-- " prefix) */
 	msg("%s", &note[3]);

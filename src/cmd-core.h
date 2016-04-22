@@ -27,17 +27,17 @@
  * All valid game commands.  Not all implemented yet.
  */
 typedef enum cmd_code {
-	CMD_NULL = 0,	/* A "do nothing" command so that there's something
-					   UIs can use as a "no command yet" sentinel. */
 	/*
-	 * Splash screen commands
+	 * A "do nothing" command so that there's something
+	 * UIs can use as a "no command yet" sentinel.
 	 */
+	CMD_NULL = 0,
+
+	/* Splash screen commands */
 	CMD_LOADFILE,
 	CMD_NEWGAME,
 
-	/*
-	 * Birth commands
-	 */
+	/* Birth commands */
 	CMD_BIRTH_INIT,
 	CMD_BIRTH_RESET,
 	CMD_CHOOSE_RACE,
@@ -51,9 +51,7 @@ typedef enum cmd_code {
 	CMD_HISTORY_CHOICE,
 	CMD_ACCEPT_CHARACTER,
 
-	/*
-	 * The main game commands
-	 */
+	/* The main game commands */
 	CMD_GO_UP,
 	CMD_GO_DOWN,
 	CMD_SEARCH,
@@ -70,7 +68,10 @@ typedef enum cmd_code {
 	CMD_DROP,
 	CMD_BROWSE_SPELL,
 	CMD_STUDY,
-	CMD_CAST, /* Casting a spell /or/ praying. */
+
+	 /* Casting a spell OR praying. */
+	CMD_CAST,
+
 	CMD_USE_STAFF,
 	CMD_USE_WAND,
 	CMD_USE_ROD,
@@ -95,7 +96,7 @@ typedef enum cmd_code {
 	CMD_ALTER,
 	CMD_SLEEP,
 
-    /* Store commands */
+	/* Store commands */
 	CMD_SELL,
 	CMD_BUY,
 	CMD_STASH,
@@ -129,11 +130,6 @@ enum {
 	DIR_S = 2,
 	DIR_SE = 3,
 };
-
-/**
- * ------------------------------------------------------------------------
- * Argument structures
- * ------------------------------------------------------------------------ */
 
 /**
  * The data of the argument
@@ -171,7 +167,6 @@ struct cmd_arg {
 	union cmd_arg_data data;
 	char name[20];		/* Better than dynamic allocation */
 };
-
 
 /**
  * Maximum number of arguments a command needs to take.
@@ -219,20 +214,8 @@ enum cmd_return_codes {
  */
 typedef void (*cmd_handler_fn)(struct command *cmd);
 
-
-/**
- * ------------------------------------------------------------------------
- * Command type functions
- * ------------------------------------------------------------------------ */
-
 /* Return the verb that goes alongside the given command. */
 const char *cmd_verb(cmd_code cmd);
-
-
-/**
- * ------------------------------------------------------------------------
- * Command queue functions
- * ------------------------------------------------------------------------ */
 
 /**
  * Returns the top command on the queue.
@@ -253,19 +236,15 @@ bool cmdq_pop(cmd_context c);
  * Insert commands in the queue.
  */
 errr cmdq_push_copy(struct command *cmd);
-errr cmdq_push_repeat(cmd_code c, int nrepeats);
-errr cmdq_push(cmd_code c);
 
+errr cmdq_push_repeat(cmd_code c, int nrepeats);
+
+errr cmdq_push(cmd_code c);
 
 /**
  * Process all commands presently in the queue.
  */
 void cmdq_execute(cmd_context ctx);
-
-/**
- * ------------------------------------------------------------------------
- * Command repeat manipulation
- * ------------------------------------------------------------------------ */
 
 /**
  * Remove any pending repeats from the current command.
@@ -289,13 +268,6 @@ void cmd_disable_repeat(void);
  */
 int cmd_get_nrepeats(void);
 
-
-
-/**
- * ------------------------------------------------------------------------
- * Command type functions
- * ------------------------------------------------------------------------ */
-
 /**
  * Set the args of a command.
  */
@@ -306,7 +278,6 @@ void cmd_set_arg_target(struct command *cmd, const char *arg, int target);
 void cmd_set_arg_point(struct command *cmd, const char *arg, int x, int y);
 void cmd_set_arg_item(struct command *cmd, const char *arg, struct object *obj);
 void cmd_set_arg_number(struct command *cmd, const char *arg, int amt);
-
 
 /**
  * Get the args of a command.
@@ -322,17 +293,36 @@ int cmd_get_arg_number(struct command *cmd, const char *arg, int *amt);
 /**
  * Try a bit harder.
  */
-int cmd_get_direction(struct command *cmd, const char *arg, int *dir,
-					  bool allow_5);
+int cmd_get_direction(struct command *cmd,
+		      const char *arg,
+		      int *dir,
+		      bool allow_5);
+
 int cmd_get_target(struct command *cmd, const char *arg, int *target);
-int cmd_get_item(struct command *cmd, const char *arg, struct object **obj,
-				 const char *prompt, const char *reject, item_tester filter,
-				 int mode);
+
+int cmd_get_item(struct command *cmd,
+		 const char *arg,
+		 struct object **obj,
+		 const char *prompt,
+		 const char *reject,
+		 item_tester filter,
+		 int mode);
+
 int cmd_get_quantity(struct command *cmd, const char *arg, int *amt, int max);
-int cmd_get_string(struct command *cmd, const char *arg, const char **str,
-				   const char *initial, const char *title, const char *prompt);
-int cmd_get_spell(struct command *cmd, const char *arg, int *spell,
-				  const char *verb, item_tester book_filter, const char *error,
-				  bool (*spell_filter)(int spell));
+
+int cmd_get_string(struct command *cmd,
+		   const char *arg,
+		   const char **str,
+		   const char *initial,
+		   const char *title,
+		   const char *prompt);
+
+int cmd_get_spell(struct command *cmd,
+		  const char *arg,
+		  int *spell,
+		  const char *verb,
+		  item_tester book_filter,
+		  const char *error,
+		  bool (*spell_filter)(int spell));
 
 #endif
