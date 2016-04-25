@@ -1,0 +1,638 @@
+
+		Angband coding guidelines
+
+This document reflects the discussion held on the Angband forums
+(http://angband.oook.cz/forum/showthread.php?t=7830)
+
+This is a short document describing the preferred coding style for 
+Angband.  Coding style is very personal, the Angband developers have, as
+Nick so elquently put it, 'sluged it out' and this is the consensus view.
+
+Nobody is going to scream and shout if you don't comply to these
+guidelines to the letter - there's a lot to digest, and the last thing these
+guidelines are intended to do is scare of anyone that wants to contribute.
+
+Luckily, scripts/checkpatch.pl (shamelessly stolen from the Linux Kernel)
+covers most of the guidelines.
+
+The Angband code guidelines were originally published at
+http://trac.rephial.org/wiki/CodingGuidelines
+
+Coincidently, the majority of the original guide reflected the Linux
+Kernel coding style with a few notable exceptions (4 space tabs instead of
+8 for example). So this document will look familiar to anyone who has done
+any Linux Kernal coding :)
+
+This document may seem unreasonably long, but it's full of examples.
+
+So with no further ado - here are the Angband Coding Guidelines:
+
+--- Line Length and Indentation ---
+
+Tabs are 4 characters, and thus indentations are also 4 characters.
+
+Limit the length of lines to 80 columns.
+
+Break statements longer than 80 columns into sensible chunks.
+
+Caveat 1: You can exceed 80 columns if it significantly increases readability
+
+Caveat 2: Never break string constants, because that breaks the ability to
+grep for them.
+
+Avoid, if at all possible, code that requires more than 3 levels of
+indent. Use helper functions - you'll be amazed how often a seemingly
+benign snippet of code ends up being replicated. Replicated code pretty
+much guarantees that, one day, it will create bugs.
+
+Unlike the Linux kernel, Angband source does NOT have 'case' statements
+aligned with the 'switch':
+
+	switch (suffix) {
+		case 'G':
+		case 'g':
+			mem <<= 30;
+			break;
+
+		case 'M':
+		case 'm':
+			mem <<= 20;
+			break;
+
+		case 'K':
+		case 'k':
+			mem <<= 10;
+
+		default:
+			break;
+	}
+
+--- Variables ---
+
+Avoid global variables like the plague, we already have too many
+
+Use enums where possible instead of defines
+
+NEVER use magic numbers - EVER!
+
+Don't use floating point
+
+Group variable declarations together, without blank lines. Leave one (and
+only one) blank line between variable declarations and code.
+
+Group variables that are logically related together, and declare variables
+that are not initialised, followed by variables that are initialised.
+
+This is bad:
+	int x;
+	int i;
+	int j;
+	struct foo *bar = mem_alloc(sizeof(struct(bar));
+	struct foo *tmp;
+	int k = 5;
+	int y = 1;
+	
+This is good:
+
+	int i;
+	int j;
+	int k = 5;
+	struct foo *tmp;
+	struct foo *bar = mem_alloc(sizeof(struct(bar));
+	int x;
+	int y = 1;
+
+Rationale: When refactoring, related variable are easy to identify
+
+Do not mix initialised and uninitialised declarations.
+
+This is bad:
+
+	int x, y = 0;
+
+This is good:
+
+	int x;
+	int y = 0;
+
+Don't mix code and declarations
+
+This is bad:
+
+	int i;
+	
+	i = some_function();
+	
+	int j = i + 2;
+	
+This is good
+
+	int i, j;
+	
+	i = some_function();
+	j = i + 2;
+
+Declare variables as locally as possible.
+
+This is bad:
+
+	function do_something(struct foo *bar)
+	{
+		int x;
+		int i;
+		
+		...
+		
+		for (i = 0; i < bar->size - 1; i++) {
+			x = some_calculation(bar->fred);
+			
+			if (x == 1) {
+				bar->fred = 0
+			}
+		}
+	}
+
+This is good:
+
+	function do_something(struct foo *bar)
+	{
+		int i;
+		
+		...
+		
+		for (i = 0; i < bar->size - 1; i++) {
+			int x = some_calculation(bar->fred);
+			
+			if (x == 1) {
+				bar->fred = 0
+			}
+		}
+	}
+
+Rationale: It makes factoring out code much easier
+
+Do not put multiple assignments on a single line.
+
+This is bad:
+	
+	x = y = 2;
+
+This is good:
+
+	x = 2;
+	y = x;
+
+Use const where you shouldn't be modifying a variable:
+
+void print_msg(const char *msg)
+
+--- Functions ---
+
+Functions should do one thing, and do it well
+
+HOW a function does what it does should be obvious - do not obviscate your
+code
+
+Include parameter names in function prototypes
+
+This is bad:
+
+	struct object *get_obj_at(int, int);
+	
+This is good:
+
+	struct object *get_obj_at(int x, int y);
+
+If a function has no arguments, declare it as function(void), not function()
+
+If a function's argument list goes over 80 columns, list each argument on a
+separate line with each argument left-aligned with the first. Use tabs as
+initial indents, and spaces to complete the alignment:
+
+struct message *do_stuff(int count,
+						 char *msg_str,
+						 char *err_str,
+						 struct object *obj) 
+
+From the Linux Kernel coding style:
+
+"The maximum length of a function is inversely proportional to the
+complexity and indentation level of that function.  So, if you have a
+conceptually simple function that is just one long (but simple)
+case-statement, where you have to do lots of small things for a lot of
+different cases, it's OK to have a longer function.
+
+However, if you have a complex function, and you suspect that a
+less-than-gifted first-year high-school student might not even
+understand what the function is all about, you should adhere to the
+maximum limits all the more closely.  Use helper functions with
+descriptive names (you can ask the compiler to in-line them if you think
+it's performance-critical, and it will probably do a better job of it
+than you would have done)."
+
+If you need to declare more than 10 variables, your function might be in
+need of a refactor.
+
+Try to keep functions short - 80 lines max, 40 lines is preferred.
+
+Don't 'shorten' code by striping out every blank line - keep blank lines
+between logical blocks of code, for example:
+
+	bar = mem_alloc(sizeof(struct foo));
+	bar->x = 1;
+	bar->y = 2;
+	bar->z = 3;
+	
+	do_something(bar);
+	
+	if (bar->x != 1) {
+		do_something_else(bar);
+	}
+
+	mem_free(bar);
+	bar = NULL;
+
+Only ever add one blank line - do not insert two blank lines between
+functions for example.
+
+--- Braces ---
+
+Put the opening brace last on the line, and put the closing brace first:
+
+These are bad:
+	if (x == 0)
+	{
+		i++
+	}
+
+	if (x == 0)
+	{
+		i++; }
+
+	if (x == 0)
+	{ i++; }
+
+This is good:
+	if (x == 0) {
+		i++;
+	}
+
+Do not put statements on the same line as a condition - EVER!
+
+This is bad:
+
+	if (x == 0) {i++};
+	do_something(i);
+
+This is good:
+
+	if (x == 0) {
+		i++;
+	}
+
+	do_something(i);
+
+Do not use braces for 'case' blocks
+
+Apart from inside 'case' blocks, ALWAYS use braces after conditional
+statements.
+
+This is bad:
+	if (ptr != NULL)
+		ptr->x++;
+
+This is good:
+	if (ptr != NULL) {
+		ptr->x++;
+	}
+
+This applies to all non-function statement blocks (if, switch, for, while, do)
+
+Caveat: Functions are special - they have the opening brace at the beginning
+of the next line:
+
+	int function(int x)
+	{
+		body of function
+	}
+
+The closing losing brace is on a line of its own _except_:
+
+a) do/while
+
+	do {
+		body of do-loop
+	} while (condition);
+
+b) if/else if/else *** THIS IS UNDER ACTIVE DISCUSSION ***
+
+	if (x == y) {
+		..
+	} else if (x > y) {
+		...
+	} else {
+		....
+	}
+
+--- Spaces ---
+
+Angband style for use of spaces depends (mostly) on function-versus-keyword
+usage.
+
+Use a space after (most) keywords. The notable exceptions are sizeof and
+typeof which are treated like functions (i.e. use parentheses even though
+the C language does not mandate it)
+
+So use a space after these keywords:
+
+	if, switch, case, for, do, while
+
+Do not use spaces between function names and the opening parentheses
+
+This is bad:
+
+	s = sizeof (struct file);
+	
+This is good:
+
+	s = sizeof(struct file);
+
+
+Do not add spaces inside parenthesized expressions.
+
+This is bad:
+
+	s = sizeof( struct foo );
+	
+This is good:
+
+	s = sizeof(struct foo);
+
+When declaring pointer the '*' is adjacent to the vairable name not adjacent
+to the type name.  Examples:
+
+These are bad:
+
+	char* foo;
+	bool some_function(char* foo);
+	
+These are good:
+
+	char *foo;
+	bool some_function(char *foo);
+
+Use one space around (on each side of) most binary and ternary operators,
+such as any of these:
+
+	=  +  -  <  >  *  /  %  |  &  ^  <=  >=  ==  !=  ?  :
+
+but no space after unary operators:
+
+	&  *  +  -  ~  !  sizeof  typeof  alignof  __attribute__  defined
+
+no space between variables and increment & decrement unary operators:
+
+	++  --
+
+and no space around the '.' and "->" structure member operators.
+
+Don't leave whitespace at the end of lines.
+
+--- Naming ---
+
+Do not use CamelCase
+
+Keep names short, but descriptive.
+
+These are bad:
+
+	void *try_to_find_the_next_object(struct object *the_current_object)
+	int loop_counter;
+	struct object *pointer_to_the_next_object;
+	struct bar *temporary_pointer;
+	
+These are good:
+
+	void *find_next_obj(struct object *cur_obj)
+	int i;
+	struct object *nxt_obj;
+	struct bar *tmp;
+
+Don't use hungarian notation.
+
+These are bad:
+
+	int i_cnt;
+	struct foo *next_foo_ptr;
+
+These are good:
+
+	int cnt;
+	struct foo *nxt_foo;
+	
+Names for GLOBAL variables and functions (to be used only if you _really_
+need them) need to be more descriptive than names for local variables and
+functions.
+
+--- Typedefs ---
+
+Don't use typedefs unless the contents of a structure need to be hidden (i.e.
+the structure is only ever passed as a parameter to accessor functions)
+
+The 'dice' structures are a good example of this - dice are typedef'd in
+z_dice.h, and the structure only exists in z_dice.c.
+
+Rule of thumb - if the structure is defined in a .h file, DON'T typedef it
+
+--- Centralized exiting of functions --
+The 'goto' statement comes in handy when a function exits from multiple
+locations and some common work such as cleanup has to be done.  If there is
+no cleanup needed then just return directly.
+
+The rationale for using gotos is:
+
+- unconditional statements are easier to understand and follow
+- nesting is reduced
+- errors by not updating individual exit points when making modifications
+  are prevented
+
+	bool fun(int a)
+	{
+		int result = false;
+		char *buffer;
+
+		buffer = mem_alloc(SIZE, GFP_KERNEL);
+
+		if (!buffer)
+			return false;
+
+		if (condition1) {
+			while (loop1) {
+				
+				...
+				
+				if (error) {
+					goto out_buffer;
+				}
+			}
+
+			result = true;
+			goto out_buffer;
+		}
+
+		...
+
+	out_buffer:
+		mem_free(buffer);
+		return result;
+	}
+
+A common type of bug to be aware of is "one err bugs" which look like this:
+
+	err:
+		mem_free(foo->bar);
+		mem_free(foo);
+
+The bug in this code is that on some exit paths "foo" is NULL. The fix for
+this is to either a) split it up into two error labels
+
+	err_bar:
+		mem_free(bar);
+
+	err_foo:
+		mem_free(foo);
+
+or b) add some conditional logic:
+
+	err:
+		if (foo) {
+			mem_free(bar);
+		}
+		
+		mem_free(foo);
+
+Choose label names which say what the goto does or why the goto exists.
+
+--- Commenting ---
+
+Comments are good, but there is also a danger of over-commenting.
+
+NEVER try to explain HOW your code works in a comment: it's much better to
+write the code so that the _working_ is obvious, and it's a waste of
+time to explain badly written code.
+
+Generally, you want your comments to tell WHAT your code does, not HOW.
+
+Try to avoid putting comments inside a function body: if the function is so
+complex that you need to separately comment parts of it, you should probably
+go back and read the section titled 'Functions'
+
+You can make small comments to note or warn about something particularly
+clever (or ugly), but try to avoid excess.
+
+ALWAYS put the comments at the head of the function, telling people what it
+does, and possibly WHY it does it.
+
+Always use C89 "/* ... */" comment style style.
+
+Never use C99-style "// ..." comments.
+
+The style for long (multi-line) comments is:
+
+	/*
+	 * This is the preferred style for multi-line
+	 * comments in the Angband source code.
+	 * Please use it consistently.
+	 *
+	 * Description:  A column of asterisks on the left side,
+	 * with beginning and ending almost-blank lines.
+	 */
+
+Always comment data structures
+
+--- String and memory functions ---
+
+Don't use the C built-in string functions, use the my_ versions instead
+(strcpy -> my_strcpy, sprintf -> strnfmt()) - they are safer.
+
+Do not use the C built-in alloc() and free() functions, use the mem_ versions
+instead (mem_alloc(), mem_free(), etc.) - they wrap platform specific
+behaviour such as alloc(0) and free(NULL)
+
+--- Constants, Enums, and Macros ---
+
+CAPITALIZE constant, enum labels, and macro names
+
+	#define CONSTANT 0x12345
+	
+	enum aspect {
+		MINIMISE,
+		AVERAGE,
+		MAXIMISE,
+		EXTREMIFY,
+		RANDOMISE
+	};
+
+	#define MFLAG_SIZE		FLAG_SIZE(MFLAG_MAX)
+
+
+Enums are preferred when defining several related constants.
+
+Generally, inline functions are preferable to macros resembling functions.
+
+Macros with multiple statements should be enclosed in a do - while block:
+
+	#define macrofun(a, b, c) 	\
+		do {					\
+			if (a == 5)			\
+				do_this(b, c);	\
+		} while (0)
+
+Things to avoid when using macros:
+
+1) macros that affect control flow:
+
+	#define FOO(x)				\
+		do {					\
+			if (blah(x) < 0)	\
+				return false;	\
+		} while (0)
+
+is a _very_ bad idea.  It looks like a function call but exits the "calling"
+function; don't break the internal parsers of those who will read the code.
+
+2) macros that depend on having a local variable with a magic name:
+
+	#define FOO(val) bar(index, val)
+
+might look like a good thing, but it's confusing as hell when one reads the
+code and it's prone to breakage from seemingly innocent changes.
+
+3) macros with arguments that are used as l-values: FOO(x) = y; will
+bite you if somebody e.g. turns FOO into an inline function.
+
+4) forgetting about precedence: macros defining constants using expressions
+must enclose the expression in parentheses. Beware of similar issues with
+macros using parameters.
+
+	#define CONSTANT 0x4000
+	#define CONSTEXP (CONSTANT | 3)
+
+5) namespace collisions when defining local variables in macros resembling
+functions:
+
+#define FOO(x)			\
+({						\
+	typeof(x) ret;		\
+	ret = calc_ret(x);	\
+	(ret);				\
+})
+
+ret is a common name for a local variable - __foo_ret is less likely
+to collide with an existing variable.
+
+
+--- Conditional Compilation ---
+
+Wherever possible, don't use preprocessor conditionals (#if, #ifdef) in .c
+files; doing so makes code harder to read and logic harder to follow.
