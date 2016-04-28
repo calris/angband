@@ -45,28 +45,6 @@ indent. Use helper functions - you'll be amazed how often a seemingly
 benign snippet of code ends up being replicated. Replicated code pretty
 much guarantees that, one day, it will create bugs.
 
-Unlike the Linux kernel, Angband source does NOT have 'case' statements
-aligned with the 'switch':
-
-	switch (suffix) {
-		case 'G':
-		case 'g':
-			mem <<= 30;
-			break;
-
-		case 'M':
-		case 'm':
-			mem <<= 20;
-			break;
-
-		case 'K':
-		case 'k':
-			mem <<= 10;
-
-		default:
-			break;
-	}
-
 --- Variables ---
 
 Avoid global variables like the plague, we already have too many
@@ -131,6 +109,19 @@ This is good
 	
 	i = some_function();
 	j = i + 2;
+	
+Exception:
+Any assert() checks on function parameters (can) be placed before variable
+declarations:
+
+bool my_func(struct foo *bar)
+{
+	assert(bar);
+	
+	struct foo *tmp = bar;
+	
+	...
+}
 
 Declare variables as locally as possible.
 
@@ -292,7 +283,26 @@ This is good:
 
 	do_something(i);
 
-Do not use braces for 'case' blocks
+Use braces for 'case' blocks. C does not allow variable declarations
+immediately after a case label, so you need braces for local variables
+
+	switch (suffix) {
+		case 'G':
+		case 'g': {
+			int i;
+			
+			for (i = 0; i < 100; i++) {
+				do_stuff();
+			}
+
+			break;
+		}
+
+		default: {
+			break;
+		}
+	}
+
 
 Apart from inside 'case' blocks, ALWAYS use braces after conditional
 statements.
