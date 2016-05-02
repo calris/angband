@@ -4834,8 +4834,19 @@ sub process {
 					$herectx .= raw_line($linenr, $n) . "\n";
 				}
 
-				WARN("BRACES",
+				WARN("ALLOW_SINGLE_STATEMENT_NO_BRACES",
 				     "braces {} are not necessary for single statement blocks\n" . $herectx);
+			}
+			if ($level == 0 && !($block =~ /^\s*\{/)) {
+				my $herectx = $here . "\n";
+				my $cnt = statement_rawlines($block);
+
+				for (my $n = 0; $n < $cnt; $n++) {
+					$herectx .= raw_line($linenr, $n) . "\n";
+				}
+
+				WARN("FORBID_SINGLE_STATEMENT_NO_BRACES",
+				     "braces {} are necessary for single statement blocks\n" . $herectx);
 			}
 		}
 
