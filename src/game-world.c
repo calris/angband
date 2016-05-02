@@ -26,13 +26,14 @@
 #include "mon-util.h"
 #include "obj-desc.h"
 #include "obj-gear.h"
-#include "obj-identify.h"
+#include "obj-knowledge.h"
 #include "obj-tval.h"
 #include "obj-util.h"
 #include "player-calcs.h"
 #include "player-timed.h"
 #include "player-util.h"
 #include "target.h"
+#include "trap.h"
 
 u16b daycount = 0;
 u32b seed_randart;		/* Hack -- consistent random artifacts */
@@ -281,7 +282,7 @@ static void decrease_timeouts(void)
  */
 void process_world(struct chunk *c)
 {
-	int i;
+	int i, y, x;
 
 	/* Compact the monster list if we're approaching the limit */
 	if (cave_monster_count(cave) + 32 > z_info->level_monster_max)
@@ -425,14 +426,30 @@ void process_world(struct chunk *c)
 			player_exp_lose(player, d / 10, false);
 		}
 
-		equip_notice_flag(player, OF_DRAIN_EXP);
+		equip_learn_flag(player, OF_DRAIN_EXP);
 	}
 
 	/* Recharge activatable objects and rods */
 	recharge_objects();
 
-	/* Feel the inventory */
-	sense_inventory();
+	/* Notice things after time */
+	if (!(turn % 100))
+		equip_learn_after_time(player);
+
+	/* Decrease trap timeouts */
+	for (y = 0; y < cave->height; y++) {
+		for (x = 0; x < cave->width; x++) {
+			struct trap *trap = cave->squares[y][x].trap;
+			while (trap) {
+				if (trap->timeout) {
+					trap->timeout--;
+					if (!trap->timeout)
+						square_light_spot(cave, y, x);
+				}
+				trap = trap->next;
+			}
+		}
+	}
 
 
 	/*** Involuntary Movement ***/
@@ -440,7 +457,7 @@ void process_world(struct chunk *c)
 	/* Random teleportation */
 	if (player_of_has(player, OF_TELEPORT) && one_in_(50)) {
 		const char *forty = "40";
-		equip_notice_flag(player, OF_TELEPORT);
+		equip_learn_flag(player, OF_TELEPORT);
 		effect_simple(EF_TELEPORT, forty, 0, 1, 0, NULL);
 		disturb(player, 0);
 	}

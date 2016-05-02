@@ -24,6 +24,7 @@
 #include "cave.h"
 #include "effects.h"
 #include "init.h"
+#include "mon-attack.h"
 #include "mon-blow-methods.h"
 #include "mon-blow-effects.h"
 #include "mon-desc.h"
@@ -31,7 +32,7 @@
 #include "mon-spell.h"
 #include "mon-timed.h"
 #include "mon-util.h"
-#include "obj-identify.h"
+#include "obj-knowledge.h"
 #include "player-attack.h"
 #include "player-timed.h"
 #include "player-util.h"
@@ -424,7 +425,7 @@ bool check_hit(struct player *p, int power, int level)
 	ac = p->state.ac + p->state.to_a;
 
 	/* If the monster checks vs ac, the player learns ac bonuses */
-	equip_notice_on_defend(p);
+	equip_learn_on_defend(p);
 
 	/* Check if the player was hit */
 	return test_hit(chance, ac, true);

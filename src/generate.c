@@ -38,7 +38,6 @@
 #include "mon-make.h"
 #include "mon-spell.h"
 #include "monster.h"
-#include "obj-identify.h"
 #include "obj-tval.h"
 #include "obj-util.h"
 #include "object.h"
@@ -53,7 +52,7 @@
  */
 struct pit_profile *pit_info;
 struct vault *vaults;
-struct cave_profile *cave_profiles;
+static struct cave_profile *cave_profiles;
 struct dun_data *dun;
 struct room_template *room_templates;
 
@@ -829,7 +828,8 @@ static void cave_clear(struct chunk *c, struct player *p)
 			struct object *obj = square_object(c, y, x);
 			while (obj) {
 				if (obj->artifact) {
-					if (!OPT(birth_lose_arts) && !object_was_sensed(obj))
+					bool found = obj->known && obj->known->artifact;
+					if (!OPT(birth_lose_arts) && !found)
 						obj->artifact->created = false;
 					else
 						history_lose_artifact(obj->artifact);
@@ -854,7 +854,7 @@ void cave_generate(struct chunk **c, struct player *p)
 {
 	const char *error = "no generation";
 	int i, y, x, tries = 0;
-	struct chunk *chunk;
+	struct chunk *chunk = NULL;
 
 	assert(c);
 
@@ -888,19 +888,19 @@ void cave_generate(struct chunk **c, struct player *p)
 
 		/* Ensure quest monsters */
 		if (is_quest(chunk->depth)) {
-			int i;
-			for (i = 1; i < z_info->r_max; i++) {
-				struct monster_race *race = &r_info[i];
-				int y, x;
-				
+			int i2;
+			for (i2 = 1; i2 < z_info->r_max; i2++) {
+				struct monster_race *race = &r_info[i2];
+				int y2, x2;
+
 				/* The monster must be an unseen quest monster of this depth. */
 				if (race->cur_num > 0) continue;
 				if (!rf_has(race->flags, RF_QUESTOR)) continue;
 				if (race->level != chunk->depth) continue;
 	
 				/* Pick a location and place the monster */
-				find_empty(chunk, &y, &x);
-				place_new_monster(chunk, y, x, race, true, true, ORIGIN_DROP);
+				find_empty(chunk, &y2, &x2);
+				place_new_monster(chunk, y2, x2, race, true, true, ORIGIN_DROP);
 			}
 		}
 

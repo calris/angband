@@ -27,8 +27,8 @@
 #include "mon-msg.h"
 #include "mon-util.h"
 #include "obj-gear.h"
-#include "obj-identify.h"
 #include "obj-ignore.h"
+#include "obj-knowledge.h"
 #include "obj-power.h"
 #include "obj-tval.h"
 #include "obj-util.h"
@@ -40,7 +40,7 @@
 /**
  * Stat Table (INT) -- Magic devices
  */
-const byte adj_int_dev[STAT_RANGE] =
+static const byte adj_int_dev[STAT_RANGE] =
 {
 	0	/* 3 */,
 	0	/* 4 */,
@@ -85,7 +85,7 @@ const byte adj_int_dev[STAT_RANGE] =
 /**
  * Stat Table (WIS) -- Saving throw
  */
-const byte adj_wis_sav[STAT_RANGE] =
+static const byte adj_wis_sav[STAT_RANGE] =
 {
 	0	/* 3 */,
 	0	/* 4 */,
@@ -131,53 +131,53 @@ const byte adj_wis_sav[STAT_RANGE] =
 /**
  * Stat Table (DEX) -- disarming
  */
-const byte adj_dex_dis[STAT_RANGE] =
+static const byte adj_dex_dis[STAT_RANGE] =
 {
 	0	/* 3 */,
 	0	/* 4 */,
 	0	/* 5 */,
 	0	/* 6 */,
 	0	/* 7 */,
-	0	/* 8 */,
-	0	/* 9 */,
-	0	/* 10 */,
-	0	/* 11 */,
-	0	/* 12 */,
+	1	/* 8 */,
+	1	/* 9 */,
+	1	/* 10 */,
+	1	/* 11 */,
+	1	/* 12 */,
 	1	/* 13 */,
 	1	/* 14 */,
-	1	/* 15 */,
+	2	/* 15 */,
 	2	/* 16 */,
 	2	/* 17 */,
-	4	/* 18/00-18/09 */,
-	4	/* 18/10-18/19 */,
-	4	/* 18/20-18/29 */,
+	3	/* 18/00-18/09 */,
+	3	/* 18/10-18/19 */,
+	3	/* 18/20-18/29 */,
 	4	/* 18/30-18/39 */,
-	5	/* 18/40-18/49 */,
+	4	/* 18/40-18/49 */,
 	5	/* 18/50-18/59 */,
-	5	/* 18/60-18/69 */,
-	6	/* 18/70-18/79 */,
-	6	/* 18/80-18/89 */,
-	7	/* 18/90-18/99 */,
-	8	/* 18/100-18/109 */,
-	8	/* 18/110-18/119 */,
-	8	/* 18/120-18/129 */,
-	8	/* 18/130-18/139 */,
-	8	/* 18/140-18/149 */,
-	9	/* 18/150-18/159 */,
-	9	/* 18/160-18/169 */,
-	9	/* 18/170-18/179 */,
-	9	/* 18/180-18/189 */,
-	9	/* 18/190-18/199 */,
-	10	/* 18/200-18/209 */,
-	10	/* 18/210-18/219 */,
-	10	/* 18/220+ */
+	6	/* 18/60-18/69 */,
+	7	/* 18/70-18/79 */,
+	8	/* 18/80-18/89 */,
+	9	/* 18/90-18/99 */,
+	10	/* 18/100-18/109 */,
+	10	/* 18/110-18/119 */,
+	11	/* 18/120-18/129 */,
+	12	/* 18/130-18/139 */,
+	13	/* 18/140-18/149 */,
+	14	/* 18/150-18/159 */,
+	15	/* 18/160-18/169 */,
+	16	/* 18/170-18/179 */,
+	17	/* 18/180-18/189 */,
+	18	/* 18/190-18/199 */,
+	19	/* 18/200-18/209 */,
+	19	/* 18/210-18/219 */,
+	19	/* 18/220+ */
 };
 
 
 /**
  * Stat Table (INT) -- disarming
  */
-const byte adj_int_dis[STAT_RANGE] =
+static const byte adj_int_dis[STAT_RANGE] =
 {
 	0	/* 3 */,
 	0	/* 4 */,
@@ -222,7 +222,7 @@ const byte adj_int_dis[STAT_RANGE] =
 /**
  * Stat Table (DEX) -- bonus to ac (plus 128)
  */
-const byte adj_dex_ta[STAT_RANGE] =
+static const byte adj_dex_ta[STAT_RANGE] =
 {
 	128 + -4	/* 3 */,
 	128 + -3	/* 4 */,
@@ -267,7 +267,7 @@ const byte adj_dex_ta[STAT_RANGE] =
 /**
  * Stat Table (STR) -- bonus to dam (plus 128)
  */
-const byte adj_str_td[STAT_RANGE] =
+static const byte adj_str_td[STAT_RANGE] =
 {
 	128 + -2	/* 3 */,
 	128 + -2	/* 4 */,
@@ -313,7 +313,7 @@ const byte adj_str_td[STAT_RANGE] =
 /**
  * Stat Table (DEX) -- bonus to hit (plus 128)
  */
-const byte adj_dex_th[STAT_RANGE] =
+static const byte adj_dex_th[STAT_RANGE] =
 {
 	128 + -3	/* 3 */,
 	128 + -2	/* 4 */,
@@ -359,7 +359,7 @@ const byte adj_dex_th[STAT_RANGE] =
 /**
  * Stat Table (STR) -- bonus to hit (plus 128)
  */
-const byte adj_str_th[STAT_RANGE] =
+static const byte adj_str_th[STAT_RANGE] =
 {
 	128 + -3	/* 3 */,
 	128 + -2	/* 4 */,
@@ -405,7 +405,7 @@ const byte adj_str_th[STAT_RANGE] =
 /**
  * Stat Table (STR) -- weight limit in deca-pounds
  */
-const byte adj_str_wgt[STAT_RANGE] =
+static const byte adj_str_wgt[STAT_RANGE] =
 {
 	5	/* 3 */,
 	6	/* 4 */,
@@ -497,7 +497,7 @@ const byte adj_str_hold[STAT_RANGE] =
 /**
  * Stat Table (STR) -- digging value
  */
-const byte adj_str_dig[STAT_RANGE] =
+static const byte adj_str_dig[STAT_RANGE] =
 {
 	0	/* 3 */,
 	0	/* 4 */,
@@ -589,7 +589,7 @@ const byte adj_str_blow[STAT_RANGE] =
 /**
  * Stat Table (DEX) -- index into the "blow" table
  */
-const byte adj_dex_blow[STAT_RANGE] =
+static const byte adj_dex_blow[STAT_RANGE] =
 {
 	0	/* 3 */,
 	0	/* 4 */,
@@ -727,7 +727,7 @@ const byte adj_con_fix[STAT_RANGE] =
 /**
  * Stat Table (CON) -- extra 1/100th hitpoints per level
  */
-const int adj_con_mhp[STAT_RANGE] =
+static const int adj_con_mhp[STAT_RANGE] =
 {
 	-250	/* 3 */,
 	-150	/* 4 */,
@@ -769,7 +769,7 @@ const int adj_con_mhp[STAT_RANGE] =
 	1250	/* 18/220+ */
 };
 
-const int adj_mag_study[STAT_RANGE] =
+static const int adj_mag_study[STAT_RANGE] =
 {
 	  0	/* 3 */,
 	  0	/* 4 */,
@@ -814,7 +814,7 @@ const int adj_mag_study[STAT_RANGE] =
 /**
  * Stat Table (INT/WIS) -- extra 1/100 mana-points per level
  */
-const int adj_mag_mana[STAT_RANGE] =
+static const int adj_mag_mana[STAT_RANGE] =
 {
 	  0	/* 3 */,
 	 10	/* 4 */,
@@ -884,7 +884,7 @@ const int adj_mag_mana[STAT_RANGE] =
  * The player gets blows/round equal to 100/this number, up to a maximum of
  * "num" blows/round, plus any "bonus" blows/round.
  */
-const byte blows_table[12][12] =
+static const byte blows_table[12][12] =
 {
 	/* P */
    /* D:   0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11+ */
@@ -961,9 +961,9 @@ bool earlier_object(struct object *orig, struct object *new, bool store)
 	if (orig->sval > new->sval) return true;
 
 	if (!store) {
-		/* Unidentified objects always come last (default to orig) */
-		if (!object_is_known(new)) return false;
-		if (!object_is_known(orig)) return true;
+		/* Unaware objects always come last (default to orig) */
+		if (new->kind->flavor && !object_flavor_is_aware(new)) return false;
+		if (orig->kind->flavor && !object_flavor_is_aware(orig)) return true;
 
 		/* Lights sort by decreasing fuel */
 		if (tval_is_light(orig)) {
@@ -974,18 +974,18 @@ bool earlier_object(struct object *orig, struct object *new, bool store)
 
 	/* Objects sort by decreasing value, except ammo */
 	if (tval_is_ammo(orig)) {
-		if (object_value_real(orig, 1, false, false) <
-			object_value_real(new, 1, false, false))
+		if (object_value(orig, 1, false) <
+			object_value(new, 1, false))
 			return false;
-		if (object_value_real(orig, 1, false, false) >
-			object_value_real(new, 1, false, false))
+		if (object_value(orig, 1, false) >
+			object_value(new, 1, false))
 			return true;
 	} else {
-		if (object_value_real(orig, 1, false, false) >
-			object_value_real(new, 1, false, false))
+		if (object_value(orig, 1, false) >
+			object_value(new, 1, false))
 			return false;
-		if (object_value_real(orig, 1, false, false) <
-			object_value_real(new, 1, false, false))
+		if (object_value(orig, 1, false) <
+			object_value(new, 1, false))
 			return true;
 	}
 
@@ -1054,9 +1054,8 @@ void calc_inventory(struct player_upkeep *upkeep, struct object *gear,
 						upkeep->quiver[i] = current;
 						upkeep->quiver_cnt += current->number;
 
-						/* Notice stuff if it's first time in the quiver */
-						if (!object_was_worn(current))
-							object_notice_on_wield(current);
+						/* In the quiver counts as worn */
+						object_learn_on_wield(player, current);
 
 						/* Done with this slot */
 						break;
@@ -1100,9 +1099,8 @@ void calc_inventory(struct player_upkeep *upkeep, struct object *gear,
 		upkeep->quiver[i] = first;
 		upkeep->quiver_cnt += first->number;
 
-		/* Notice stuff if it's first time in the quiver */
-		if (!object_was_worn(first))
-			object_notice_on_wield(first);
+		/* In the quiver counts as worn */
+		object_learn_on_wield(player, first);
 	}
 
 	/* Note reordering */
@@ -1430,7 +1428,7 @@ static void calc_mana(struct player *p, struct player_state *state, bool update)
 	/* Weigh the armor */
 	cur_wgt = 0;
 	for (i = 0; i < p->body.count; i++) {
-		struct object *obj = slot_object(p, i);
+		struct object *obj_local = slot_object(p, i);
 
 		/* Ignore non-armor */
 		if (slot_type_is(i, EQUIP_WEAPON)) continue;
@@ -1440,8 +1438,8 @@ static void calc_mana(struct player *p, struct player_state *state, bool update)
 		if (slot_type_is(i, EQUIP_LIGHT)) continue;
 
 		/* Add weight */
-		if (obj)
-			cur_wgt += obj->weight;
+		if (obj_local)
+			cur_wgt += obj_local->weight;
 	}
 
 	/* Determine the weight allowance */
@@ -1548,8 +1546,12 @@ static void calc_torch(struct player *p, struct player_state *state,
 		/* Skip empty slots */
 		if (!obj) continue;
 
-		/* Light radius is now a modifier */
-		amt = obj->modifiers[OBJ_MOD_LIGHT];
+		/* Light radius - innate plus modifier */
+		if (of_has(obj->flags, OF_LIGHT_1))
+			amt = 1;
+		else if (of_has(obj->flags, OF_LIGHT_2))
+			amt = 2;
+		amt += obj->modifiers[OBJ_MOD_LIGHT];
 
 		/* Cursed objects emit no light */
 		if (of_has(obj->flags, OF_LIGHT_CURSE))
@@ -1753,6 +1755,8 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 
 	/* Scan the equipment */
 	for (i = 0; i < p->body.count; i++) {
+		int dig = 0;
+
 		obj = slot_object(p, i);
 
 		/* Skip non-objects */
@@ -1776,18 +1780,20 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 		/* Affect stealth */
 		state->skills[SKILL_STEALTH] += obj->modifiers[OBJ_MOD_STEALTH];
 
-		/* Affect searching ability (factor of five) */
-		state->skills[SKILL_SEARCH] += (obj->modifiers[OBJ_MOD_SEARCH] * 5);
-
-		/* Affect searching frequency (factor of five) */
-		state->skills[SKILL_SEARCH_FREQUENCY] += 
-			(obj->modifiers[OBJ_MOD_SEARCH] * 5);
-
 		/* Affect infravision */
 		state->see_infra += obj->modifiers[OBJ_MOD_INFRA];
 
-		/* Affect digging (factor of 20) */
-		state->skills[SKILL_DIGGING] += (obj->modifiers[OBJ_MOD_TUNNEL] * 20);
+		/* Affect digging (innate effect, plus bonus, times 20) */
+		if (tval_is_digger(obj)) {
+			if (of_has(obj->flags, OF_DIG_1))
+				dig = 1;
+			else if (of_has(obj->flags, OF_DIG_2))
+				dig = 2;
+			else if (of_has(obj->flags, OF_DIG_3))
+				dig = 3;
+		}
+		dig += obj->modifiers[OBJ_MOD_TUNNEL];
+		state->skills[SKILL_DIGGING] += (dig * 20);
 
 		/* Affect speed */
 		state->speed += obj->modifiers[OBJ_MOD_SPEED];
@@ -1803,9 +1809,7 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 
 		/* Affect resists */
 		for (j = 0; j < ELEM_MAX; j++)
-			if (!known_only || object_is_known(obj) ||
-				object_element_is_known(obj, j)) {
-
+			if (!known_only || obj->known->el_info[j].res_level) {
 				/* Note vulnerability for later processing */
 				if (obj->el_info[j].res_level == -1)
 					vuln[i] = true;
@@ -1819,8 +1823,7 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 		state->ac += obj->ac;
 
 		/* Apply the bonuses to armor class */
-		if (!known_only || object_is_known(obj) ||
-			object_defence_plusses_are_visible(obj))
+		if (!known_only || obj->known->to_a)
 			state->to_a += obj->to_a;
 
 		/* Do not apply weapon and bow bonuses until combat calculations */
@@ -1828,12 +1831,10 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 		if (slot_type_is(i, EQUIP_BOW)) continue;
 
 		/* Apply the bonuses to hit/damage */
-		if (!known_only || object_is_known(obj) ||
-			object_attack_plusses_are_visible(obj))
-		{
+		if (!known_only || obj->known->to_h)
 			state->to_h += obj->to_h;
+		if (!known_only || obj->known->to_d)
 			state->to_d += obj->to_d;
-		}
 	}
 
 
@@ -2045,10 +2046,6 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 	if (j > i / 2)
 		state->speed -= ((j - (i / 2)) / (i / 10));
 
-	/* Searching slows the player down */
-	if (p->searching)
-		state->speed -= 10;
-
 	/* Sanity check on extreme speeds */
 	if (state->speed < 0)
 		state->speed = 0;
@@ -2071,8 +2068,8 @@ void calc_bonuses(struct player *p, struct player_state *state, bool known_only,
 	 * ------------------------------------ */
 
 	/* Affect Skill -- disarming (DEX and INT) */
-	state->skills[SKILL_DISARM] += adj_dex_dis[state->stat_ind[STAT_DEX]];
-	state->skills[SKILL_DISARM] += adj_int_dis[state->stat_ind[STAT_INT]];
+	state->skills[SKILL_DISARM_PHYS] += adj_dex_dis[state->stat_ind[STAT_DEX]];
+	state->skills[SKILL_DISARM_MAGIC] += adj_int_dis[state->stat_ind[STAT_INT]];
 
 	/* Affect Skill -- magic devices (INT) */
 	state->skills[SKILL_DEVICE] += adj_int_dev[state->stat_ind[STAT_INT]];
@@ -2561,7 +2558,6 @@ static const struct flag_event_trigger redraw_events[] =
 	{ PR_STATE,   EVENT_STATE },
 	{ PR_STATUS,  EVENT_STATUS },
 	{ PR_STUDY,   EVENT_STUDYSTATUS },
-	{ PR_DTRAP,   EVENT_DETECTIONSTATUS },
 	{ PR_FEELING, EVENT_FEELING },
 
 	{ PR_INVEN,   EVENT_INVENTORY },

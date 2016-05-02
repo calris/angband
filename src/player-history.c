@@ -238,12 +238,11 @@ static bool history_is_artifact_logged(struct artifact *artifact)
  * Adding artifacts to the history list is trickier than other operations.
  * This is a wrapper function that gets some of the logic out of places
  * where it really doesn't belong.  Call this to add an artifact to the history
- * list or make the history entry visible--history_add_artifact will make that
- * determination depending on what object_is_known returns for the artifact.
+ * list or make the history entry visible.
  */
 bool history_add_artifact(struct artifact *artifact, bool known, bool found)
 {
-	struct object body = { 0 }, known_body = { 0 };
+	struct object body = OBJECT_NULL, known_body = OBJECT_NULL;
 	struct object *fake = &body, *known_obj = &known_body;
 
 	char o_name[80];
@@ -254,8 +253,7 @@ bool history_add_artifact(struct artifact *artifact, bool known, bool found)
 	/* Make fake artifact for description purposes */
 	make_fake_artifact(fake, artifact);
 	fake->known = known_obj;
-	known_obj->artifact = (struct artifact *) 1;
-	known_obj->kind = fake->kind;
+	object_copy(known_obj, fake);
 	object_desc(o_name, sizeof(o_name), fake,
 				ODESC_PREFIX | ODESC_BASE | ODESC_SPOIL);
 	object_wipe(known_obj);

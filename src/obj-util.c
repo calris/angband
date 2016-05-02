@@ -29,8 +29,8 @@
 #include "monster.h"
 #include "obj-desc.h"
 #include "obj-gear.h"
-#include "obj-identify.h"
 #include "obj-ignore.h"
+#include "obj-knowledge.h"
 #include "obj-make.h"
 #include "obj-pile.h"
 #include "obj-slays.h"
@@ -230,10 +230,7 @@ void flavor_init(void)
 void object_flags(const struct object *obj, bitflag flags[OF_SIZE])
 {
 	of_wipe(flags);
-
-	if (!obj)
-		return;
-
+	if (!obj) return;
 	of_copy(flags, obj->flags);
 }
 
@@ -277,7 +274,19 @@ bool object_test(item_tester tester, const struct object *obj)
  */
 bool is_unknown(const struct object *obj)
 {
-	struct grid_data gd = { 0 };
+	struct grid_data gd = {
+		.m_idx = 0,
+		.f_idx = 0,
+		.first_kind = NULL,
+		.trap = NULL,
+		.multiple_objects = false,
+		.unseen_object = false,
+		.unseen_money = false,
+		.lighting = LIGHTING_LOS,
+		.in_view = false,
+		.is_player = false,
+		.hallucinate = false,
+	};
 	map_info(obj->iy, obj->ix, &gd);
 	return gd.unseen_object;
 }	

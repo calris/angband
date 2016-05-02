@@ -361,27 +361,11 @@ bool square_wasseen(struct chunk *c, int y, int x) {
 }
 
 /**
- * True if the square has been detected for traps
- */
-bool square_isdtrap(struct chunk *c, int y, int x) {
-	assert(square_in_bounds(c, y, x));
-	return sqinfo_has(c->squares[y][x].info, SQUARE_DTRAP);
-}
-
-/**
  * True if cave square is a feeling trigger square 
  */
 bool square_isfeel(struct chunk *c, int y, int x) {
 	assert(square_in_bounds(c, y, x));
 	return sqinfo_has(c->squares[y][x].info, SQUARE_FEEL);
-}
-
-/**
- * True if the square is on the trap detection edge
- */
-bool square_isdedge(struct chunk *c, int y, int x) {
-	assert(square_in_bounds(c, y, x));
-	return sqinfo_has(c->squares[y][x].info, SQUARE_DEDGE);
 }
 
 /**
@@ -632,6 +616,15 @@ bool square_isknowntrap(struct chunk *c, int y, int x)
 }
 
 /**
+ * True if the square is a known, disabled player trap.
+ */
+bool square_isdisabledtrap(struct chunk *c, int y, int x)
+{
+	return square_isvisibletrap(c, y, x) &&
+		(square_trap_timeout(c, y, x, -1) > 0);
+}
+
+/**
  * Determine if a given location may be "destroyed"
  *
  * Used by destruction spells, and for placing stairs, etc.
@@ -652,28 +645,6 @@ bool square_changeable(struct chunk *c, int y, int x)
 
 	/* Accept */
 	return (true);
-}
-
-
-/**
- * Checks if a square is at the (inner) edge of a trap detect area 
- */ 
-bool square_dtrap_edge(struct chunk *c, int y, int x) 
-{ 
-	/* Check if the square is a dtrap in the first place */ 
-	if (!square_isdtrap(c, y, x)) return false;
-
- 	/* Check for non-dtrap adjacent grids */ 
-	if (square_in_bounds_fully(c, y + 1, x) && (!square_isdtrap(c, y + 1, x)))
-		return true;
-	if (square_in_bounds_fully(c, y, x + 1) && (!square_isdtrap(c, y, x + 1)))
-		return true;
-	if (square_in_bounds_fully(c, y - 1, x) && (!square_isdtrap(c, y - 1, x)))
-		return true;
-	if (square_in_bounds_fully(c, y, x - 1) && (!square_isdtrap(c, y, x - 1)))
-		return true;
-
-	return false; 
 }
 
 
@@ -852,6 +823,12 @@ void square_destroy_door(struct chunk *c, int y, int x) {
 void square_destroy_trap(struct chunk *c, int y, int x)
 {
 	square_remove_trap(c, y, x, false, -1);
+}
+
+void square_disable_trap(struct chunk *c, int y, int x)
+{
+	if (!square_isplayertrap(c, y, x)) return;
+	square_set_trap_timeout(c, y, x, false, -1, 10);
 }
 
 void square_tunnel_wall(struct chunk *c, int y, int x)

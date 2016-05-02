@@ -15,9 +15,7 @@
 # skill-device:base:increment
 # skill-save:base:increment
 # skill-stealth:base:increment
-# skill-search:base:increment
-# skill-search-freq:base:increment
-# skill-melee:base:increment
+# # # skill-melee:base:increment
 # skill-shoot:base:increment
 # skill-throw:base:increment
 # skill-dig:base:increment
@@ -98,12 +96,11 @@
 ############### WARRIOR ###############
 name:0:Warrior
 stats:3:-2:-2:2:2
-skill-disarm:25:10
+skill-disarm-phys:25:15
+skill-disarm-magic:20:10
 skill-device:18:7
 skill-save:18:10
 skill-stealth:0:0
-skill-search:14:0
-skill-search-freq:2:0
 skill-melee:70:45
 skill-shoot:55:45
 skill-throw:55:45
@@ -134,12 +131,11 @@ magic:0:0:0:0
 ############### MAGE ###############
 name:1:Mage
 stats:-3:3:0:0:-2
-skill-disarm:30:7
+skill-disarm-phys:30:10
+skill-disarm-magic:35:12
 skill-device:36:13
 skill-save:30:9
 skill-stealth:2:0
-skill-search:16:0
-skill-search-freq:20:0
 skill-melee:34:15
 skill-shoot:20:15
 skill-throw:20:15
@@ -227,9 +223,10 @@ dice:$Dd6
 expr:D:PLAYER_LEVEL:- 5 / 6 + 3
 desc:Fires a lightning beam that hurts each monster in its path.
 
-spell:Trap/Door Destruction:5:5:30:6
+spell:Disable Traps, Destroy Doors:5:5:30:6
 effect:TOUCH:KILL_DOOR
-desc:Destroys all traps and doors within a 1-square radius of you.
+effect:TOUCH:KILL_TRAP
+desc:Disables traps and destroys doors within a 1-square radius of you.
 
 spell:Cure Poison:5:5:35:4
 effect:CURE:POISONED
@@ -311,7 +308,7 @@ desc:  Uniques are not affected.
 
 spell:Identify:11:7:25:6
 effect:IDENTIFY
-desc:Reveals the powers of an object.
+desc:Reveals an unknown rune on an object.
 
 spell:Reveal Monsters:15:6:40:6
 effect:DETECT_INVISIBLE_MONSTERS
@@ -598,12 +595,11 @@ desc: damage to each monster in its area of effect.
 ############### PRIEST ###############
 name:2:Priest
 stats:-1:-3:3:-1:1
-skill-disarm:25:7
+skill-disarm-phys:25:12
+skill-disarm-magic:25:12
 skill-device:30:10
 skill-save:32:12
 skill-stealth:2:0
-skill-search:16:0
-skill-search-freq:8:0
 skill-melee:48:20
 skill-shoot:35:20
 skill-throw:35:20
@@ -934,7 +930,7 @@ desc: in the immediate area.
 
 spell:Perception:20:20:80:20
 effect:IDENTIFY
-desc:Reveals the powers of an object.
+desc:Reveals an unknown rune on an object.
 
 spell:Probing:25:40:80:150
 effect:PROBE
@@ -992,7 +988,10 @@ book:prayer book:[Holy Infusions]:5:2
 
 spell:Unbarring Ways:5:6:50:40
 effect:TOUCH:KILL_DOOR
-desc:Destroys all traps and doors within a 1-square radius of you.
+effect:TIMED_INC:TRAPSAFE
+dice:10+d10
+desc:Destroys all doors within a 1-square radius of you and renders you safe
+desc: from traps for a short while.
 
 spell:Recharging:15:20:80:25
 effect:RECHARGE
@@ -1067,12 +1066,11 @@ desc: undead, a demon, an elemental, a golem, or a vortex.
 ############### ROGUE ###############
 name:3:Rogue
 stats:0:1:-3:3:-1
-skill-disarm:45:15
+skill-disarm-phys:45:20
+skill-disarm-magic:45:20
 skill-device:32:10
 skill-save:28:10
 skill-stealth:3:1
-skill-search:32:0
-skill-search-freq:24:0
 skill-melee:60:40
 skill-shoot:66:30
 skill-throw:66:30
@@ -1152,9 +1150,10 @@ expr:B:PLAYER_LEVEL:+ 0
 desc:Attempts to confuse a single monster for a level-dependant duration.
 desc:  Uniques and monsters that resist confusion are not affected.
 
-spell:Trap/Door Destruction:14:7:60:2
+spell:Disable Traps, Destroy Doors:14:7:60:2
 effect:TOUCH:KILL_DOOR
-desc:Destroys all traps and doors within a 1-square radius of you.
+effect:TOUCH:KILL_TRAP
+desc:Disables traps and destroys doors within a 1-square radius of you.
 
 spell:Cure Poison:21:9:90:1
 effect:CURE:POISONED
@@ -1211,7 +1210,7 @@ desc: is susceptible to rock remover takes 20+1d30 points of damage.
 
 spell:Identify:18:18:60:2
 effect:IDENTIFY
-desc:Reveals the powers of an object.
+desc:Reveals an unknown rune on an object.
 
 spell:Reveal Monsters:20:11:50:4
 effect:DETECT_INVISIBLE_MONSTERS
@@ -1395,12 +1394,11 @@ desc:  Uniques or monsters that resist confusion are not affected.
 ############### RANGER ###############
 name:4:Ranger
 stats:0:2:-2:1:-1
-skill-disarm:30:8
+skill-disarm-phys:30:13
+skill-disarm-magic:20:13
 skill-device:32:10
 skill-save:28:10
 skill-stealth:3:0
-skill-search:24:0
-skill-search-freq:16:0
 skill-melee:56:30
 skill-shoot:72:45
 skill-throw:72:45
@@ -1500,9 +1498,10 @@ dice:$Dd6
 expr:D:PLAYER_LEVEL:- 5 / 6 + 3
 desc:Fires a lightning beam that hurts each monster in its path.
 
-spell:Trap/Door Destruction:9:8:45:3
+spell:Disable Traps, Destroy Doors:9:8:45:3
 effect:TOUCH:KILL_DOOR
-desc:Destroys all traps and doors within a 1-square radius of you.
+effect:TOUCH:KILL_TRAP
+desc:Disables traps and destroys doors within a 1-square radius of you.
 
 spell:Cure Poison:11:9:45:3
 effect:CURE:POISONED
@@ -1584,7 +1583,7 @@ desc:  Uniques are not affected.
 
 spell:Identify:23:25:90:3
 effect:IDENTIFY
-desc:Reveals the powers of an object.
+desc:Reveals an unknown rune on an object.
 
 spell:Reveal Monsters:25:17:50:4
 effect:DETECT_INVISIBLE_MONSTERS
@@ -1842,12 +1841,11 @@ desc:  This spell has no effect when used in the town.
 ############### PALADIN ###############
 name:5:Paladin
 stats:1:-3:1:-1:2
-skill-disarm:20:7
+skill-disarm-phys:20:12
+skill-disarm-magic:20:10
 skill-device:24:10
 skill-save:25:11
 skill-stealth:0:0
-skill-search:12:0
-skill-search-freq:2:0
 skill-melee:68:35
 skill-shoot:40:30
 skill-throw:40:30
@@ -2149,7 +2147,7 @@ desc: in the immediate area.
 
 spell:Perception:25:25:80:16
 effect:IDENTIFY
-desc:Reveals the powers of an object.
+desc:Reveals an unknown rune on an object.
 
 spell:Probing:30:15:80:135
 effect:PROBE
@@ -2191,7 +2189,10 @@ book:prayer book:[Holy Infusions]:5:2
 
 spell:Unbarring Ways:10:16:50:20
 effect:TOUCH:KILL_DOOR
-desc:Destroys all traps and doors within a 1-square radius of you.
+effect:TIMED_INC:TRAPSAFE
+dice:10+d10
+desc:Destroys all doors within a 1-square radius of you and renders you safe
+desc: from traps for a short while.
 
 spell:Recharging:25:30:80:15
 effect:RECHARGE

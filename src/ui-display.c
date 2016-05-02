@@ -41,6 +41,7 @@
 #include "savefile.h"
 #include "target.h"
 #include "ui-birth.h"
+#include "ui-display.h"
 #include "ui-game.h"
 #include "ui-input.h"
 #include "ui-map.h"
@@ -83,7 +84,6 @@ static game_event_type statusline_events[] =
 {
 	EVENT_STUDYSTATUS,
 	EVENT_STATUS,
-	EVENT_DETECTIONSTATUS,
 	EVENT_STATE,
 	EVENT_FEELING,
 };
@@ -445,9 +445,6 @@ static void prt_speed(int row, int col)
 	const char *type = NULL;
 	char buf[32] = "";
 
-	/* Hack -- Visually "undo" the Search Mode Slowdown */
-	if (player->searching) i += 10;
-
 	/* 110 is normal speed, and requires no display */
 	if (i > 110) {
 		attr = COLOUR_L_GREEN;
@@ -664,6 +661,7 @@ static const struct state_info effects[] =
 	{ TMD_POISONED,  S("Poisoned"),   COLOUR_ORANGE },
 	{ TMD_PROTEVIL,  S("ProtEvil"),   COLOUR_L_GREEN },
 	{ TMD_SPRINT,    S("Sprint"),     COLOUR_L_GREEN },
+	{ TMD_TRAPSAFE,  S("TrapSafe"),   COLOUR_L_GREEN },
 	{ TMD_TELEPATHY, S("ESP"),        COLOUR_L_BLUE },
 	{ TMD_INVULN,    S("Invuln"),     COLOUR_L_GREEN },
 	{ TMD_HERO,      S("Hero"),       COLOUR_L_GREEN },
@@ -681,6 +679,7 @@ static const struct state_info effects[] =
 	{ TMD_OPP_POIS,  S("RPois"),      COLOUR_GREEN },
 	{ TMD_OPP_CONF,  S("RConf"),      COLOUR_VIOLET },
 	{ TMD_AMNESIA,   S("Amnesiac"),   COLOUR_ORANGE },
+	{ TMD_SCRAMBLE,   S("Scrambled"),   COLOUR_VIOLET },
 };
 
 #define PRINT_STATE(sym, data, index, row, col) \
@@ -765,7 +764,7 @@ static size_t prt_hunger(int row, int col)
 
 
 /**
- * Prints Searching, Resting, or 'count' status
+ * Prints Resting, or 'count' status
  * Display is always exactly 10 characters wide (see below)
  *
  * This function was a major bottleneck when resting, so a lot of
@@ -778,7 +777,7 @@ static size_t prt_state(int row, int col)
 	char text[16] = "";
 
 
-	/* Displayed states are resting, repeating and searching */
+	/* Displayed states are resting and repeating */
 	if (player_is_resting(player)) {
 		int i;
 		int n = player_resting_count(player);
@@ -825,8 +824,6 @@ static size_t prt_state(int row, int col)
 			strnfmt(text, sizeof(text), "Rep. %3d00", nrepeats / 100);
 		else
 			strnfmt(text, sizeof(text), "Repeat %3d", nrepeats);
-	} else if (player->searching) {
-		my_strcpy(text, "Searching ", sizeof(text));
 	}
 
 	/* Display the info (or blanks) */
@@ -943,26 +940,6 @@ static size_t prt_level_feeling(int row, int col)
 }
 
 /**
- * Prints trap detection status
- */
-static size_t prt_dtrap(int row, int col)
-{
-	/* The player is in a trap-detected grid */
-	if (square_isdtrap(cave, player->py, player->px)) {
-		/* The player is on the border */
-		if (square_isdedge(cave, player->py, player->px))
-			c_put_str(COLOUR_YELLOW, "DTrap", row, col);
-		else
-			c_put_str(COLOUR_L_GREEN, "DTrap", row, col);
-
-		return 5;
-	}
-
-	return 0;
-}
-
-
-/**
  * Print how many spells the player can study.
  */
 static size_t prt_study(int row, int col)
@@ -1024,7 +1001,7 @@ typedef size_t status_f(int row, int col);
 
 static status_f *status_handlers[] =
 { prt_level_feeling, prt_unignore, prt_recall, prt_descent, prt_state, prt_cut, 
-  prt_stun, prt_hunger, prt_study, prt_tmd, prt_dtrap };
+  prt_stun, prt_hunger, prt_study, prt_tmd };
 
 
 /**

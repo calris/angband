@@ -20,7 +20,10 @@
 #include "cave.h"
 #include "effects.h"
 #include "init.h"
+#include "mon-util.h"
+#include "obj-knowledge.h"
 #include "player-attack.h"
+#include "player-timed.h"
 #include "player-util.h"
 #include "trap.h"
 
@@ -276,7 +279,7 @@ void square_free_trap(struct chunk *c, int y, int x)
 /**
  * Reveal some of the player traps in a square
  */
-bool square_reveal_trap(struct chunk *c, int y, int x, int chance, bool domsg)
+bool square_reveal_trap(struct chunk *c, int y, int x, bool domsg)
 {
     int found_trap = 0;
 	struct trap *trap = square_trap(c, y, x);
@@ -301,9 +304,6 @@ bool square_reveal_trap(struct chunk *c, int y, int x, int chance, bool domsg)
 
 			/* We found a trap */
 			found_trap++;
-
-			/* If chance is < 100, check for further looking */
-			if ((chance < 100) && (randint1(100) > chance)) break;
 		}
 		trap = trap->next;
 	}
@@ -382,6 +382,9 @@ extern void hit_trap(int y, int x)
     /* Count the hidden traps here */
     int num = num_traps(cave, y, x, -1);
 
+	/* The player is safe from all traps */
+	if (player->timed[TMD_TRAPSAFE]) return;
+
     /* Oops.  We've walked right into trouble. */
     if      (num == 1) msg("You stumble upon a trap!");
     else if (num >  1) msg("You stumble upon some traps!");
@@ -389,15 +392,73 @@ extern void hit_trap(int y, int x)
 
 	/* Look at the traps in this grid */
 	for (trap = square_trap(cave, y, x); trap; trap = trap->next) {
+		int flag;
+		bool saved = false;
+
 		/* Require that trap be capable of affecting the character */
 		if (!trf_has(trap->kind->flags, TRF_TRAP)) continue;
+		if (trap->timeout) continue;
+
+		/* Set this to be the current trap */
+		cave->trap_current = trap;
 	    
 		/* Disturb the player */
 		disturb(player, 0);
 
-		/* Fire off the trap */
-		effect = trap->kind->effect;
-		effect_do(effect, NULL, &ident, false, 0, 0, 0);
+		/* Give a message */
+		if (trap->kind->msg)
+			msg(trap->kind->msg);
+
+		/* Test for save due to flag */
+		for (flag = of_next(trap->kind->save_flags, FLAG_START);
+			 flag != FLAG_END;
+			 flag = of_next(trap->kind->save_flags, flag + 1))
+			if (player_of_has(player, flag)) {
+				saved = true;
+				equip_learn_flag(player, flag);
+			}
+
+		/* Test for save due to armor */
+		if (trf_has(trap->kind->flags, TRF_SAVE_ARMOR) && !trap_check_hit(125))
+			saved = true;
+
+		/* Test for save due to saving throw */
+		if (trf_has(trap->kind->flags, TRF_SAVE_THROW) &&
+			(randint0(100) < player->state.skills[SKILL_SAVE]))
+			saved = true;
+
+		/* Save, or fire off the trap */
+		if (saved) {
+			if (trap->kind->msg_good)
+				msg(trap->kind->msg_good);
+		} else {
+			if (trap->kind->msg_bad)
+				msg(trap->kind->msg_bad);
+			effect = trap->kind->effect;
+			effect_do(effect, NULL, &ident, false, 0, 0, 0);
+
+			/* Do any extra effects */
+			if (trap->kind->effect_xtra && one_in_(2)) {
+				if (trap->kind->msg_xtra)
+					msg(trap->kind->msg_xtra);
+				effect = trap->kind->effect_xtra;
+				effect_do(effect, NULL, &ident, false, 0, 0, 0);
+			}
+		}
+
+		/* Some traps drop you a dungeon level */
+		if (trf_has(trap->kind->flags, TRF_DOWN))
+			dungeon_change_level(dungeon_get_next_level(player->depth, 1));
+
+		/* Some traps drop you onto them */
+		if (trf_has(trap->kind->flags, TRF_PIT))
+			monster_swap(player->py, player->px, trap->fy, trap->fx);
+
+		/* Some traps disappear after activating */
+		if (trf_has(trap->kind->flags, TRF_ONETIME)) {
+			square_destroy_trap(cave, y, x);
+			square_forget(cave, y, x);
+		}
 
 		/* Trap may have gone */
 		if (!square_trap(cave, y, x)) break;
@@ -406,6 +467,9 @@ extern void hit_trap(int y, int x)
 		trf_on(trap->flags, TRF_VISIBLE);
 		square_memorize(cave, y, x);
 	}
+
+	/* Clear the current trap */
+	cave->trap_current = NULL;
 
     /* Verify traps (remove marker if appropriate) */
     (void)square_verify_trap(cave, y, x, 0);
@@ -484,6 +548,86 @@ bool square_remove_trap(struct chunk *c, int y, int x, bool domsg, int t_idx)
 }
 
 /**
+ * Remove traps.
+ *
+ * If called with t_idx < 0, will remove all traps in the location given.
+ * Otherwise, will remove all traps with the given kind.
+ *
+ * Return true if no traps now exist in this grid.
+ */
+bool square_set_trap_timeout(struct chunk *c, int y, int x, bool domsg,
+							 int t_idx, int time)
+{
+    bool trap_exists;
+	struct trap *current_trap = NULL;
+
+	/* Bounds check */
+	assert(square_in_bounds(c, y, x));
+
+	/* Look at the traps in this grid */
+	current_trap = c->squares[y][x].trap;
+	while (current_trap) {
+		/* Get the next trap (may be NULL) */
+		struct trap *next_trap = current_trap->next;
+
+		/* If called with a specific index, skip others */
+		if ((t_idx >= 0) && (t_idx != current_trap->t_idx)) {
+			if (!next_trap) break;
+			current_trap = next_trap;
+			continue;
+		}
+
+		/* Set the timer */
+		current_trap->timeout = time;
+
+		/* Message if requested */
+		msg("You have disabled the %s.", current_trap->kind->name);
+
+		/* Replace with the next trap */
+		current_trap = next_trap;
+    }
+
+    /* Refresh grids that the character can see */
+    if (square_isseen(c, y, x))
+		square_light_spot(c, y, x);
+
+    /* Verify traps (remove marker if appropriate) */
+    trap_exists = square_verify_trap(c, y, x, 0);
+
+    /* Report whether any traps exist in this grid */
+    return (!trap_exists);
+}
+
+/**
+ * Give the remaining time for a trap to be disabled; note it chooses the first
+ * appropriate trap on the grid
+ */
+int square_trap_timeout(struct chunk *c, int y, int x, int t_idx)
+{
+	struct trap *current_trap = c->squares[y][x].trap;
+	while (current_trap) {
+		/* Get the next trap (may be NULL) */
+		struct trap *next_trap = current_trap->next;
+
+		/* If called with a specific index, skip others */
+		if ((t_idx >= 0) && (t_idx != current_trap->t_idx)) {
+			if (!next_trap) break;
+			current_trap = next_trap;
+			continue;
+		}
+
+		/* If the timer is set, return the value */
+		if (current_trap->timeout)
+			return current_trap->timeout;
+
+		/* Replace with the next trap */
+		current_trap = next_trap;
+    }
+
+	return 0;
+}
+
+/**
  * Lock a closed door to a given power
  */
 void square_set_door_lock(struct chunk *c, int y, int x, int power)
@@ -503,7 +647,7 @@ void square_set_door_lock(struct chunk *c, int y, int x, int power)
 	trap = square_trap(c, y, x);
 	while (trap) {
 		if (trap->kind == lock)
-			trap->xtra = power;
+			trap->power = power;
 		trap = trap->next;
 	}
 }
@@ -528,7 +672,7 @@ int square_door_power(struct chunk *c, int y, int x)
 	trap = square_trap(c, y, x);
 	while (trap) {
 		if (trap->kind == lock)
-			return trap->xtra;
+			return trap->power;
 		trap = trap->next;
 	}
 

@@ -32,7 +32,7 @@
  */
 enum
 {
-	#define STAT(a, b, c, d, e, f, g, h) STAT_##a,
+	#define STAT(a, b, c, d, e, f, g, h, i) STAT_##a,
 	#include "list-stats.h"
 	#undef STAT
 
@@ -88,6 +88,7 @@ enum
 
 
 #define PY_MAX_EXP		99999999L	/* Maximum exp */
+#define PY_KNOW_LEVEL	30			/* Level to know all runes */
 #define PY_MAX_LEVEL	50			/* Maximum level */
 
 /**
@@ -122,12 +123,11 @@ enum
  */
 enum
 {
-	SKILL_DISARM,			/* Skill: Disarming */
+	SKILL_DISARM_PHYS,		/* Skill: Disarming - physical*/
+	SKILL_DISARM_MAGIC,		/* Skill: Disarming - magical */
 	SKILL_DEVICE,			/* Skill: Magic Devices */
 	SKILL_SAVE,				/* Skill: Saving throw */
 	SKILL_STEALTH,			/* Skill: Stealth factor */
-	SKILL_SEARCH,			/* Skill: Searching ability */
-	SKILL_SEARCH_FREQUENCY,	/* Skill: Searching frequency */
 	SKILL_TO_HIT_MELEE,		/* Skill: To hit (normal) */
 	SKILL_TO_HIT_BOW,		/* Skill: To hit (shooting) */
 	SKILL_TO_HIT_THROW,		/* Skill: To hit (throwing) */
@@ -526,6 +526,7 @@ struct player {
 
 	s16b stat_max[STAT_MAX];	/* Current "maximal" stat values */
 	s16b stat_cur[STAT_MAX];	/* Current "natural" stat values */
+	s16b stat_map[STAT_MAX];	/* Tracks remapped stats from temp stat swap */
 
 	s16b *timed;		/* Timed effects */
 
@@ -539,7 +540,6 @@ struct player {
 	s16b food;			/* Current nutrition */
 
 	byte confusing;		/* Glowing hands */
-	byte searching;		/* Currently searching */
 	byte unignoring;	/* Unignoring */
 
 	byte *spell_flags; /* Spell flags */
@@ -575,6 +575,8 @@ struct player {
 	struct object *gear;
 	/* Known gear */
 	struct object *gear_k;
+	/* Object knowledge ("runes") */
+	struct object *obj_k;
 
 	struct player_body body;
 };

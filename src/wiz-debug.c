@@ -29,7 +29,6 @@
 #include "monster.h"
 #include "obj-desc.h"
 #include "obj-gear.h"
-#include "obj-identify.h"
 #include "obj-make.h"
 #include "obj-pile.h"
 #include "obj-power.h"
@@ -42,6 +41,7 @@
 #include "player-util.h"
 #include "project.h"
 #include "target.h"
+#include "trap.h"
 #include "ui-command.h"
 #include "ui-event.h"
 #include "ui-display.h"
@@ -205,7 +205,7 @@ static void do_cmd_keylog(void) {
 	int i;
 	char buf[50];
 	char buf2[12];
-	struct keypress keys[2] = {{EVT_NONE, 0}, {EVT_NONE, 0}};
+	struct keypress keys[2] = {KEYPRESS_NULL, KEYPRESS_NULL};
 
 	screen_save();
 
@@ -453,7 +453,7 @@ static void wiz_display_item(const struct object *obj, bool all)
 
 
 /** Object creation code **/
-bool choose_artifact = false;
+static bool choose_artifact = false;
 
 static const region wiz_create_item_area = { 0, 0, 0, 0 };
 
@@ -485,8 +485,8 @@ static void get_art_name(char *buf, int max, int a_idx)
 	/* Make it known to us */
 	known_obj = object_new();
 	obj->known = known_obj;
+	object_copy(known_obj, obj);
 	known_obj->notice |= OBJ_NOTICE_IMAGINED;
-	object_notice_everything(obj);
 
 	/* Create the artifact description */
 	object_desc(buf, max, obj, ODESC_SINGULAR | ODESC_SPOIL);
@@ -824,8 +824,8 @@ static void wiz_create_item(bool art)
 		if (art) {
 			int j;
 			for (j = 1; j < z_info->a_max; j++) {
-				struct artifact *art = &a_info[j];
-				if (art->tval == i) break;
+				struct artifact *art_local = &a_info[j];
+				if (art_local->tval == i) break;
 			}
 			if (j == z_info->a_max) continue;
 		}
@@ -1617,10 +1617,7 @@ static void do_cmd_wiz_query(void)
 		case 's': flag = (SQUARE_SEEN); break;
 		case 'v': flag = (SQUARE_VIEW); break;
 		case 'w': flag = (SQUARE_WASSEEN); break;
-		case 'd': flag = (SQUARE_DTRAP); break;
 		case 'f': flag = (SQUARE_FEEL); break;
-		case 'e': flag = (SQUARE_DEDGE); break;
-		case 'z': flag = (SQUARE_VERT); break;
 		case 't': flag = (SQUARE_TRAP); break;
 		case 'n': flag = (SQUARE_INVIS); break;
 		case 'i': flag = (SQUARE_WALL_INNER); break;
@@ -2077,13 +2074,6 @@ void get_debug_command(void)
 			break;
 		}
 
-		/* Identify */
-		case 'i':
-		{
-			effect_simple(EF_IDENTIFY, "0", 0, 0, 0, NULL);
-			break;
-		}
-
 		/* Go up or down in the dungeon */
 		case 'j':
 		{
@@ -2098,7 +2088,7 @@ void get_debug_command(void)
 			break;
 		}
 
-		/* Work out what the kayer is typing */
+		/* Work out what the player is typing */
 		case 'L': 
 		{
 			do_cmd_keylog();
@@ -2261,12 +2251,25 @@ void get_debug_command(void)
 		/* Create a trap */
 		case 'T':
 		{
-			if (!square_isfloor(cave, player->py, player->px))
+			if (!square_isfloor(cave, player->py, player->px)) {
 				msg("You can't place a trap there!");
-			else if (player->depth == 0)
+				break;
+			} else if (player->depth == 0) {
 				msg("You can't place a trap in the town!");
-			else
-				square_add_trap(cave, player->py, player->px);
+				break;
+			}
+
+			char buf[40];
+			if (!get_string("Create which trap? ", buf, sizeof(buf)))
+				break;
+
+			struct trap_kind *trap = lookup_trap(buf);
+			if (trap) {
+				place_trap(cave, player->py, player->px, trap->tidx, 0);
+			} else {
+				msg("Trap not found.");
+			}
+
 			break;
 		}
 

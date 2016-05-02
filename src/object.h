@@ -62,6 +62,8 @@ struct brand {
 	struct brand *next;
 };
 
+extern struct brand *game_brands;
+
 /* Slay type */
 struct slay {
 	char *name;
@@ -70,6 +72,8 @@ struct slay {
 	int damage; /* Storage for damage during description */
 	struct slay *next;
 };
+
+extern struct slay *game_slays;
 
 enum {
 	EL_INFO_HATES = 0x01,
@@ -181,7 +185,8 @@ struct object_kind {
 
 	/** Also saved in savefile **/
 
-	quark_t note; 	/**< Autoinscription quark number */
+	quark_t note_aware; 	/**< Autoinscription quark number */
+	quark_t note_unaware; 	/**< Autoinscription quark number */
 
 	bool aware;		/**< Set if player is aware of the kind's effects */
 	bool tried;		/**< Set if kind has been tried */
@@ -322,7 +327,7 @@ extern struct ego_item *e_info;
  */
 enum {
 	OBJ_NOTICE_WORN = 0x01,
-	OBJ_NOTICE_SENSED = 0x02,
+	OBJ_NOTICE_ASSESSED = 0x02,
 	OBJ_NOTICE_IGNORE = 0x04,
 	OBJ_NOTICE_IMAGINED = 0x08,
 };
@@ -406,6 +411,49 @@ struct object {
 	u16b origin_xtra;   /* Extra information about origin */
 
 	quark_t note; 		/* Inscription index */
+};
+
+/**
+ * Null object constant, for safe initialization.
+ */
+static struct object const OBJECT_NULL = {
+	.kind = NULL,
+	.ego = NULL,
+	.artifact = NULL,
+	.prev = NULL,
+	.next = NULL,
+	.known = NULL,
+	.oidx = 0,
+	.iy = 0,
+	.ix = 0,
+	.tval = 0,
+	.sval = 0,
+	.pval = 0,
+	.weight = 0,
+	.flags = { 0 },
+	.modifiers = { 0 },
+	.el_info = { { 0, 0 } },
+	.brands = NULL,
+	.slays = NULL,
+	.ac = 0,
+	.to_a = 0,
+	.to_h = 0,
+	.to_d = 0,
+	.dd = 0,
+	.ds = 0,
+	.effect = NULL,
+	.effect_msg = NULL,
+	.activation = NULL,
+	.time = { 0, 0, 0, 0 },
+	.timeout = 0,
+	.number = 0,
+	.notice = 0,
+	.held_m_idx = 0,
+	.mimicking_m_idx = 0,
+	.origin = 0,
+	.origin_depth = 0,
+	.origin_xtra = 0,
+	.note = 0,
 };
 
 struct flavor

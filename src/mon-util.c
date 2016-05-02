@@ -26,8 +26,8 @@
 #include "mon-list.h"
 #include "mon-util.h"
 #include "obj-desc.h"
-#include "obj-identify.h"
 #include "obj-ignore.h"
+#include "obj-knowledge.h"
 #include "obj-pile.h"
 #include "obj-util.h"
 #include "player-calcs.h"
@@ -499,9 +499,6 @@ void monster_swap(int y1, int x1, int y2, int x2)
 		player->py = y2;
 		player->px = x2;
 
-		/* Update the trap detection status */
-		player->upkeep->redraw |= (PR_DTRAP);
-
 		/* Update the panel */
 		player->upkeep->update |= (PU_PANEL);
 
@@ -539,9 +536,6 @@ void monster_swap(int y1, int x1, int y2, int x2)
 		/* Move player */
 		player->py = y1;
 		player->px = x1;
-
-		/* Update the trap detection status */
-		player->upkeep->redraw |= (PR_DTRAP);
 
 		/* Update the panel */
 		player->upkeep->update |= (PU_PANEL);
@@ -637,9 +631,9 @@ void update_smart_learn(struct monster *m, struct player *p, int flag,
 	/* Sanity check */
 	if (!flag && !element_ok) return;
 
-	/* anything a monster might learn, the player should learn */
-	if (flag) equip_notice_flag(p, flag);
-	if (element_ok) equip_notice_element(p, element);
+	/* Anything a monster might learn, the player should learn */
+	if (flag) equip_learn_flag(p, flag);
+	if (element_ok) equip_learn_element(p, element);
 
 	/* Not allowed to learn */
 	if (!OPT(birth_ai_learn)) return;

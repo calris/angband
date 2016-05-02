@@ -34,7 +34,7 @@
 /**
  * Stat Table (INT/WIS) -- Minimum failure rate (percentage)
  */
-const byte adj_mag_fail[STAT_RANGE] =
+static const byte adj_mag_fail[STAT_RANGE] =
 {
 	99	/* 3 */,
 	99	/* 4 */,
@@ -79,7 +79,7 @@ const byte adj_mag_fail[STAT_RANGE] =
 /**
  * Stat Table (INT/WIS) -- failure rate adjustment
  */
-const int adj_mag_stat[STAT_RANGE] =
+static const int adj_mag_stat[STAT_RANGE] =
 {
 	-5	/* 3 */,
 	-4	/* 4 */,
@@ -471,12 +471,6 @@ bool spell_cast(int spell_index, int dir)
 }
 
 
-bool spell_is_identify(int spell_index)
-{
-	const struct class_spell *spell = spell_by_index(spell_index);
-	return (spell->effect->index == EF_IDENTIFY);
-}
-
 bool spell_needs_aim(int spell_index)
 {
 	const struct class_spell *spell = spell_by_index(spell_index);
@@ -567,6 +561,11 @@ static int spell_value_base_player_level(void)
 	return player->lev;
 }
 
+static int spell_value_base_dungeon_level(void)
+{
+	return cave->depth;
+}
+
 static int spell_value_base_max_sight(void)
 {
 	return z_info->max_sight;
@@ -590,6 +589,7 @@ expression_base_value_f spell_value_base_by_name(const char *name)
 	} value_bases[] = {
 		{ "MONSTER_LEVEL", spell_value_base_monster_level },
 		{ "PLAYER_LEVEL", spell_value_base_player_level },
+		{ "DUNGEON_LEVEL", spell_value_base_dungeon_level },
 		{ "MAX_SIGHT", spell_value_base_max_sight },
 		{ "FOOD_FAINT", spell_value_base_food_faint },
 		{ "FOOD_STARVE", spell_value_base_food_starve },

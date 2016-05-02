@@ -28,8 +28,8 @@
 #include "mon-util.h"
 #include "monster.h"
 #include "obj-gear.h"
-#include "obj-identify.h"
 #include "obj-ignore.h"
+#include "obj-knowledge.h"
 #include "obj-make.h"
 #include "obj-pile.h"
 #include "obj-randart.h"
@@ -49,32 +49,29 @@
 /**
  * Dungeon constants
  */
-byte square_size = 0;
+static byte square_size = 0;
 
 /**
  * Player constants
  */
-byte hist_size = 0;
+static byte hist_size = 0;
 
 /**
  * Object constants
  */
-byte obj_mod_max = 0;
-byte of_size = 0;
-byte elem_max = 0;
+static byte obj_mod_max = 0;
+static byte of_size = 0;
+static byte elem_max = 0;
 
 /**
  * Monster constants
  */
-byte monster_blow_max = 0;
-byte rf_size = 0;
-byte rsf_size = 0;
-byte mflag_size = 0;
+static byte mflag_size = 0;
 
 /**
  * Trap constants
  */
-byte trf_size = 0;
+static byte trf_size = 0;
 
 /**
  * Shorthand function pointer for rd_item version
@@ -159,10 +156,10 @@ static struct object *rd_item(void)
 	/* Read brands */
 	rd_byte(&tmp8u);
 	while (tmp8u) {
-		char buf[40];
+		char buf_local[40];
 		struct brand *b = mem_zalloc(sizeof *b);
-		rd_string(buf, sizeof(buf));
-		b->name = string_make(buf);
+		rd_string(buf_local, sizeof(buf_local));
+		b->name = string_make(buf_local);
 		rd_s16b(&tmp16s);
 		b->element = tmp16s;
 		rd_s16b(&tmp16s);
@@ -175,10 +172,10 @@ static struct object *rd_item(void)
 	/* Read slays */
 	rd_byte(&tmp8u);
 	while (tmp8u) {
-		char buf[40];
+		char buf_local[40];
 		struct slay *s = mem_zalloc(sizeof *s);
-		rd_string(buf, sizeof(buf));
-		s->name = string_make(buf);
+		rd_string(buf_local, sizeof(buf_local));
+		s->name = string_make(buf_local);
 		rd_s16b(&tmp16s);
 		s->race_flag = tmp16s;
 		rd_s16b(&tmp16s);
@@ -225,13 +222,9 @@ static struct object *rd_item(void)
 
 	/* Lookup ego */
 	obj->ego = lookup_ego(ego_idx);
-	if (ego_idx == EGO_ART_KNOWN)
-		obj->ego = (struct ego_item *)1;
 
 	/* Set artifact, fail if invalid index */
-	if (art_idx == EGO_ART_KNOWN) {
-		obj->artifact = (struct artifact *)1;
-	} else if (art_idx >= z_info->a_max) {
+	if (art_idx >= z_info->a_max) {
 		object_delete(&obj);
 		return NULL;
 	} else if (art_idx > 0) {
@@ -239,9 +232,7 @@ static struct object *rd_item(void)
 	}
 
 	/* Set effect */
-	if (effect == 1)
-		obj->effect = (struct effect *)1;
-	else if (effect && obj->ego)
+	if (effect && obj->ego)
 		obj->effect = obj->ego->effect;
 
 	if (effect && !obj->effect)
@@ -330,7 +321,8 @@ static void rd_trap(struct trap *trap)
     trap->kind = &trap_info[trap->t_idx];
     rd_byte(&trap->fy);
     rd_byte(&trap->fx);
-    rd_byte(&trap->xtra);
+    rd_byte(&trap->power);
+    rd_byte(&trap->timeout);
 
     for (i = 0; i < trf_size; i++)
 		rd_byte(&trap->flags[i]);
@@ -494,7 +486,7 @@ int rd_monster_memory(void)
 
 int rd_object_memory(void)
 {
-	int i;
+	size_t i;
 	u16b tmp16u;
 
 	/* Object Memory */
@@ -527,7 +519,7 @@ int rd_object_memory(void)
 		return (-1);
 	}
 
-	/* Read the object memory */
+	/* Read the kind knowledge */
 	for (i = 0; i < tmp16u; i++) {
 		byte tmp8u;
 		struct object_kind *kind = &k_info[i];
@@ -657,6 +649,7 @@ int rd_player(void)
 
 	for (i = 0; i < stat_max; i++) rd_s16b(&player->stat_max[i]);
 	for (i = 0; i < stat_max; i++) rd_s16b(&player->stat_cur[i]);
+	for (i = 0; i < stat_max; i++) rd_s16b(&player->stat_map[i]);
 	for (i = 0; i < stat_max; i++) rd_s16b(&player->stat_birth[i]);
 
 	rd_s16b(&player->ht_birth);
@@ -729,7 +722,6 @@ int rd_player(void)
 	rd_s16b(&player->energy);
 	rd_s16b(&player->word_recall);
 	rd_byte(&player->confusing);
-	rd_byte(&player->searching);
 
 	/* Find the number of timed effects */
 	rd_byte(&num);
@@ -815,10 +807,10 @@ int rd_ignore(void)
 		}
 	}
 
-	/* Read the current number of auto-inscriptions */
+	/* Read the current number of aware object auto-inscriptions */
 	rd_u16b(&inscriptions);
 
-	/* Read the autoinscriptions array */
+	/* Read the aware object autoinscriptions array */
 	for (i = 0; i < inscriptions; i++) {
 		char tmp[80];
 		s16b kidx;
@@ -829,7 +821,37 @@ int rd_ignore(void)
 		if (!k)
 			quit_fmt("objkind_byid(%d) failed", kidx);
 		rd_string(tmp, sizeof(tmp));
-		k->note = quark_add(tmp);
+		k->note_aware = quark_add(tmp);
+	}
+
+	/* Read the current number of unaware object auto-inscriptions */
+	rd_u16b(&inscriptions);
+
+	/* Read the unaware object autoinscriptions array */
+	for (i = 0; i < inscriptions; i++) {
+		char tmp[80];
+		s16b kidx;
+		struct object_kind *k;
+
+		rd_s16b(&kidx);
+		k = objkind_byid(kidx);
+		if (!k)
+			quit_fmt("objkind_byid(%d) failed", kidx);
+		rd_string(tmp, sizeof(tmp));
+		k->note_unaware = quark_add(tmp);
+	}
+
+	/* Read the current number of rune auto-inscriptions */
+	rd_u16b(&inscriptions);
+
+	/* Read the rune autoinscriptions array */
+	for (i = 0; i < inscriptions; i++) {
+		char tmp[80];
+		s16b runeid;
+
+		rd_s16b(&runeid);
+		rd_string(tmp, sizeof(tmp));
+		rune_set_note(runeid, tmp);
 	}
 
 	return 0;
@@ -838,7 +860,9 @@ int rd_ignore(void)
 
 int rd_misc(void)
 {
+	size_t i;
 	byte tmp8u;
+	s16b tmp16s;
 	
 	/* Read the randart seed */
 	rd_u32b(&seed_randart);
@@ -861,6 +885,64 @@ int rd_misc(void)
 	/* Current turn */
 	rd_s32b(&turn);
 
+	if (player->is_dead)
+		return 0;
+
+	/* Property knowledge */
+	/* Flags */
+	for (i = 0; i < OF_SIZE; i++)
+		rd_byte(&player->obj_k->flags[i]);
+
+	/* Modifiers */
+	for (i = 0; i < OBJ_MOD_MAX; i++) {
+		rd_s16b(&player->obj_k->modifiers[i]);
+	}
+
+	/* Elements */
+	for (i = 0; i < ELEM_MAX; i++) {
+		rd_s16b(&player->obj_k->el_info[i].res_level);
+		rd_byte(&player->obj_k->el_info[i].flags);
+	}
+
+	/* Brands */
+	rd_byte(&tmp8u);
+	while (tmp8u) {
+		char buf[40];
+		struct brand *b = mem_zalloc(sizeof *b);
+		rd_string(buf, sizeof(buf));
+		b->name = string_make(buf);
+		rd_s16b(&tmp16s);
+		b->element = tmp16s;
+		rd_s16b(&tmp16s);
+		b->multiplier = tmp16s;
+		b->next = player->obj_k->brands;
+		player->obj_k->brands = b;
+		rd_byte(&tmp8u);
+	}
+
+	/* Read slays */
+	rd_byte(&tmp8u);
+	while (tmp8u) {
+		char buf[40];
+		struct slay *s = mem_zalloc(sizeof *s);
+		rd_string(buf, sizeof(buf));
+		s->name = string_make(buf);
+		rd_s16b(&tmp16s);
+		s->race_flag = tmp16s;
+		rd_s16b(&tmp16s);
+		s->multiplier = tmp16s;
+		s->next = player->obj_k->slays;
+		player->obj_k->slays = s;
+		rd_byte(&tmp8u);
+	}
+
+	/* Combat data */
+	rd_s16b(&player->obj_k->ac);
+	rd_s16b(&player->obj_k->to_a);
+	rd_s16b(&player->obj_k->to_h);
+	rd_s16b(&player->obj_k->to_d);
+	rd_byte(&player->obj_k->dd);
+	rd_byte(&player->obj_k->ds);
 	return 0;
 }
 

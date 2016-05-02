@@ -30,7 +30,6 @@
 #include "mon-util.h"
 #include "monster.h"
 #include "obj-chest.h"
-#include "obj-identify.h"
 #include "obj-ignore.h"
 #include "obj-pile.h"
 #include "obj-util.h"
@@ -127,130 +126,51 @@ void do_cmd_go_down(struct command *cmd)
 
 
 /**
- * Search for hidden things.  Returns true if a search was attempted, returns
- * false when the player has a 0% chance of finding anything.  Prints messages
- * for negative confirmation when verbose mode is requested.
+ * Search for traps or secret doors
  */
-bool search(bool verbose)
+static void search(void)
 {
 	int py = player->py;
 	int px = player->px;
-	int y, x, chance;
-	bool found = false;
+	int y, x;
 	struct object *obj;
 
-	/* Start with base search ability */
-	chance = player->state.skills[SKILL_SEARCH];
-
-	/* Penalize various conditions */
-	if (player->timed[TMD_BLIND] || no_light())
-		chance = chance / 10;
-	if (player->timed[TMD_CONFUSED] || player->timed[TMD_IMAGE])
-		chance = chance / 10;
-
-	/* Prevent fruitless searches */
-	if (chance <= 0) {
-		if (verbose) {
-			msg("You can't make out your surroundings well enough to search.");
-
-			/* Cancel repeat */
-			disturb(player, 0);
-		}
-
-		return false;
-	}
+	/* Various conditions mean no searching */
+	if (player->timed[TMD_BLIND] || no_light() ||
+		player->timed[TMD_CONFUSED] || player->timed[TMD_IMAGE])
+		return;
 
 	/* Search the nearby grids, which are always in bounds */
 	for (y = (py - 1); y <= (py + 1); y++) {
 		for (x = (px - 1); x <= (px + 1); x++) {
-			/* Sometimes, notice things */
-			if (randint0(100) < chance) {
-				if (square_issecrettrap(cave, y, x)) {
-					found = true;
-
-					/* Reveal trap, display a message */
-					if (square_reveal_trap(cave, y, x, chance, true))
-						/* Disturb */
-						disturb(player, 0);
-				}
-
-				/* Secret door */
-				if (square_issecretdoor(cave, y, x)) {
-					found = true;
-
-					/* Message */
-					msg("You have found a secret door.");
-
-					/* Pick a door */
-					place_closed_door(cave, y, x);
-
-					/* Disturb */
+			/* Traps */
+			if (square_issecrettrap(cave, y, x)) {
+				if (square_reveal_trap(cave, y, x, true))
 					disturb(player, 0);
-				}
+			}
 
-				/* Scan all objects in the grid */
-				for (obj = square_object(cave, y, x); obj; obj = obj->next) {
-					/* Skip if not a trapped chest */
-					if (!is_trapped_chest(obj)) continue;
+			/* Secret doors */
+			if (square_issecretdoor(cave, y, x)) {
+				msg("You have found a secret door.");
+				place_closed_door(cave, y, x);
+				disturb(player, 0);
+			}
 
-					/* Identify once */
-					if (!object_is_known(obj)) {
-						found = true;
+			/* Traps on chests */
+			for (obj = square_object(cave, y, x); obj; obj = obj->next) {
+				if (!obj->known || !is_trapped_chest(obj))
+					continue;
 
-						/* Message */
-						msg("You have discovered a trap on the chest!");
-
-						/* Know the trap */
-						object_notice_everything(obj);
-
-						/* Notice it */
-						disturb(player, 0);
-					}
+				if (obj->known->pval != obj->pval) {
+					msg("You have discovered a trap on the chest!");
+					obj->known->pval = obj->pval;
+					disturb(player, 0);
 				}
 			}
 		}
 	}
-
-	if (verbose && !found) {
-		if (chance >= 100)
-			msg("There are no secrets here.");
-		else
-			msg("You found nothing.");
-	}
-
-	return true;
 }
 
-
-
-/**
- * Simple command to "search" for one turn
- */
-void do_cmd_search(struct command *cmd)
-{
-	/* Only take a turn if attempted */
-	if (search(true))
-		player->upkeep->energy_use = z_info->move_energy;
-}
-
-
-/**
- * Toggle search mode
- */
-void do_cmd_toggle_search(struct command *cmd)
-{
-	if (player->searching) {
-		/* Stop searching */
-		player->searching = false;
-		player->upkeep->update |= (PU_BONUS);
-		player->upkeep->redraw |= (PR_STATE);
-	} else {
-		/* Start searching */
-		player->searching = true;
-		player->upkeep->update |= (PU_BONUS);
-		player->upkeep->redraw |= (PR_STATE | PR_SPEED);
-	}
-}
 
 
 /**
@@ -292,7 +212,7 @@ static bool do_cmd_open_aux(int y, int x)
 	/* Locked door */
 	if (square_islockeddoor(cave, y, x)) {
 		/* Disarm factor */
-		i = player->state.skills[SKILL_DISARM];
+		i = player->state.skills[SKILL_DISARM_PHYS];
 
 		/* Penalize some conditions */
 		if (player->timed[TMD_BLIND] || no_light())
@@ -365,14 +285,14 @@ void do_cmd_open(struct command *cmd)
 	/* Get arguments */
 	err = cmd_get_arg_direction(cmd, "direction", &dir);
 	if (err || dir == DIR_UNKNOWN) {
-		int y, x;
+		int y2, x2;
 		int n_closed_doors, n_locked_chests;
 
-		n_closed_doors = count_feats(&y, &x, square_iscloseddoor, false);
-		n_locked_chests = count_chests(&y, &x, CHEST_OPENABLE);
+		n_closed_doors = count_feats(&y2, &x2, square_iscloseddoor, false);
+		n_locked_chests = count_chests(&y2, &x2, CHEST_OPENABLE);
 
 		if (n_closed_doors + n_locked_chests == 1) {
-			dir = coords_to_dir(y, x);
+			dir = coords_to_dir(y2, x2);
 			cmd_set_arg_direction(cmd, "direction", dir);
 		} else if (cmd_get_direction(cmd, "direction", &dir, false)) {
 			return;
@@ -508,11 +428,11 @@ void do_cmd_close(struct command *cmd)
 	/* Get arguments */
 	err = cmd_get_arg_direction(cmd, "direction", &dir);
 	if (err || dir == DIR_UNKNOWN) {
-		int y, x;
+		int y2, x2;
 
 		/* Count open doors */
-		if (count_feats(&y, &x, square_isopendoor, false) == 1) {
-			dir = coords_to_dir(y, x);
+		if (count_feats(&y2, &x2, square_isopendoor, false) == 1) {
+			dir = coords_to_dir(y2, x2);
 			cmd_set_arg_direction(cmd, "direction", dir);
 		} else if (cmd_get_direction(cmd, "direction", &dir, false)) {
 			return;
@@ -673,9 +593,6 @@ static bool do_cmd_tunnel_aux(int y, int x)
 			msg("You tunnel into the %s.",
 				square_apparent_name(cave, player, y, x));
 		more = true;
-		if (square_issecretdoor(cave, y, x))
-			/* Occasional Search XXX XXX */
-			if (randint0(100) < 25) search(false);
 	}
 
 	/* Result */
@@ -774,7 +691,7 @@ static bool do_cmd_lock_door(int y, int x)
 	if (!do_cmd_disarm_test(y, x)) return false;
 
 	/* Get the "disarm" factor */
-	i = player->state.skills[SKILL_DISARM];
+	i = player->state.skills[SKILL_DISARM_PHYS];
 
 	/* Penalize some conditions */
 	if (player->timed[TMD_BLIND] || no_light())
@@ -823,14 +740,12 @@ static bool do_cmd_lock_door(int y, int x)
  */
 static bool do_cmd_disarm_aux(int y, int x)
 {
-	int i, j, power;
+	int skill, power, chance;
     struct trap *trap = cave->squares[y][x].trap;
 	bool more = false;
 
-
 	/* Verify legality */
 	if (!do_cmd_disarm_test(y, x)) return (false);
-
 
     /* Choose first player trap */
 	while (trap) {
@@ -841,44 +756,41 @@ static bool do_cmd_disarm_aux(int y, int x)
 	if (!trap)
 		return false;
 
-	/* Get the "disarm" factor */
-	i = player->state.skills[SKILL_DISARM];
+	/* Get the base disarming skill */
+	if (trf_has(trap->flags, TRF_MAGICAL))
+		skill = player->state.skills[SKILL_DISARM_MAGIC];
+	else
+		skill = player->state.skills[SKILL_DISARM_PHYS];
 
 	/* Penalize some conditions */
-	if (player->timed[TMD_BLIND] || no_light()) i = i / 10;
-	if (player->timed[TMD_CONFUSED] || player->timed[TMD_IMAGE]) i = i / 10;
+	if (player->timed[TMD_BLIND] || no_light() || player->timed[TMD_CONFUSED] ||
+		player->timed[TMD_IMAGE])
+		skill = skill / 10;
 
-	/* XXX XXX XXX Variable power? */
+	/* Extract trap power */
+	power = cave->depth / 5;
 
-	/* Extract trap "power" */
-	power = 5;
-
-	/* Extract the difficulty */
-	j = i - power;
+	/* Extract the percentage success */
+	chance = skill - power;
 
 	/* Always have a small chance of success */
-	if (j < 2) j = 2;
+	if (chance < 2) chance = 2;
 
-	/* Success */
-	if (randint0(100) < j) {
-		/* Message */
+	/* Two chances - one to disarm, one not to set the trap off */
+	if (randint0(100) < chance) {
 		msgt(MSG_DISARM, "You have disarmed the %s.", trap->kind->name);
-
-		/* Reward */
 		player_exp_gain(player, power);
 
-		/* Forget the trap */
+		/* Trap is gone */
 		square_forget(cave, y, x);
-
-		/* Remove the trap */
 		square_destroy_trap(cave, y, x);
-	} else if ((i > 5) && (randint1(i) > 5)) {
-		/* Failure -- Keep trying */
+	} else if (randint0(100) < chance) {
 		event_signal(EVENT_INPUT_FLUSH);
 		msg("You failed to disarm the %s.", trap->kind->name);
+
+		/* Player can try again */
 		more = true;
 	} else {
-		/* Failure -- Set off the trap */
 		msg("You set off the %s!", trap->kind->name);
 		hit_trap(y, x);
 	}
@@ -904,14 +816,14 @@ void do_cmd_disarm(struct command *cmd)
 	/* Get arguments */
 	err = cmd_get_arg_direction(cmd, "direction", &dir);
 	if (err || dir == DIR_UNKNOWN) {
-		int y, x;
+		int y2, x2;
 		int n_traps, n_chests;
 
-		n_traps = count_feats(&y, &x, square_isknowntrap, true);
-		n_chests = count_chests(&y, &x, CHEST_TRAPPED);
+		n_traps = count_feats(&y2, &x2, square_isknowntrap, true);
+		n_chests = count_chests(&y2, &x2, CHEST_TRAPPED);
 
 		if (n_traps + n_chests == 1) {
-			dir = coords_to_dir(y, x);
+			dir = coords_to_dir(y2, x2);
 			cmd_set_arg_direction(cmd, "direction", dir);
 		} else if (cmd_get_direction(cmd, "direction", &dir, n_chests > 0)) {
 			/* If there are chests to disarm, 5 is allowed as a direction */
@@ -1038,11 +950,8 @@ void do_cmd_alter(struct command *cmd)
  */
 void move_player(int dir, bool disarm)
 {
-	int py = player->py;
-	int px = player->px;
-
-	int y = py + ddy[dir];
-	int x = px + ddx[dir];
+	int y = player->py + ddy[dir];
+	int x = player->px + ddx[dir];
 
 	int m_idx = cave->squares[y][x].mon;
 	struct monster *mon = cave_monster(cave, m_idx);
@@ -1071,7 +980,6 @@ void move_player(int dir, bool disarm)
 		/* Stop running before known traps */
 		disturb(player, 0);
 	} else if (!square_ispassable(cave, y, x)) {
-		/* Disturb the player */
 		disturb(player, 0);
 
 		/* Notice unknown obstacles, mention known obstacles */
@@ -1100,37 +1008,11 @@ void move_player(int dir, bool disarm)
 				msgt(MSG_HITWALL, "There is a wall blocking your way.");
 		}
 	} else {
-		/* See if trap detection status will change */
-		bool old_dtrap = square_isdtrap(cave, py, px);
-		bool new_dtrap = square_isdtrap(cave, y, x);
-
-		/* Note the change in the detect status */
-		if (old_dtrap != new_dtrap)
-			player->upkeep->redraw |= (PR_DTRAP);
-
-		/* Disturb player if the player is about to leave the area */
-		if (player->upkeep->running && !player->upkeep->running_firststep && 
-			old_dtrap && !new_dtrap) {
-			disturb(player, 0);
-			return;
-		}
-
 		/* Move player */
-		monster_swap(py, px, y, x);
-
-		/* New location */
-		y = py = player->py;
-		x = px = player->px;
-
-		/* Searching */
-		if (player->searching ||
-				(player->state.skills[SKILL_SEARCH_FREQUENCY] >= 50) ||
-				one_in_(50 - player->state.skills[SKILL_SEARCH_FREQUENCY]))
-			search(false);
+		monster_swap(player->py, player->px, y, x);
 
 		/* Handle store doors, or notice objects */
-		if (square_isshop(cave, player->py, player->px)) {
-			/* Disturb */
+		if (square_isshop(cave, y, x)) {
 			disturb(player, 0);
 			event_signal(EVENT_ENTER_STORE);
 			event_remove_handler_type(EVENT_ENTER_STORE);
@@ -1139,26 +1021,22 @@ void move_player(int dir, bool disarm)
 			event_signal(EVENT_LEAVE_STORE);
 			event_remove_handler_type(EVENT_LEAVE_STORE);
 		} else {
-			/* Know objects, queue autopickup */
-			floor_pile_know(cave, player->py, player->px);
+			floor_pile_know(cave, y, x);
 			cmdq_push(CMD_AUTOPICKUP);
 		}
 
-
 		/* Discover invisible traps, set off visible ones */
 		if (square_issecrettrap(cave, y, x)) {
-			/* Disturb */
 			disturb(player, 0);
-
-			/* Hit the trap. */
 			hit_trap(y, x);
 		} else if (square_isknowntrap(cave, y, x)) {
-			/* Disturb */
 			disturb(player, 0);
-
-			/* Hit the trap */
 			hit_trap(y, x);
 		}
+
+		/* Update view and search */
+		update_view(cave, player);
+		search();
 	}
 
 	player->upkeep->running_firststep = false;
@@ -1229,6 +1107,10 @@ void do_cmd_walk(struct command *cmd)
 {
 	int x, y, dir;
 
+	/* Don't disarm on movement if the player is trapsafe,
+	 * or the trap is disabled */
+	bool disarm = player->timed[TMD_TRAPSAFE] ? false : true;
+
 	/* Get arguments */
 	if (cmd_get_direction(cmd, "direction", &dir, false) != CMD_OK)
 		return;
@@ -1244,9 +1126,12 @@ void do_cmd_walk(struct command *cmd)
 	if (!do_cmd_walk_test(y, x))
 		return;
 
+	/* Don't disarm if it's a disabled trap */
+	if (square_isdisabledtrap(cave, y, x)) disarm = false;
+
 	player->upkeep->energy_use = z_info->move_energy;
 
-	move_player(dir, true);
+	move_player(dir, disarm);
 }
 
 
@@ -1341,14 +1226,8 @@ void do_cmd_hold(struct command *cmd)
 	/* Take a turn */
 	player->upkeep->energy_use = z_info->move_energy;
 
-	/* Spontaneous Searching */
-	if ((player->state.skills[SKILL_SEARCH_FREQUENCY] >= 50) ||
-	    one_in_(50 - player->state.skills[SKILL_SEARCH_FREQUENCY]))
-		search(false);
-
-	/* Continuous Searching */
-	if (player->searching)
-		search(false);
+	/* Searching (probably not necessary - NRM)*/
+	search();
 
 	/* Pick things up, not using extra energy */
 	do_autopickup();
@@ -1392,7 +1271,6 @@ void do_cmd_rest(struct command *cmd)
 
 	/* Do some upkeep on the first turn of rest */
 	if (!player_is_resting(player)) {
-		player->searching = false;
 		player->upkeep->update |= (PU_BONUS);
 
 		/* If a number of turns was entered, remember it */

@@ -21,8 +21,8 @@
 #include "init.h"
 #include "obj-desc.h"
 #include "obj-gear.h"
-#include "obj-identify.h"
 #include "obj-info.h"
+#include "obj-knowledge.h"
 #include "obj-util.h"
 #include "player.h"
 #include "player-calcs.h"
@@ -272,7 +272,7 @@ static const struct player_flag_record player_flag_table[RES_ROWS * 4] = {
 	{ "Sear.",	OBJ_MOD_SEARCH,		-1,				-1, 		-1 },
 	{ "Infra",	OBJ_MOD_INFRA,		-1,				-1,			TMD_SINFRA },
 	{ "Tunn.",	OBJ_MOD_TUNNEL,		-1,				-1, 		-1 },
-	{ "Speed",	OBJ_MOD_SPEED,		-1,				-1,			 TMD_FAST },
+	{ "Speed",	OBJ_MOD_SPEED,		-1,				-1,			TMD_FAST },
 	{ "Blows",	OBJ_MOD_BLOWS,		-1,				-1, 		-1 },
 	{ "Shots",	OBJ_MOD_SHOTS,		-1,				-1, 		-1 },
 	{ "Might",	OBJ_MOD_MIGHT,		-1,				-1, 		-1 },
@@ -301,7 +301,7 @@ static void display_resistance_panel(const struct player_flag_record *rec,
 			byte attr = COLOUR_WHITE | (j % 2) * 8; /* alternating columns */
 			char sym = '.';
 
-			bool res = false, imm = false, vul = false;
+			bool res = false, imm = false, vul = false, rune = false;
 			bool timed = false;
 			bool known = false;
 
@@ -344,8 +344,10 @@ static void display_resistance_panel(const struct player_flag_record *rec,
 					if (rec[i].mod == OBJ_MOD_TUNNEL)
 						res = (player->race->r_skills[SKILL_DIGGING] > 0);
 				}
+				rune = (player->obj_k->modifiers[rec[i].mod] == 1);
 			} else if (rec[i].flag != -1) {
 				res = of_has(f, rec[i].flag);
+				rune = of_has(player->obj_k->flags, rec[i].flag);
 			} else if (rec[i].element != -1) {
 				if (j != player->body.count) {
 					imm = obj && known &&
@@ -359,10 +361,12 @@ static void display_resistance_panel(const struct player_flag_record *rec,
 					res = player->race->el_info[rec[i].element].res_level == 1;
 					vul = player->race->el_info[rec[i].element].res_level == -1;
 				}
+				rune = (player->obj_k->el_info[rec[i].element].res_level == 1);
 			}
 
 			/* Set the symbols and print them */
 			if (imm) name_attr = COLOUR_GREEN;
+			else if (!rune) name_attr = COLOUR_SLATE;
 			else if (res && (name_attr != COLOUR_GREEN))
 				name_attr = COLOUR_L_BLUE;
 
@@ -370,7 +374,7 @@ static void display_resistance_panel(const struct player_flag_record *rec,
 			else if (imm) sym = '*';
 			else if (res) sym = '+';
 			else if (timed) { sym = '!'; attr = COLOUR_L_GREEN; }
-			else if ((j < player->body.count) && obj && !known)
+			else if ((j < player->body.count) && obj && !known && !rune)
 				sym = '?';
 
 			Term_addch(attr, sym);
@@ -668,7 +672,6 @@ static const char *show_speed(void)
 	int tmp = player->state.speed;
 	if (player->timed[TMD_FAST]) tmp -= 10;
 	if (player->timed[TMD_SLOW]) tmp += 10;
-	if (player->searching) tmp += 10;
 	if (tmp == 110) return "Normal";
 	strnfmt(buffer, sizeof(buffer), "%d", tmp - 110);
 	return buffer;
@@ -737,8 +740,8 @@ static struct panel *get_panel_combat(void) {
 	/* Melee */
 	obj = equipped_item_by_slot_name(player, "weapon");
 	bth = (player->state.skills[SKILL_TO_HIT_MELEE] * 10) / BTH_PLUS_ADJ;
-	dam = player->known_state.to_d + (obj && object_attack_plusses_are_visible(obj) ? obj->to_d : 0);
-	hit = player->known_state.to_h + (obj && object_attack_plusses_are_visible(obj) ? obj->to_h : 0);
+	dam = player->known_state.to_d + (obj ? obj->known->to_d : 0);
+	hit = player->known_state.to_h + (obj ? obj->known->to_h : 0);
 
 	panel_space(p);
 
@@ -755,8 +758,8 @@ static struct panel *get_panel_combat(void) {
 	/* Ranged */
 	obj = equipped_item_by_slot_name(player, "shooting");
 	bth = (player->state.skills[SKILL_TO_HIT_BOW] * 10) / BTH_PLUS_ADJ;
-	hit = player->known_state.to_h + (obj && object_attack_plusses_are_visible(obj) ? obj->to_h : 0);
-	dam = obj && object_attack_plusses_are_visible(obj) ? obj->to_d : 0;
+	hit = player->known_state.to_h + (obj ? obj->known->to_h : 0);
+	dam = obj ? obj->known->to_d : 0;
 
 	panel_space(p);
 	panel_line(p, COLOUR_L_BLUE, "Shoot to-dam", "%+d", dam);
@@ -772,6 +775,7 @@ static struct panel *get_panel_skills(void) {
 	int skill;
 	byte attr;
 	const char *desc;
+	int depth = cave ? cave->depth : 0;
 
 #define BOUND(x, min, max)		MIN(max, MAX(min, x))
 
@@ -783,28 +787,17 @@ static struct panel *get_panel_skills(void) {
 	desc = likert(player->state.skills[SKILL_STEALTH], 1, &attr);
 	panel_line(p, attr, "Stealth", "%s", desc);
 
-	/* Disarming: -5 because we assume we're disarming a dungeon trap */
-	skill = BOUND(player->state.skills[SKILL_DISARM] - 5, 2, 100);
-	panel_line(p, colour_table[skill / 10], "Disarming", "%d%%", skill);
+	/* Physical disarming: assume we're disarming a dungeon trap */
+	skill = BOUND(player->state.skills[SKILL_DISARM_PHYS] - depth / 5, 2, 100);
+	panel_line(p, colour_table[skill / 10], "Disarm - phys.", "%d%%", skill);
+
+	/* Magical disarming */
+	skill = BOUND(player->state.skills[SKILL_DISARM_MAGIC] - depth / 5, 2, 100);
+	panel_line(p, colour_table[skill / 10], "Disarm - magic", "%d%%", skill);
 
 	/* Magic devices */
 	skill = player->state.skills[SKILL_DEVICE];
 	panel_line(p, colour_table[skill / 13], "Magic Devices", "%d", skill);
-
-	/* Search frequency */
-	skill = MAX(player->state.skills[SKILL_SEARCH_FREQUENCY], 1);
-	if (skill >= 50) {
-		panel_line(p, colour_table[10], "Perception", "1 in 1");
-	} else {
-		/* convert to chance of searching */
-		skill = 50 - skill;
-		panel_line(p, colour_table[(100 - skill*2) / 10],
-				"Perception", "1 in %d", skill);
-	}
-
-	/* Searching ability */
-	skill = BOUND(player->state.skills[SKILL_SEARCH], 0, 100);
-	panel_line(p, colour_table[skill / 10], "Searching", "%d%%", skill);
 
 	/* Infravision */
 	panel_line(p, COLOUR_L_GREEN, "Infravision", "%d ft",
@@ -814,7 +807,6 @@ static struct panel *get_panel_skills(void) {
 	skill = player->state.speed;
 	if (player->timed[TMD_FAST]) skill -= 10;
 	if (player->timed[TMD_SLOW]) skill += 10;
-	if (player->searching) skill += 10;
 	attr = skill < 110 ? COLOUR_L_UMBER : COLOUR_L_GREEN;
 	panel_line(p, attr, "Speed", "%s", show_speed());
 
