@@ -224,6 +224,7 @@ int Metadpy_update(int flush, int sync, int discard);
 int Metadpy_do_beep(void);
 
 void Infowin_set(struct infowin *iwin);
+void Infowin_set_border(int16_t ox, int16_t oy);
 int Infowin_set_name(const char *name);
 int Infowin_nuke(void);
 int Infowin_init_top(int x, int y, int w, int h, int b, Pixell fg, Pixell bg);
@@ -234,27 +235,32 @@ int Infowin_impell(int x, int y);
 int Infowin_resize(int w, int h);
 int Infowin_wipe(void);
 
-void Infoclr_set(struct infoclr *iclr);
-int Infoclr_nuke(void);
-int Infoclr_init_data(Pixell fg, Pixell bg, enum x11_function f, int stip);
-int Infoclr_change_fg(Pixell fg);
+int Infoclr_nuke(struct infoclr *iclr);
+int Infoclr_init_data(struct infoclr *iclr,
+					  Pixell fg,
+					  Pixell bg,
+					  enum x11_function f,
+					  int stip);
+int Infoclr_change_fg(struct infoclr *iclr, Pixell fg);
 
 void Infofnt_set(struct infofnt *ifnt);
 int Infofnt_nuke(void);
 int Infofnt_init_data(const char *name);
 
 int Infofnt_text_std(struct x11_term_data *td,
-		     struct infoclr *bg_col,
-		     int x,
-		     int y,
-		     const wchar_t *str,
-		     int len);
+					 struct infoclr *fg_col,
+					 struct infoclr *bg_col,
+					 int x,
+					 int y,
+					 const wchar_t *str,
+					 int len);
 
 int Infofnt_text_non(struct x11_term_data *td,
-		     int x,
-		     int y,
-		     const wchar_t *str,
-		     int len);
+					 struct infoclr *iclr,
+					 int x,
+					 int y,
+					 const wchar_t *str,
+					 int len);
 
 extern struct metadpy *Metadpy;
 extern struct infowin *Infowin;

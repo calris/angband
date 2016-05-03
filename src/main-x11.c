@@ -639,8 +639,7 @@ static errr Term_xtra_x11_react(void)
 						     color_table_x11[i][3]);
 
 				/* Change the foreground */
-				Infoclr_set(clr[i]);
-				Infoclr_change_fg(pixel);
+				Infoclr_change_fg(clr[i], pixel);
 			}
 		}
 	}
@@ -700,11 +699,13 @@ static errr Term_xtra_x11(int n, int v)
  */
 static errr Term_wipe_x11(int x, int y, int n)
 {
-	/* Erase (use black) */
-	Infoclr_set(clr[COLOUR_DARK]);
-
 	/* Mega-Hack -- Erase some space */
-	Infofnt_text_non((struct x11_term_data *)Term->data, x, y, L"", n);
+	Infofnt_text_non((struct x11_term_data *)Term->data,
+					 clr[COLOUR_DARK],
+					 x,
+					 y,
+					 L"",
+					 n);
 
 	/* Success */
 	return (0);
@@ -717,15 +718,13 @@ static errr Term_wipe_x11(int x, int y, int n)
 static errr Term_text_x11(int x, int y, int n, int a, const wchar_t *s)
 {
 	/* Draw the text */
-	Infoclr_set(clr[a]);
-
-	/* Draw the text */
 	Infofnt_text_std((struct x11_term_data *)Term->data,
-			 clr[COLOUR_DARK],
-			 x,
-			 y,
-			 s,
-			 n);
+					 clr[a],
+					 clr[COLOUR_DARK],
+					 x,
+					 y,
+					 s,
+					 n);
 
 	/* Success */
 	return (0);
@@ -1128,8 +1127,7 @@ static errr term_data_init(struct term *t, int i)
 	Infowin_set_name(name);
 
 	/* Save the inner border */
-	Infowin->ox = ox;
-	Infowin->oy = oy;
+	Infowin_set_border(ox, oy);
 
 	/* Make Class Hints */
 	ch = XAllocClassHint();
@@ -1269,8 +1267,7 @@ static void hook_quit(const char *str)
 	x11_free_cursor_col();
 
 	for (i = 0; i < MAX_COLORS * BG_MAX; ++i) {
-		Infoclr_set(clr[i]);
-		(void)Infoclr_nuke();
+		Infoclr_nuke(clr[i]);
 		mem_free(clr[i]);
 	}
 
@@ -1389,8 +1386,6 @@ errr init_x11(int argc, char **argv)
 
 		clr[i] = mem_zalloc(sizeof(struct infoclr));
 
-		Infoclr_set(clr[i]);
-
 		/* Acquire Angband colors */
 		color_table_x11[i % MAX_COLORS][0] =
 			angband_color_table[i % MAX_COLORS][0];
@@ -1419,10 +1414,11 @@ errr init_x11(int argc, char **argv)
 			{
 				case BG_BLACK: {
 					/* Default Background */
-					Infoclr_init_data(pixel,
-							  Metadpy->bg,
-							  CPY,
-							  0);
+					Infoclr_init_data(clr[i],
+									  pixel,
+									  Metadpy->bg,
+									  CPY,
+									  0);
 					break;
 				}
 
@@ -1432,10 +1428,12 @@ errr init_x11(int argc, char **argv)
 								color_table_x11[i % MAX_COLORS][1],
 								color_table_x11[i % MAX_COLORS][2],
 								color_table_x11[i % MAX_COLORS][3]);
-					Infoclr_init_data(pixel,
-							  backpixel,
-							  CPY,
-							  0);
+
+					Infoclr_init_data(clr[i],
+									  pixel,
+									  backpixel,
+									  CPY,
+									  0);
 					break;
 				}
 
@@ -1445,16 +1443,18 @@ errr init_x11(int argc, char **argv)
 								 color_table_x11[COLOUR_SHADE][1],
 								 color_table_x11[COLOUR_SHADE][2],
 								 color_table_x11[COLOUR_SHADE][3]);
-					Infoclr_init_data(pixel,
-							  backpixel,
-							  CPY,
-							  0);
+
+					Infoclr_init_data(clr[i],
+									  pixel,
+									  backpixel,
+									  CPY,
+									  0);
 					break;
 				}
 			}
 		} else {
 			/* Handle monochrome */
-			Infoclr_init_data(pixel, Metadpy->bg, CPY, 0);
+			Infoclr_init_data(clr[i], pixel, Metadpy->bg, CPY, 0);
 		}
 	}
 

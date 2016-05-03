@@ -18,7 +18,6 @@
 
 static struct metadpy metadpy_default;
 static struct infofnt *Infofnt;
-static struct infoclr *Infoclr;
 
 struct infowin *Infowin;
 struct metadpy *Metadpy = &metadpy_default;
@@ -31,14 +30,12 @@ static struct infoclr *xor;
 void x11_alloc_cursor_col(void)
 {
 	xor = mem_zalloc(sizeof(struct infoclr));
-	Infoclr_set(xor);
-	Infoclr_init_data(Metadpy->fg, Metadpy->bg, XOR, 0);
+	Infoclr_init_data(xor, Metadpy->fg, Metadpy->bg, XOR, 0);
 }
 
 void x11_free_cursor_col(void)
 {
-	Infoclr_set(xor);
-	(void)Infoclr_nuke();
+	Infoclr_nuke(xor);
 	mem_free(xor);
 }
 
@@ -48,29 +45,29 @@ void Infofnt_set(struct infofnt *ifnt)
 	Infofnt = ifnt;
 }
 
-/* Set the current Infoclr */
-void Infoclr_set(struct infoclr *iclr)
-{
-	Infoclr = iclr;
-}
-
 /* Set the current Infowin */
 void Infowin_set(struct infowin *iwin)
 {
 	Infowin = iwin;
 }
 
+void Infowin_set_border(int16_t ox, int16_t oy)
+{
+	Infowin->ox = ox;
+	Infowin->oy = oy;
+}
+
 /**
  * Find the square a particular pixel is part of.
  */
 void pixel_to_square(struct x11_term_data *td,
-		     int * const x,
-		     int * const y,
-		     const int ox,
-		     const int oy)
+					 int * const x,
+					 int * const y,
+					 const int ox,
+					 const int oy)
 {
-	(*x) = (ox - Infowin->ox) / td->tile_wid;
-	(*y) = (oy - Infowin->oy) / td->tile_hgt;
+	*x = (ox - Infowin->ox) / td->tile_wid;
+	*y = (oy - Infowin->oy) / td->tile_hgt;
 }
 
 /**
@@ -79,12 +76,12 @@ void pixel_to_square(struct x11_term_data *td,
 int x11_term_curs(struct x11_term_data *td, int x, int y)
 {
 	XDrawRectangle(Metadpy->dpy,
-		       Infowin->win,
-		       xor->gc,
-		       x * td->tile_wid + Infowin->ox,
-		       y * td->tile_hgt + Infowin->oy,
-		       td->tile_wid - 1,
-		       td->tile_hgt - 1);
+				   Infowin->win,
+				   xor->gc,
+				   x * td->tile_wid + Infowin->ox,
+				   y * td->tile_hgt + Infowin->oy,
+				   td->tile_wid - 1,
+				   td->tile_hgt - 1);
 
 	return 0;
 }
@@ -95,12 +92,12 @@ int x11_term_curs(struct x11_term_data *td, int x, int y)
 int x11_term_bigcurs(struct x11_term_data *td, int x, int y)
 {
 	XDrawRectangle(Metadpy->dpy,
-		       Infowin->win,
-		       xor->gc,
-		       x * td->tile_wid + Infowin->ox,
-		       y * td->tile_hgt + Infowin->oy,
-		       td->tile_wid2 - 1,
-		       td->tile_hgt - 1);
+				   Infowin->win,
+				   xor->gc,
+				   x * td->tile_wid + Infowin->ox,
+				   y * td->tile_hgt + Infowin->oy,
+				   td->tile_wid2 - 1,
+				   td->tile_hgt - 1);
 
 	return 0;
 }
@@ -116,12 +113,12 @@ static unsigned int xkb_mask_modifier(XkbDescPtr xkb, const char *name)
 		return 2;
 	}
 
-	for (int i = 0; (!mask) && (i <= XkbNumVirtualMods); i++ ) {
-		char* mod_str = XGetAtomName( xkb->dpy, xkb->names->vmods[i] );
+	for (int i = 0; (!mask) && (i <= XkbNumVirtualMods); i++) {
+		char* mod_str = XGetAtomName(xkb->dpy, xkb->names->vmods[i]);
 
 		if (mod_str) {
 			if (!strcmp(name, mod_str)) {
-				XkbVirtualModsToReal( xkb, 1 << i, &mask );
+				XkbVirtualModsToReal(xkb, 1 << i, &mask);
 			}
 
 			XFree(mod_str);
@@ -163,9 +160,6 @@ int Metadpy_init(Display *dpy, const char *name)
 		/* We will not have to nuke it when done */
 		m->nuke = 0;
 	}
-
-
-	/*** Save some information ***/
 
 	/* Save the Display itself */
 	m->dpy = dpy;
@@ -481,18 +475,13 @@ int Infowin_wipe(void)
 /**
  * Nuke an old 'infoclr'.
  */
-int Infoclr_nuke(void)
+int Infoclr_nuke(struct infoclr *iclr)
 {
-	struct infoclr *iclr = Infoclr;
-
 	/* Deal with 'GC' */
 	if (iclr->nuke) {
 		/* Free the GC */
 		XFreeGC(Metadpy->dpy, iclr->gc);
 	}
-
-	/* Forget the current */
-	Infoclr = (struct infoclr*)(NULL);
 
 	/* Success */
 	return (0);
@@ -507,14 +496,14 @@ int Infoclr_nuke(void)
  *	op:   The Opcode for the requested Operation (see above)
  *	stip: The stipple mode
  */
-int Infoclr_init_data(Pixell fg, Pixell bg, enum x11_function f, int stip)
+int Infoclr_init_data(struct infoclr *iclr,
+					  Pixell fg,
+					  Pixell bg,
+					  enum x11_function f, int stip)
 {
 	GC gc;
 	XGCValues gcv;
 	unsigned long gc_mask;
-	struct infoclr *iclr = Infoclr;
-
-	/*** Simple error checking of opr and clr ***/
 
 	/* Check the 'Pixells' for realism */
 	if (bg > Metadpy->zg) {
@@ -585,23 +574,17 @@ int Infoclr_init_data(Pixell fg, Pixell bg, enum x11_function f, int stip)
  * Inputs:
  *	fg:   The Pixell for the requested Foreground (see above)
  */
-int Infoclr_change_fg(Pixell fg)
+int Infoclr_change_fg(struct infoclr *iclr, Pixell fg)
 {
-	struct infoclr *iclr = Infoclr;
-
-
-	/*** Simple error checking of opr and clr ***/
-
 	/* Check the 'Pixells' for realism */
-	if (fg > Metadpy->zg) return (-1);
+	if (fg > Metadpy->zg) {
+		return -1;
+	}
 
-	/*** Change ***/
-
-	/* Change */
 	XSetForeground(Metadpy->dpy, iclr->gc, fg);
 
 	/* Success */
-	return (0);
+	return 0;
 }
 
 
@@ -716,14 +699,17 @@ int Infofnt_init_data(const char *name)
  * Standard Text
  */
 int Infofnt_text_std(struct x11_term_data *td,
-		     struct infoclr *bg_col,
-		     int x,
-		     int y,
-		     const wchar_t *str,
-		     int len)
+					 struct infoclr *fg_col,
+					 struct infoclr *bg_col,
+					 int x,
+					 int y,
+					 const wchar_t *str,
+					 int len)
 {
 	int i;
 	int w, h;
+
+	plog("Infofnt_text_std");
 
 	/*** Do a brief info analysis ***/
 
@@ -778,7 +764,7 @@ int Infofnt_text_std(struct x11_term_data *td,
 			XwcDrawImageString(Metadpy->dpy,
 					   Infowin->win,
 					   Infofnt->fs,
-					   Infoclr->gc,
+					   fg_col->gc,
 					   x + i * td->tile_wid + Infofnt->off,
 					   y,
 					   str + i,
@@ -789,7 +775,7 @@ int Infofnt_text_std(struct x11_term_data *td,
 		XwcDrawImageString(Metadpy->dpy,
 				   Infowin->win,
 				   Infofnt->fs,
-				   Infoclr->gc,
+				   fg_col->gc,
 				   x,
 				   y,
 				   str,
@@ -804,10 +790,11 @@ int Infofnt_text_std(struct x11_term_data *td,
  * Painting where text would be
  */
 int Infofnt_text_non(struct x11_term_data *td,
-		     int x,
-		     int y,
-		     const wchar_t *str,
-		     int len)
+					 struct infoclr *iclr,
+					 int x,
+					 int y,
+					 const wchar_t *str,
+					 int len)
 {
 	int w, h;
 
@@ -837,7 +824,7 @@ int Infofnt_text_non(struct x11_term_data *td,
 	/*** Actually 'paint' the area ***/
 
 	/* Just do a Fill Rectangle */
-	XFillRectangle(Metadpy->dpy, Infowin->win, Infoclr->gc, x, y, w, h);
+	XFillRectangle(Metadpy->dpy, Infowin->win, iclr->gc, x, y, w, h);
 
 	/* Success */
 	return 0;
