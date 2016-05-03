@@ -17,9 +17,6 @@
 #include "z-util.h"
 
 static struct metadpy metadpy_default;
-static struct infofnt *Infofnt;
-
-struct infowin *Infowin;
 struct metadpy *Metadpy = &metadpy_default;
 
 /**
@@ -39,22 +36,13 @@ void x11_free_cursor_col(void)
 	mem_free(xor);
 }
 
-/* Set the current infofnt */
-void Infofnt_set(struct infofnt *ifnt)
-{
-	Infofnt = ifnt;
-}
 
-/* Set the current Infowin */
-void Infowin_set(struct infowin *iwin)
+int Infowin_set_border(struct infowin *iwin, int16_t ox, int16_t oy)
 {
-	Infowin = iwin;
-}
+	iwin->ox = ox;
+	iwin->oy = oy;
 
-void Infowin_set_border(int16_t ox, int16_t oy)
-{
-	Infowin->ox = ox;
-	Infowin->oy = oy;
+	return 0;
 }
 
 /**
@@ -66,8 +54,8 @@ void pixel_to_square(struct x11_term_data *td,
 					 const int ox,
 					 const int oy)
 {
-	*x = (ox - Infowin->ox) / td->tile_wid;
-	*y = (oy - Infowin->oy) / td->tile_hgt;
+	*x = (ox - td->win->ox) / td->tile_wid;
+	*y = (oy - td->win->oy) / td->tile_hgt;
 }
 
 /**
@@ -76,10 +64,10 @@ void pixel_to_square(struct x11_term_data *td,
 int x11_term_curs(struct x11_term_data *td, int x, int y)
 {
 	XDrawRectangle(Metadpy->dpy,
-				   Infowin->win,
+				   td->win->handle,
 				   xor->gc,
-				   x * td->tile_wid + Infowin->ox,
-				   y * td->tile_hgt + Infowin->oy,
+				   x * td->tile_wid + td->win->ox,
+				   y * td->tile_hgt + td->win->oy,
 				   td->tile_wid - 1,
 				   td->tile_hgt - 1);
 
@@ -92,10 +80,10 @@ int x11_term_curs(struct x11_term_data *td, int x, int y)
 int x11_term_bigcurs(struct x11_term_data *td, int x, int y)
 {
 	XDrawRectangle(Metadpy->dpy,
-				   Infowin->win,
+				   td->win->handle,
 				   xor->gc,
-				   x * td->tile_wid + Infowin->ox,
-				   y * td->tile_hgt + Infowin->oy,
+				   x * td->tile_wid + td->win->ox,
+				   y * td->tile_hgt + td->win->oy,
 				   td->tile_wid2 - 1,
 				   td->tile_hgt - 1);
 
@@ -271,30 +259,34 @@ int Metadpy_do_beep(void)
 /**
  * Set the name (in the title bar) of Infowin
  */
-int Infowin_set_name(const char *name)
+int Infowin_set_name(struct infowin *iwin, const char *name)
 {
 	Status st;
 	XTextProperty tp;
 	char buf[128];
 	char *bp = buf;
+
 	my_strcpy(buf, name, sizeof(buf));
 	st = XStringListToTextProperty(&bp, 1, &tp);
-	if (st) XSetWMName(Metadpy->dpy, Infowin->win, &tp);
+
+	if (st) {
+		XSetWMName(Metadpy->dpy, iwin->handle, &tp);
+	}
+
 	XFree(tp.value);
-	return (0);
+
+	return 0;
 }
 
 /**
  * Nuke Infowin
  */
-int Infowin_nuke(void)
+int Infowin_nuke(struct infowin *iwin)
 {
-	struct infowin *iwin = Infowin;
-
 	/* Nuke if requested */
 	if (iwin->nuke) {
 		/* Destory the old window */
-		XDestroyWindow(Metadpy->dpy, iwin->win);
+		XDestroyWindow(Metadpy->dpy, iwin->handle);
 	}
 
 	/* Success */
@@ -305,17 +297,15 @@ int Infowin_nuke(void)
 /**
  * Prepare a new 'infowin'.
  */
-static int Infowin_prepare(Window xid)
+static int Infowin_prepare(struct infowin *iwin, Window xid)
 {
-	struct infowin *iwin = Infowin;
-
 	Window tmp_win;
 	XWindowAttributes xwa;
 	int x, y;
 	unsigned int w, h, b, d;
 
 	/* Assign stuff */
-	iwin->win = xid;
+	iwin->handle = xid;
 
 	/* Check For Error XXX Extract some ACTUAL data from 'xid' */
 	XGetGeometry(Metadpy->dpy, xid, &tmp_win, &x, &y, &w, &h, &b, &d);
@@ -351,126 +341,119 @@ static int Infowin_prepare(Window xid)
  *	x,y: The position of this Window
  *	w,h: The size of this Window
  *	b,d: The border width and pixel depth
- *
- * Notes:
- *	If 'dad == None' assume 'dad == root'
  */
-static int Infowin_init_data(Window parent,
-			      int x,
-			      int y,
-			      int w,
-			      int h,
-			      int b,
-			      Pixell fg,
-			      Pixell bg)
+int Infowin_init(struct infowin *iwin,
+				 int x,
+				 int y,
+				 int w,
+				 int h,
+				 int b,
+				 Pixell fg,
+				 Pixell bg)
 {
 	Window xid;
 
 	/* Wipe it clean */
-	memset(Infowin, 0, sizeof(struct infowin));
+	memset(iwin, 0, sizeof(struct infowin));
 
-	/*** Error Check XXX ***/
-
-
-	/*** Create the Window 'xid' from data ***/
-
-	/* What happened here?  XXX XXX XXX */
-
-	/* Create the Window XXX Error Check */
-	xid = XCreateSimpleWindow(Metadpy->dpy, parent, x, y, w, h, b, fg, bg);
+	xid = XCreateSimpleWindow(Metadpy->dpy,
+							  Metadpy->root,
+							  x,
+							  y,
+							  w,
+							  h,
+							  b,
+							  fg,
+							  bg);
 
 	/* Start out selecting No events */
 	XSelectInput(Metadpy->dpy, xid, 0L);
 
-	/*** Prepare the new infowin ***/
-
 	/* Mark it as nukable */
-	Infowin->nuke = 1;
+	iwin->nuke = 1;
 
 	/* Attempt to Initialize the infowin */
-	return (Infowin_prepare(xid));
-}
-
-int Infowin_init_top(int x, int y, int w, int h, int b, Pixell fg, Pixell bg)
-{
-	return Infowin_init_data(Metadpy->root, x, y, w, h, b, fg, bg);
+	return Infowin_prepare(iwin, xid);
 }
 
 /**
  * Modify the event mask of an Infowin
  */
-int Infowin_set_mask(long mask)
+int Infowin_set_mask(struct infowin *iwin, long mask)
 {
 	/* Save the new setting */
-	Infowin->mask = mask;
+	iwin->mask = mask;
 
 	/* Execute the Mapping */
-	XSelectInput(Metadpy->dpy, Infowin->win, Infowin->mask);
+	XSelectInput(Metadpy->dpy, iwin->handle, iwin->mask);
 
 	/* Success */
-	return (0);
+	return 0;
+}
+
+int Infowin_set_class_hint(struct infowin *iwin, XClassHint *ch)
+{
+	XSetClassHint(Metadpy->dpy, iwin->handle, ch);
+
+	return 0;
+}
+
+int Infowin_set_size_hints(struct infowin *iwin, XSizeHints *sh)
+{
+	XSetWMNormalHints(Metadpy->dpy, iwin->handle, sh);
+
+	return 0;
 }
 
 
 /**
  * Request that Infowin be mapped
  */
-int Infowin_map(void)
+int Infowin_map(struct infowin *iwin)
 {
-	/* Execute the Mapping */
-	XMapWindow(Metadpy->dpy, Infowin->win);
+	XMapWindow(Metadpy->dpy, iwin->handle);
 
-	/* Success */
-	return (0);
+	return 0;
 }
 
 /**
  * Request that Infowin be raised
  */
-int Infowin_raise(void)
+int Infowin_raise(struct infowin *iwin)
 {
-	/* Raise towards visibility */
-	XRaiseWindow(Metadpy->dpy, Infowin->win);
+	XRaiseWindow(Metadpy->dpy, iwin->handle);
 
-	/* Success */
-	return (0);
+	return 0;
 }
 
 /**
  * Request that Infowin be moved to a new location
  */
-int Infowin_impell(int x, int y)
+int Infowin_impell(struct infowin *iwin, int x, int y)
 {
-	/* Execute the request */
-	XMoveWindow(Metadpy->dpy, Infowin->win, x, y);
+	XMoveWindow(Metadpy->dpy, iwin->handle, x, y);
 
-	/* Success */
-	return (0);
+	return 0;
 }
-
 
 /**
  * Resize an infowin
  */
-int Infowin_resize(int w, int h)
+int Infowin_resize(struct infowin *iwin, int w, int h)
 {
-	/* Execute the request */
-	XResizeWindow(Metadpy->dpy, Infowin->win, w, h);
+	XResizeWindow(Metadpy->dpy, iwin->handle, w, h);
 
-	/* Success */
-	return (0);
+	return 0;
 }
 
 /**
  * Visually clear Infowin
  */
-int Infowin_wipe(void)
+int Infowin_wipe(struct infowin *iwin)
 {
-	/* Execute the request */
-	XClearWindow(Metadpy->dpy, Infowin->win);
+	XClearWindow(Metadpy->dpy, iwin->handle);
 
-	/* Success */
-	return (0);
+	return 0;
 }
 /**
  * Nuke an old 'infoclr'.
@@ -592,10 +575,8 @@ int Infoclr_change_fg(struct infoclr *iclr, Pixell fg)
 /**
  * Nuke an old 'infofnt'.
  */
-int Infofnt_nuke(void)
+int Infofnt_nuke(struct infofnt *ifnt)
 {
-	struct infofnt *ifnt = Infofnt;
-
 	/* Deal with 'name' */
 	if (ifnt->name) {
 		/* Free the name */
@@ -616,9 +597,8 @@ int Infofnt_nuke(void)
 /**
  * Prepare a new 'infofnt'
  */
-static int Infofnt_prepare(XFontSet fs)
+static int Infofnt_prepare(struct infofnt *ifnt, XFontSet fs)
 {
-	struct infofnt *ifnt = Infofnt;
 	int font_count, i;
 	XFontSetExtents *extents;
 	XFontStruct **fonts;
@@ -649,7 +629,7 @@ static int Infofnt_prepare(XFontSet fs)
  * Inputs:
  *	name: The name of the requested Font
  */
-int Infofnt_init_data(const char *name)
+int Infofnt_init_data(struct infofnt *ifnt, const char *name)
 {
 	XFontSet fs;
 	char **missing;
@@ -658,37 +638,43 @@ int Infofnt_init_data(const char *name)
 	/*** Load the info Fresh, using the name ***/
 
 	/* If the name is not given, report an error */
-	if (!name) return (-1);
+	if (!name) {
+		return -1;
+	}
 
 	fs = XCreateFontSet(Metadpy->dpy, name, &missing, &missing_count, NULL);
 
 	/* The load failed, try to recover */
-	if (!fs) return (-1);
-	if (missing_count)
+	if (!fs) {
+		return -1;
+	}
+
+	if (missing_count) {
 		XFreeStringList(missing);
+	}
 
 	/*** Init the font ***/
 
 	/* Wipe the thing */
-	(void)memset(Infofnt, 0, sizeof(struct infofnt));
+	memset(ifnt, 0, sizeof(struct infofnt));
 
 	/* Attempt to prepare it */
-	if (Infofnt_prepare(fs)) {
+	if (Infofnt_prepare(ifnt,fs)) {
 		/* Free the font */
 		XFreeFontSet(Metadpy->dpy, fs);
 
 		/* Fail */
-		return (-1);
+		return -1;
 	}
 
 	/* Save a copy of the font name */
-	Infofnt->name = string_make(name);
+	ifnt->name = string_make(name);
 
 	/* Mark it as nukable */
-	Infofnt->nuke = 1;
+	ifnt->nuke = 1;
 
 	/* HACK - force all fonts to be printed character by character */
-	Infofnt->mono = 1;
+	ifnt->mono = 1;
 
 	/* Success */
 	return (0);
@@ -709,8 +695,6 @@ int Infofnt_text_std(struct x11_term_data *td,
 	int i;
 	int w, h;
 
-	plog("Infofnt_text_std");
-
 	/*** Do a brief info analysis ***/
 
 	/* Do nothing if the string is null */
@@ -726,13 +710,13 @@ int Infofnt_text_std(struct x11_term_data *td,
 	/*** Decide where to place the string, vertically ***/
 
 	/* Ignore Vertical Justifications */
-	y = (y * td->tile_hgt) + Infowin->oy;
+	y = (y * td->tile_hgt) + td->win->oy;
 
 
 	/*** Decide where to place the string, horizontally ***/
 
 	/* Line up with x at left edge of column 'x' */
-	x = (x * td->tile_wid) + Infowin->ox;
+	x = (x * td->tile_wid) + td->win->ox;
 
 	/*** Erase the background ***/
 
@@ -744,42 +728,42 @@ int Infofnt_text_std(struct x11_term_data *td,
 
 	/* Fill the background */
 	XFillRectangle(Metadpy->dpy,
-		       Infowin->win,
-		       bg_col->gc,
-		       x,
-		       y,
-		       w,
-		       h);
+				   td->win->handle,
+				   bg_col->gc,
+				   x,
+				   y,
+				   w,
+				   h);
 
 	/*** Actually draw 'str' onto the infowin ***/
-	y += Infofnt->asc;
+	y += td->fnt->asc;
 
 	/*** Handle the fake mono we can enforce on fonts ***/
 
 	/* Monotize the font */
-	if (Infofnt->mono) {
+	if (td->fnt->mono) {
 		/* Do each character */
 		for (i = 0; i < len; ++i) {
 			/* Note that the Infoclr is set up to contain the Infofnt */
 			XwcDrawImageString(Metadpy->dpy,
-					   Infowin->win,
-					   Infofnt->fs,
-					   fg_col->gc,
-					   x + i * td->tile_wid + Infofnt->off,
-					   y,
-					   str + i,
-					   1);
+							   td->win->handle,
+							   td->fnt->fs,
+							   fg_col->gc,
+							   x + i * td->tile_wid + td->fnt->off,
+							   y,
+							   str + i,
+							   1);
 		}
 	} else {
 		/* Note that the Infoclr is set up to contain the Infofnt */
 		XwcDrawImageString(Metadpy->dpy,
-				   Infowin->win,
-				   Infofnt->fs,
-				   fg_col->gc,
-				   x,
-				   y,
-				   str,
-				   len);
+						   td->win->handle,
+						   td->fnt->fs,
+						   fg_col->gc,
+						   x,
+						   y,
+						   str,
+						   len);
 	}
 
 	return 0;
@@ -811,7 +795,7 @@ int Infofnt_text_non(struct x11_term_data *td,
 	/*** Find the X dimensions ***/
 
 	/* Line up with x at left edge of column 'x' */
-	x = x * td->tile_wid + Infowin->ox;
+	x = x * td->tile_wid + td->win->ox;
 
 	/*** Find other dimensions ***/
 
@@ -819,12 +803,12 @@ int Infofnt_text_non(struct x11_term_data *td,
 	h = td->tile_hgt;
 
 	/* Simply do "at top" in row 'y' */
-	y = y * h + Infowin->oy;
+	y = y * h + td->win->oy;
 
 	/*** Actually 'paint' the area ***/
 
 	/* Just do a Fill Rectangle */
-	XFillRectangle(Metadpy->dpy, Infowin->win, iclr->gc, x, y, w, h);
+	XFillRectangle(Metadpy->dpy, td->win->handle, iclr->gc, x, y, w, h);
 
 	/* Success */
 	return 0;

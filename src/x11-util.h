@@ -106,7 +106,7 @@ struct metadpy {
  *	- Bit Flag: 4th extra flag
  */
 struct infowin {
-	Window win;
+	Window handle;
 	long mask;
 
 	int16_t ox, oy;
@@ -223,29 +223,37 @@ int Metadpy_nuke(void);
 int Metadpy_update(int flush, int sync, int discard);
 int Metadpy_do_beep(void);
 
-void Infowin_set(struct infowin *iwin);
-void Infowin_set_border(int16_t ox, int16_t oy);
-int Infowin_set_name(const char *name);
-int Infowin_nuke(void);
-int Infowin_init_top(int x, int y, int w, int h, int b, Pixell fg, Pixell bg);
-int Infowin_set_mask(long mask);
-int Infowin_map(void);
-int Infowin_raise(void);
-int Infowin_impell(int x, int y);
-int Infowin_resize(int w, int h);
-int Infowin_wipe(void);
+int Infowin_init(struct infowin *iwin,
+				 int x,
+				 int y,
+				 int w,
+				 int h,
+				 int b,
+				 Pixell fg,
+				 Pixell bg);
+int Infowin_nuke(struct infowin *iwin);
+int Infowin_set_border(struct infowin *iwin, int16_t ox, int16_t oy);
+int Infowin_set_name(struct infowin *iwin, const char *name);
+int Infowin_set_mask(struct infowin *iwin, long mask);
+int Infowin_map(struct infowin *iwin);
+int Infowin_set_class_hint(struct infowin *iwin, XClassHint *ch);
+int Infowin_set_size_hints(struct infowin *iwin, XSizeHints *sh);
+int Infowin_raise(struct infowin *iwin);
+int Infowin_impell(struct infowin *iwin, int x, int y);
+int Infowin_resize(struct infowin *iwin, int w, int h);
+int Infowin_wipe(struct infowin *iwin);
 
-int Infoclr_nuke(struct infoclr *iclr);
 int Infoclr_init_data(struct infoclr *iclr,
 					  Pixell fg,
 					  Pixell bg,
 					  enum x11_function f,
 					  int stip);
+int Infoclr_nuke(struct infoclr *iclr);
 int Infoclr_change_fg(struct infoclr *iclr, Pixell fg);
 
 void Infofnt_set(struct infofnt *ifnt);
-int Infofnt_nuke(void);
-int Infofnt_init_data(const char *name);
+int Infofnt_nuke(struct infofnt *ifnt);
+int Infofnt_init_data(struct infofnt *ifnt, const char *name);
 
 int Infofnt_text_std(struct x11_term_data *td,
 					 struct infoclr *fg_col,

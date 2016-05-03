@@ -169,6 +169,8 @@ static char settings[1024];
  */
 static int term_windows_open;
 
+
+#define X11_TERM_DATA			  ((struct x11_term_data *)Term->data)
 /**
  * Hack -- Convert an RGB value to an X11 Pixel, or die.
  */
@@ -386,7 +388,6 @@ static errr CheckEvent(bool wait)
 	XEvent xev_body, *xev = &xev_body;
 
 	struct x11_term_data *td = NULL;
-	struct infowin *iwin = NULL;
 
 	int i;
 	int window = 0;
@@ -428,23 +429,19 @@ static errr CheckEvent(bool wait)
 
 		td = (struct x11_term_data *)angband_term[i]->data;
 
-		if (xev->xany.window == td->win->win) {
-			iwin = td->win;
+		if (xev->xany.window == td->win->handle) {
 			window = i;
 			break;
 		}
 	}
 
 	/* Unknown window */
-	if (!td || !iwin) {
+	if (!td || !td->win) {
 		return 0;
 	}
 
 	/* Hack -- activate the Term */
 	Term_activate(angband_term[window]);
-
-	/* Hack -- activate the window */
-	Infowin_set(iwin);
 
 	/* Switch on the Type */
 	switch (xev->type)
@@ -460,12 +457,19 @@ static errr CheckEvent(bool wait)
 			int y = xev->xbutton.y;
 
 			/* Which button is involved */
-			if (xev->xbutton.button == Button1) z = 1;
-			else if (xev->xbutton.button == Button2) z = 2;
-			else if (xev->xbutton.button == Button3) z = 3;
-			else if (xev->xbutton.button == Button4) z = 4;
-			else if (xev->xbutton.button == Button5) z = 5;
-			else z = 0;
+			if (xev->xbutton.button == Button1) {
+				z = 1;
+			} else if (xev->xbutton.button == Button2) {
+				z = 2;
+			} else if (xev->xbutton.button == Button3) {
+				z = 3;
+			} else if (xev->xbutton.button == Button4) {
+				z = 4;
+			} else if (xev->xbutton.button == Button5) {
+				z = 5;
+			} else {
+				z = 0;
+			}
 
 			/* The co-ordinates are only used in Angband format. */
 			pixel_to_square((struct x11_term_data *)Term->data,
@@ -496,12 +500,12 @@ static errr CheckEvent(bool wait)
 		{
 			int x1, x2, y1, y2;
 
-			x1 = (xev->xexpose.x - Infowin->ox) / td->tile_wid;
-			x2 = (xev->xexpose.x + xev->xexpose.width - Infowin->ox) /
+			x1 = (xev->xexpose.x - td->win->ox) / td->tile_wid;
+			x2 = (xev->xexpose.x + xev->xexpose.width - td->win->ox) /
 				td->tile_wid;
 
-			y1 = (xev->xexpose.y - Infowin->oy) / td->tile_hgt;
-			y2 = (xev->xexpose.y + xev->xexpose.height - Infowin->oy) /
+			y1 = (xev->xexpose.y - td->win->oy) / td->tile_hgt;
+			y2 = (xev->xexpose.y + xev->xexpose.height - td->win->oy) /
 				td->tile_hgt;
 
 			Term_redraw_section(x1, y1, x2, y2);
@@ -511,14 +515,14 @@ static errr CheckEvent(bool wait)
 
 		case MapNotify:
 		{
-			Infowin->mapped = 1;
+			td->win->mapped = 1;
 			Term->mapped_flag = true;
 			break;
 		}
 
 		case UnmapNotify:
 		{
-			Infowin->mapped = 0;
+			td->win->mapped = 0;
 			Term->mapped_flag = false;
 			break;
 		}
@@ -528,18 +532,18 @@ static errr CheckEvent(bool wait)
 		{
 			int cols, rows, wid, hgt, force_resize;
 
-			int ox = Infowin->ox;
-			int oy = Infowin->oy;
+			int ox = td->win->ox;
+			int oy = td->win->oy;
 
 			/* Save the new Window Parms */
-			Infowin->x = xev->xconfigure.x;
-			Infowin->y = xev->xconfigure.y;
-			Infowin->w = xev->xconfigure.width;
-			Infowin->h = xev->xconfigure.height;
+			td->win->x = xev->xconfigure.x;
+			td->win->y = xev->xconfigure.y;
+			td->win->w = xev->xconfigure.width;
+			td->win->h = xev->xconfigure.height;
 
 			/* Determine "proper" number of rows/cols */
-			cols = ((Infowin->w - (ox + ox)) / td->tile_wid);
-			rows = ((Infowin->h - (oy + oy)) / td->tile_hgt);
+			cols = ((td->win->w - (ox + ox)) / td->tile_wid);
+			rows = ((td->win->h - (oy + oy)) / td->tile_hgt);
 
 			/* Hack -- minimal size */
 			if (cols < 1) cols = 1;
@@ -564,13 +568,12 @@ static errr CheckEvent(bool wait)
 					hgt = rows * td->tile_hgt + (oy + oy);
 
 					/* Resize window */
-					Infowin_set(td->win);
-					Infowin_resize(wid, hgt);
+					Infowin_resize(td->win, wid, hgt);
 				}
 			}
 
 			/* Resize the Term (if needed) */
-			(void)Term_resize(cols, rows);
+			Term_resize(cols, rows);
 
 			break;
 		}
@@ -579,13 +582,7 @@ static errr CheckEvent(bool wait)
 	/* Hack -- Activate the old term */
 	Term_activate(old_term);
 
-	/* Hack -- Activate the proper window */
-	Infowin_set(((struct x11_term_data *)old_term->data)->win);
-
-	/* Success */
-	plog("CheckEvent() - Success");
-
-	return (0);
+	return 0;
 }
 
 
@@ -594,19 +591,13 @@ static errr CheckEvent(bool wait)
  */
 static errr Term_xtra_x11_level(int v)
 {
-	struct x11_term_data *td = (struct x11_term_data*)(Term->data);
-
 	/* Handle "activate" */
 	if (v) {
-		/* Activate the window */
-		Infowin_set(td->win);
-
-		/* Activate the font */
-		Infofnt_set(td->fnt);
+		;
 	}
 
 	/* Success */
-	return (0);
+	return 0;
 }
 
 
@@ -658,37 +649,64 @@ static errr Term_xtra_x11(int n, int v)
 	switch (n)
 	{
 		/* Make a noise */
-		case TERM_XTRA_NOISE: Metadpy_do_beep(); return (0);
+		case TERM_XTRA_NOISE: {
+			Metadpy_do_beep();
+			return 0;
+		}
 
 		/* Flush the output XXX XXX */
-		case TERM_XTRA_FRESH: Metadpy_update(1, 0, 0); return (0);
+		case TERM_XTRA_FRESH: {
+			Metadpy_update(1, 0, 0);
+			return 0;
+		}
 
 		/* Process random events XXX */
-		case TERM_XTRA_BORED: return (CheckEvent(0));
+		case TERM_XTRA_BORED: {
+			return CheckEvent(0);
+		}
 
 		/* Process Events XXX */
-		case TERM_XTRA_EVENT: return (CheckEvent(v));
+		case TERM_XTRA_EVENT: {
+			return CheckEvent(v);
+		}
 
 		/* Flush the events XXX */
-		case TERM_XTRA_FLUSH: while (!CheckEvent(false)); return (0);
+		case TERM_XTRA_FLUSH: {
+			while (!CheckEvent(false)) {
+				;
+			}
+
+			return 0;
+		}
 
 		/* Handle change in the "level" */
-		case TERM_XTRA_LEVEL: return (Term_xtra_x11_level(v));
+		case TERM_XTRA_LEVEL: {
+			return Term_xtra_x11_level(v);
+		}
 
 		/* Clear the screen */
-		case TERM_XTRA_CLEAR: Infowin_wipe(); return (0);
+		case TERM_XTRA_CLEAR: {
+			Infowin_wipe(X11_TERM_DATA->win);
+			 return 0;
+		}
 
 		/* Delay for some milliseconds */
-		case TERM_XTRA_DELAY:
-			if (v > 0) usleep(1000 * v);
-			return (0);
+		case TERM_XTRA_DELAY: {
+			if (v > 0) {
+				usleep(1000 * v);
+			}
+
+			return 0;
+		}
 
 		/* React to changes */
-		case TERM_XTRA_REACT: return (Term_xtra_x11_react());
+		case TERM_XTRA_REACT: {
+			return Term_xtra_x11_react();
+		}
 	}
 
 	/* Unknown */
-	return (1);
+	return 1;
 }
 
 
@@ -700,7 +718,7 @@ static errr Term_xtra_x11(int n, int v)
 static errr Term_wipe_x11(int x, int y, int n)
 {
 	/* Mega-Hack -- Erase some space */
-	Infofnt_text_non((struct x11_term_data *)Term->data,
+	Infofnt_text_non(X11_TERM_DATA,
 					 clr[COLOUR_DARK],
 					 x,
 					 y,
@@ -711,14 +729,13 @@ static errr Term_wipe_x11(int x, int y, int n)
 	return (0);
 }
 
-
 /**
  * Draw some textual characters.
  */
 static errr Term_text_x11(int x, int y, int n, int a, const wchar_t *s)
 {
 	/* Draw the text */
-	Infofnt_text_std((struct x11_term_data *)Term->data,
+	Infofnt_text_std(X11_TERM_DATA,
 					 clr[a],
 					 clr[COLOUR_DARK],
 					 x,
@@ -726,8 +743,7 @@ static errr Term_text_x11(int x, int y, int n, int a, const wchar_t *s)
 					 s,
 					 n);
 
-	/* Success */
-	return (0);
+	return 0;
 }
 
 
@@ -1087,9 +1103,8 @@ static errr term_data_init(struct term *t, int i)
 
 	/* Prepare the standard font */
 	td->fnt = mem_zalloc(sizeof(struct infofnt));
-	Infofnt_set(td->fnt);
 
-	if (Infofnt_init_data(font)) {
+	if (Infofnt_init_data(td->fnt, font)) {
 		quit_fmt("Couldn't load the requested font. (%s)", font);
 	}
 
@@ -1114,20 +1129,28 @@ static errr term_data_init(struct term *t, int i)
 
 	/* Create a top-window */
 	td->win = mem_zalloc(sizeof(struct infowin));
-	Infowin_set(td->win);
-	Infowin_init_top(x, y, wid, hgt, 0, Metadpy->fg, Metadpy->bg);
+
+	Infowin_init(td->win,
+				 x,
+				 y,
+				 wid,
+				 hgt,
+				 0,
+				 Metadpy->fg,
+				 Metadpy->bg);
 
 	/* Ask for certain events */
-	Infowin_set_mask(ExposureMask |
-			 StructureNotifyMask |
-			 KeyPressMask |
-			 ButtonPressMask);
+	Infowin_set_mask(td->win,
+					 ExposureMask |
+					 StructureNotifyMask |
+					 KeyPressMask |
+					 ButtonPressMask);
 
 	/* Set the window name */
-	Infowin_set_name(name);
+	Infowin_set_name(td->win, name);
 
 	/* Save the inner border */
-	Infowin_set_border(ox, oy);
+	Infowin_set_border(td->win, ox, oy);
 
 	/* Make Class Hints */
 	ch = XAllocClassHint();
@@ -1143,13 +1166,15 @@ static errr term_data_init(struct term *t, int i)
 	my_strcpy(res_class, "Angband", sizeof(res_class));
 	ch->res_class = res_class;
 
-	XSetClassHint(Metadpy->dpy, Infowin->win, ch);
+	Infowin_set_class_hint(td->win, ch);
 
 	/* Make Size Hints */
 	sh = XAllocSizeHints();
 
 	/* Oops */
-	if (sh == NULL) quit("XAllocSizeHints failed");
+	if (sh == NULL) {
+		quit("XAllocSizeHints failed");
+	}
 
 	if (x || y)
 		sh->flags = USPosition;
@@ -1184,18 +1209,19 @@ static errr term_data_init(struct term *t, int i)
 	sh->base_height = (oy + oy);
 
 	/* Use the size hints */
-	XSetWMNormalHints(Metadpy->dpy, Infowin->win, sh);
+	Infowin_set_size_hints(td->win, sh);
 
 	/* Map the window */
-	Infowin_map();
+	Infowin_map(td->win);
 
 	/* Set pointers to allocated data */
 	td->sizeh = sh;
 	td->classh = ch;
 
 	/* Move the window to requested location */
-	if ((x >= 0) && (y >= 0)) Infowin_impell(x, y);
-
+	if ((x >= 0) && (y >= 0)) {
+		Infowin_impell(td->win, x, y);
+	}
 
 	/* Initialize the term */
 	term_init(t, cols, rows, num);
@@ -1245,14 +1271,19 @@ static void hook_quit(const char *str)
 
 		td = (struct x11_term_data *)angband_term[i]->data;
 
+		/* Free size hints */
+		XFree(td->sizeh);
+
+		/* Free class hints */
+		XFree(td->classh);
+
+
 		/* Free fonts */
-		Infofnt_set(td->fnt);
-		(void)Infofnt_nuke();
+		Infofnt_nuke(td->fnt);
 		mem_free(td->fnt);
 
 		/* Free window */
-		Infowin_set(td->win);
-		(void)Infowin_nuke();
+		Infowin_nuke(td->win);
 		mem_free(td->win);
 
 		mem_free(td);
@@ -1467,8 +1498,7 @@ errr init_x11(int argc, char **argv)
 	}
 
 	/* Raise the "Angband" window */
-	Infowin_set(((struct x11_term_data *)angband_term[0]->data)->win);
-	Infowin_raise();
+	Infowin_raise(((struct x11_term_data *)angband_term[0]->data)->win);
 
 	/* Activate the "Angband" window screen */
 	Term_activate(angband_term[0]);
