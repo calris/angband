@@ -103,10 +103,6 @@
  *
  */
 
-
-
-#ifdef USE_X11
-
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
@@ -164,13 +160,6 @@
 #define IsSpecialKey(keysym) \
   ((unsigned)(keysym) >= 0xFF00)
 
-
-/**
- * Hack -- avoid some compiler warnings
- */
-#define IGNORE_UNUSED_FUNCTIONS
-
-
 /**
  * Notes on Colors:
  *
@@ -189,28 +178,10 @@
  *   is not necessarily either black or white.
  */
 
-
-
-/**
- * ------------------------------------------------------------------------
- *  Generic Types
- * ------------------------------------------------------------------------ */
-
-
-
 /**
  * An X11 pixell specifier
  */
 typedef unsigned long Pixell;
-
-/*
- * The structures defined below
- */
-typedef struct metadpy metadpy;
-typedef struct infowin infowin;
-typedef struct infoclr infoclr;
-typedef struct infofnt infofnt;
-
 
 /**
  * A structure summarizing a given Display.
@@ -270,8 +241,6 @@ struct metadpy
 	unsigned int nuke:1;
 };
 
-
-
 /**
  * A Structure summarizing Window Information.
  *
@@ -325,11 +294,6 @@ struct infowin
 	unsigned int flag4:1;
 };
 
-
-
-
-
-
 /**
  * A Structure summarizing Operation+Color Information
  *
@@ -353,8 +317,6 @@ struct infoclr
 	unsigned int stip:1;
 	unsigned int nuke:1;
 };
-
-
 
 /**
  * A Structure to Hold Font Information
@@ -389,23 +351,16 @@ struct infofnt
 	unsigned int nuke:1;
 };
 
-
-
-/**
- * Forward declare
- */
-typedef struct term_data term_data;
-
 /**
  * A structure for each "term"
  */
 struct term_data
 {
-	term t;
+	struct term t;
 
-	infofnt *fnt;
+	struct infofnt *fnt;
 
-	infowin *win;
+	struct infowin *win;
 
 	int tile_wid;
 	int tile_wid2; /* Tile-width with bigscreen */
@@ -416,31 +371,9 @@ struct term_data
 	XSizeHints *sizeh;
 };
 
-
-
-/**
- * ------------------------------------------------------------------------
- *  Generic Macros
- * ------------------------------------------------------------------------ */
-
-
-/* Initialize 'M' using a Display named 'N' */
-#define Metadpy_init_name(N) \
-	Metadpy_init_2((Display*)(NULL),N)
-
 /* Init a top level infowin by pos,size,bord,Colors */
 #define Infowin_init_top(X,Y,W,H,B,FG,BG) \
 	Infowin_init_data(None,X,Y,W,H,B,FG,BG)
-
-/* Set the current Infowin */
-#define Infowin_set(I) \
-	(Infowin = (I))
-
-
-/* Set the current Infoclr */
-#define Infoclr_set(C) \
-	(Infoclr = (C))
-
 
 #define Infoclr_init_ppo(F,B,O,M) \
 	Infoclr_init_data(F,B,O,M)
@@ -448,48 +381,43 @@ struct term_data
 #define Infoclr_init_ppn(F,B,O,M) \
 	Infoclr_init_ppo(F,B,Infoclr_Opcode(O),M)
 
-/* Set the current infofnt */
-#define Infofnt_set(I) \
-	(Infofnt = (I))
-
-/**
- * ------------------------------------------------------------------------
- *  Generic Globals
- * ------------------------------------------------------------------------ */
-
-
-
 /**
  * The "default" values
  */
-static metadpy metadpy_default;
-
+static struct metadpy metadpy_default;
 
 /**
  * The "current" variables
  */
-static metadpy *Metadpy = &metadpy_default;
-static infowin *Infowin = (infowin*)(NULL);
-static infoclr *Infoclr = (infoclr*)(NULL);
-static infofnt *Infofnt = (infofnt*)(NULL);
+static struct metadpy *Metadpy = &metadpy_default;
+static struct infowin *Infowin = (struct infowin*)(NULL);
+static struct infoclr *Infoclr = (struct infoclr*)(NULL);
+static struct infofnt *Infofnt = (struct infofnt*)(NULL);
 
+/* Set the current Infowin */
+static void Infowin_set(struct infowin *iwin)
+{
+	Infowin = iwin;
+}
+
+/* Set the current Infoclr */
+static void Infoclr_set(struct infoclr *iclr)
+{
+	Infoclr = iclr;
+}
+/* Set the current infofnt */
+static void Infofnt_set(struct infofnt *ifnt)
+{
+	Infofnt = ifnt;
+}
 
 /*
  * Actual color table
  */
-static infoclr *clr[MAX_COLORS * BG_MAX];
-
-
-
-/**
- * ------------------------------------------------------------------------
- *  Code imported from the old maid-x11.c
- * ------------------------------------------------------------------------ */
-
+static struct infoclr *clr[MAX_COLORS * BG_MAX];
 
 static bool gamma_table_ready = false;
 static int gamma_val = 0;
-
 
 /**
  * Hack -- Convert an RGB value to an X11 Pixel, or die.
@@ -619,9 +547,9 @@ static unsigned int xkb_mask_modifier( XkbDescPtr xkb, const char *name )
  *
  * Return -1 if no Display given, and none can be opened.
  */
-static errr Metadpy_init_2(Display *dpy, const char *name)
+static errr Metadpy_init(Display *dpy, const char *name)
 {
-	metadpy *m = Metadpy;
+	struct metadpy *m = Metadpy;
 	XkbDescPtr xkb;
 	
 	/* Attempt to create a display if none given, otherwise use the given one */
@@ -700,7 +628,7 @@ static errr Metadpy_init_2(Display *dpy, const char *name)
  */
 static errr Metadpy_nuke(void)
 {
-	metadpy *m = Metadpy;
+	struct metadpy *m = Metadpy;
 
 
 	/* If required, Free the Display */
@@ -765,33 +693,12 @@ static errr Infowin_set_name(const char *name)
 	return (0);
 }
 
-
-#ifndef IGNORE_UNUSED_FUNCTIONS
-
-/**
- * Set the icon name of Infowin
- */
-static errr Infowin_set_icon_name(const char *name)
-{
-	Status st;
-	XTextProperty tp;
-	char buf[128];
-	char *bp = buf;
-	my_strcpy(buf, name, sizeof(buf));
-	st = XStringListToTextProperty(&bp, 1, &tp);
-	if (st) XSetWMIconName(Metadpy->dpy, Infowin->win, &tp);
-	return (0);
-}
-
-#endif /* IGNORE_UNUSED_FUNCTIONS */
-
-
 /**
  * Nuke Infowin
  */
 static errr Infowin_nuke(void)
 {
-	infowin *iwin = Infowin;
+	struct infowin *iwin = Infowin;
 
 	/* Nuke if requested */
 	if (iwin->nuke) {
@@ -809,7 +716,7 @@ static errr Infowin_nuke(void)
  */
 static errr Infowin_prepare(Window xid)
 {
-	infowin *iwin = Infowin;
+	struct infowin *iwin = Infowin;
 
 	Window tmp_win;
 	XWindowAttributes xwa;
@@ -845,27 +752,6 @@ static errr Infowin_prepare(Window xid)
 	return (0);
 }
 
-
-#ifndef IGNORE_UNUSED_FUNCTIONS
-
-/**
- * Initialize a new 'infowin'.
- */
-static errr Infowin_init_real(Window xid)
-{
-	/* Wipe it clean */
-	(void)memset(Infowin, 0, sizeof(infowin));
-
-	/* Start out non-nukable */
-	Infowin->nuke = 0;
-
-	/* Attempt to Prepare ourself */
-	return (Infowin_prepare(xid));
-}
-
-#endif /* IGNORE_UNUSED_FUNCTIONS */
-
-
 /**
  * Init an infowin by giving some data.
  *
@@ -884,7 +770,7 @@ static errr Infowin_init_data(Window dad, int x, int y, int w, int h,
 	Window xid;
 
 	/* Wipe it clean */
-	(void)memset(Infowin, 0, sizeof(infowin));
+	(void)memset(Infowin, 0, sizeof(struct infowin));
 
 
 	/*** Error Check XXX ***/
@@ -943,24 +829,6 @@ static errr Infowin_map(void)
 	return (0);
 }
 
-
-#ifndef IGNORE_UNUSED_FUNCTIONS
-
-/**
- * Request that Infowin be unmapped
- */
-static errr Infowin_unmap(void)
-{
-	/* Execute the Un-Mapping */
-	XUnmapWindow(Metadpy->dpy, Infowin->win);
-
-	/* Success */
-	return (0);
-}
-
-#endif /* IGNORE_UNUSED_FUNCTIONS */
-
-
 /**
  * Request that Infowin be raised
  */
@@ -972,24 +840,6 @@ static errr Infowin_raise(void)
 	/* Success */
 	return (0);
 }
-
-
-#ifndef IGNORE_UNUSED_FUNCTIONS
-
-/**
- * Request that Infowin be lowered
- */
-static errr Infowin_lower(void)
-{
-	/* Lower towards invisibility */
-	XLowerWindow(Metadpy->dpy, Infowin->win);
-
-	/* Success */
-	return (0);
-}
-
-#endif /* IGNORE_UNUSED_FUNCTIONS */
-
 
 /**
  * Request that Infowin be moved to a new location
@@ -1016,24 +866,6 @@ static errr Infowin_resize(int w, int h)
 	return (0);
 }
 
-
-#ifndef IGNORE_UNUSED_FUNCTIONS
-
-/**
- * Move and Resize an infowin
- */
-static errr Infowin_locate(int x, int y, int w, int h)
-{
-	/* Execute the request */
-	XMoveResizeWindow(Metadpy->dpy, Infowin->win, x, y, w, h);
-
-	/* Success */
-	return (0);
-}
-
-#endif /* IGNORE_UNUSED_FUNCTIONS */
-
-
 /**
  * Visually clear Infowin
  */
@@ -1045,25 +877,6 @@ static errr Infowin_wipe(void)
 	/* Success */
 	return (0);
 }
-
-
-#ifndef IGNORE_UNUSED_FUNCTIONS
-
-/**
- * Visually Paint Infowin with the current color
- */
-static errr Infowin_fill(void)
-{
-	/* Execute the request */
-	XFillRectangle(Metadpy->dpy, Infowin->win, Infoclr->gc,
-	               0, 0, Infowin->w, Infowin->h);
-
-	/* Success */
-	return (0);
-}
-
-#endif /* IGNORE_UNUSED_FUNCTIONS */
-
 
 /**
  * A NULL terminated pair list of legal "operation names"
@@ -1124,89 +937,12 @@ static int Infoclr_Opcode(const char *str)
 	return (-1);
 }
 
-
-#ifndef IGNORE_UNUSED_FUNCTIONS
-
-/**
- * Request a Pixell by name.  Note: uses 'Metadpy'.
- *
- * Inputs:
- *      name: The name of the color to try to load (see below)
- *
- * Output:
- *	The Pixell value that metched the given name
- *	'Metadpy->fg' if the name was unparseable
- *
- * Valid forms for 'name':
- *	'fg', 'bg', 'zg', '<name>' and '#<code>'
- */
-static Pixell Infoclr_Pixell(const char *name)
-{
-	XColor scrn;
-
-	/* Attempt to Parse the name */
-	if (name && name[0]) {
-		/* The 'bg' color is available */
-		if (streq(name, "bg")) return (Metadpy->bg);
-
-		/* The 'fg' color is available */
-		if (streq(name, "fg")) return (Metadpy->fg);
-
-		/* The 'zg' color is available */
-		if (streq(name, "zg")) return (Metadpy->zg);
-
-		/* The 'white' color is available */
-		if (streq(name, "white")) return (Metadpy->white);
-
-		/* The 'black' color is available */
-		if (streq(name, "black")) return (Metadpy->black);
-
-		/* Attempt to parse 'name' into 'scrn' */
-		if (!(XParseColor(Metadpy->dpy, Metadpy->cmap, name, &scrn)))
-			plog_fmt("Warning: Couldn't parse color '%s'\n", name);
-
-		/* Attempt to Allocate the Parsed color */
-		if (!(XAllocColor(Metadpy->dpy, Metadpy->cmap, &scrn)))
-			plog_fmt("Warning: Couldn't allocate color '%s'\n", name);
-
-		/* The Pixel was Allocated correctly */
-		else return (scrn.pixel);
-	}
-
-	/* Warn about the Default being Used */
-	plog_fmt("Warning: Using 'fg' for unknown color '%s'\n", name);
-
-	/* Default to the 'Foreground' color */
-	return (Metadpy->fg);
-}
-
-
-/**
- * Initialize a new 'infoclr' with a real GC.
- */
-static errr Infoclr_init_1(GC gc)
-{
-	infoclr *iclr = Infoclr;
-
-	/* Wipe the iclr clean */
-	(void)memset(iclr, 0, sizeof(infoclr));
-
-	/* Assign the GC */
-	iclr->gc = gc;
-
-	/* Success */
-	return (0);
-}
-
-#endif /* IGNORE_UNUSED_FUNCTIONS */
-
-
 /**
  * Nuke an old 'infoclr'.
  */
 static errr Infoclr_nuke(void)
 {
-	infoclr *iclr = Infoclr;
+	struct infoclr *iclr = Infoclr;
 
 	/* Deal with 'GC' */
 	if (iclr->nuke) {
@@ -1215,7 +951,7 @@ static errr Infoclr_nuke(void)
 	}
 
 	/* Forget the current */
-	Infoclr = (infoclr*)(NULL);
+	Infoclr = (struct infoclr*)(NULL);
 
 	/* Success */
 	return (0);
@@ -1233,7 +969,7 @@ static errr Infoclr_nuke(void)
  */
 static errr Infoclr_init_data(Pixell fg, Pixell bg, int op, int stip)
 {
-	infoclr *iclr = Infoclr;
+	struct infoclr *iclr = Infoclr;
 
 	GC gc;
 	XGCValues gcv;
@@ -1280,7 +1016,7 @@ static errr Infoclr_init_data(Pixell fg, Pixell bg, int op, int stip)
 	/*** Initialize ***/
 
 	/* Wipe the iclr clean */
-	(void)memset(iclr, 0, sizeof(infoclr));
+	(void)memset(iclr, 0, sizeof(struct infoclr));
 
 	/* Assign the GC */
 	iclr->gc = gc;
@@ -1308,7 +1044,7 @@ static errr Infoclr_init_data(Pixell fg, Pixell bg, int op, int stip)
  */
 static errr Infoclr_change_fg(Pixell fg)
 {
-	infoclr *iclr = Infoclr;
+	struct infoclr *iclr = Infoclr;
 
 
 	/*** Simple error checking of opr and clr ***/
@@ -1332,7 +1068,7 @@ static errr Infoclr_change_fg(Pixell fg)
  */
 static errr Infofnt_nuke(void)
 {
-	infofnt *ifnt = Infofnt;
+	struct infofnt *ifnt = Infofnt;
 
 	/* Deal with 'name' */
 	if (ifnt->name) {
@@ -1356,7 +1092,7 @@ static errr Infofnt_nuke(void)
  */
 static errr Infofnt_prepare(XFontSet fs)
 {
-	infofnt *ifnt = Infofnt;
+	struct infofnt *ifnt = Infofnt;
 	int font_count, i;
 	XFontSetExtents *extents;
 	XFontStruct **fonts;
@@ -1408,7 +1144,7 @@ static errr Infofnt_init_data(const char *name)
 	/*** Init the font ***/
 
 	/* Wipe the thing */
-	(void)memset(Infofnt, 0, sizeof(infofnt));
+	(void)memset(Infofnt, 0, sizeof(struct infofnt));
 
 	/* Attempt to prepare it */
 	if (Infofnt_prepare(fs)) {
@@ -1441,7 +1177,7 @@ static errr Infofnt_text_std(int x, int y, const wchar_t *str, int len)
 	int i;
 	int w, h;
 
-	term_data *td = (term_data*)(Term->data);
+	struct term_data *td = (struct term_data*)(Term->data);
 
 	/*** Do a brief info analysis ***/
 
@@ -1508,7 +1244,7 @@ static errr Infofnt_text_non(int x, int y, const wchar_t *str, int len)
 {
 	int w, h;
 
-	term_data *td = (term_data*)(Term->data);
+	struct term_data *td = (struct term_data*)(Term->data);
 
 	/*** Find the width ***/
 
@@ -1554,7 +1290,7 @@ static errr Infofnt_text_non(int x, int y, const wchar_t *str, int len)
 /**
  * Hack -- cursor color
  */
-static infoclr *xor;
+static struct infoclr *xor;
 
 
 /**
@@ -1571,7 +1307,7 @@ static byte color_table_x11[MAX_COLORS][4];
 /**
  * The array of term data structures
  */
-static term_data data[MAX_TERM_DATA];
+static struct term_data data[MAX_TERM_DATA];
 
 
 /**
@@ -1595,7 +1331,7 @@ static int term_windows_open;
 static void react_keypress(XKeyEvent *ev)
 {
 	int n, ch = 0;
-	metadpy *m = Metadpy;
+	struct metadpy *m = Metadpy;
 
 	KeySym ks;
 
@@ -1709,7 +1445,7 @@ static void react_keypress(XKeyEvent *ev)
 static void pixel_to_square(int * const x, int * const y,
                             const int ox, const int oy)
 {
-	term_data *td = (term_data*)(Term->data);
+	struct term_data *td = (struct term_data*)(Term->data);
 
 	(*x) = (ox - Infowin->ox) / td->tile_wid;
 	(*y) = (oy - Infowin->oy) / td->tile_hgt;
@@ -1723,12 +1459,12 @@ static void pixel_to_square(int * const x, int * const y,
  */
 static errr CheckEvent(bool wait)
 {
-	term_data *old_td = (term_data*)(Term->data);
+	struct term_data *old_td = (struct term_data*)(Term->data);
 
 	XEvent xev_body, *xev = &xev_body;
 
-	term_data *td = NULL;
-	infowin *iwin = NULL;
+	struct term_data *td = NULL;
+	struct infowin *iwin = NULL;
 
 	int i;
 	int window = 0;
@@ -1913,7 +1649,7 @@ static errr CheckEvent(bool wait)
  */
 static errr Term_xtra_x11_level(int v)
 {
-	term_data *td = (term_data*)(Term->data);
+	struct term_data *td = (struct term_data*)(Term->data);
 
 	/* Handle "activate" */
 	if (v) {
@@ -2017,7 +1753,7 @@ static errr Term_xtra_x11(int n, int v)
  */
 static errr Term_curs_x11(int x, int y)
 {
-	term_data *td = (term_data*)(Term->data);
+	struct term_data *td = (struct term_data*)(Term->data);
 
 	XDrawRectangle(Metadpy->dpy, Infowin->win, xor->gc,
 				   x * td->tile_wid + Infowin->ox,
@@ -2034,7 +1770,7 @@ static errr Term_curs_x11(int x, int y)
  */
 static errr Term_bigcurs_x11(int x, int y)
 {
-	term_data *td = (term_data*)(Term->data);
+	struct term_data *td = (struct term_data*)(Term->data);
 
 	XDrawRectangle(Metadpy->dpy, Infowin->win, xor->gc,
 				   x * td->tile_wid + Infowin->ox,
@@ -2097,7 +1833,7 @@ static void save_prefs(void)
 
 	/* Save window prefs */
 	for (i = 0; i < MAX_TERM_DATA; i++) {
-		term_data *td = &data[i];
+		struct term_data *td = &data[i];
 
 		if (!td->t.mapped_flag) continue;
 
@@ -2153,7 +1889,7 @@ static void save_prefs(void)
 /**
  * Initialize a term_data
  */
-static errr term_data_init(term_data *td, int i)
+static errr term_data_init(struct term_data *td, int i)
 {
 	term *t = &td->t;
 
@@ -2360,7 +2096,7 @@ static errr term_data_init(term_data *td, int i)
 	}
 
 	/* Prepare the standard font */
-	td->fnt = mem_zalloc(sizeof(infofnt));
+	td->fnt = mem_zalloc(sizeof(struct infofnt));
 	Infofnt_set(td->fnt);
 	if (Infofnt_init_data(font))
 		quit_fmt("Couldn't load the requested font. (%s)", font);
@@ -2380,7 +2116,7 @@ static errr term_data_init(term_data *td, int i)
 	hgt = rows * td->tile_hgt + (oy + oy);
 
 	/* Create a top-window */
-	td->win = mem_zalloc(sizeof(infowin));
+	td->win = mem_zalloc(sizeof(struct infowin));
 	Infowin_set(td->win);
 	Infowin_init_top(x, y, wid, hgt, 0, Metadpy->fg, Metadpy->bg);
 
@@ -2505,7 +2241,7 @@ static void hook_quit(const char *str)
 
 	/* Free allocated data */
 	for (i = 0; i < term_windows_open; i++) {
-		term_data *td = &data[i];
+		struct term_data *td = &data[i];
 		term *t = &td->t;
 
 		/* Free size hints */
@@ -2628,13 +2364,14 @@ errr init_x11(int argc, char **argv)
 
 
 	/* Init the Metadpy if possible */
-	if (Metadpy_init_name(dpy_name)) return (-1);
+	if (Metadpy_init(NULL, dpy_name))
+		return -1;
 
 	/* Remember the number of terminal windows */
 	term_windows_open = num_term;
 
 	/* Prepare cursor color */
-	xor = mem_zalloc(sizeof(infoclr));
+	xor = mem_zalloc(sizeof(struct infoclr));
 	Infoclr_set(xor);
 	Infoclr_init_ppn(Metadpy->fg, Metadpy->bg, "xor", 0);
 
@@ -2643,7 +2380,7 @@ errr init_x11(int argc, char **argv)
 	for (i = 0; i < MAX_COLORS * BG_MAX; ++i) {
 		Pixell pixel;
 
-		clr[i] = mem_zalloc(sizeof(infoclr));
+		clr[i] = mem_zalloc(sizeof(struct infoclr));
 
 		Infoclr_set(clr[i]);
 
@@ -2702,7 +2439,7 @@ errr init_x11(int argc, char **argv)
 
 	/* Initialize the windows */
 	for (i = 0; i < num_term; i++) {
-		term_data *td = &data[i];
+		struct term_data *td = &data[i];
 
 		/* Initialize the term_data */
 		term_data_init(td, i);
@@ -2725,7 +2462,4 @@ errr init_x11(int argc, char **argv)
 	/* Success */
 	return (0);
 }
-
-#endif /* USE_X11 */
-
 
