@@ -77,7 +77,8 @@ WINMAINFILES = \
         win/scrnshot.o \
 		win/win-layout.o
 
-X11MAINFILES = main-x11.o
+X11MAINFILES = main-x11.o \
+	x11-util.o
 
 ANGFILES = \
 	cave.o \
