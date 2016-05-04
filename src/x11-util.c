@@ -12,32 +12,31 @@
 #include <X11/XKBlib.h>
 
 #include "x11-util.h"
-
 #include "z-virt.h"
 #include "z-util.h"
 
-static struct metadpy metadpy_default;
-struct metadpy *Metadpy = &metadpy_default;
+static struct x11_display metadpy_default;
+struct x11_display *x11_display = &metadpy_default;
 
 /**
  * Hack -- cursor color
  */
-static struct infoclr *xor;
+static struct x11_colour *xor_cursor_col;
 
 void x11_alloc_cursor_col(void)
 {
-	xor = mem_zalloc(sizeof(struct infoclr));
-	Infoclr_init_data(xor, Metadpy->fg, Metadpy->bg, XOR, 0);
+	xor_cursor_col = mem_zalloc(sizeof(struct x11_colour));
+	x11_colour_init(xor_cursor_col, x11_display->fg, x11_display->bg, XOR, 0);
 }
 
 void x11_free_cursor_col(void)
 {
-	Infoclr_nuke(xor);
-	mem_free(xor);
+	x11_colour_nuke(xor_cursor_col);
+	mem_free(xor_cursor_col);
 }
 
 
-int Infowin_set_border(struct infowin *iwin, int16_t ox, int16_t oy)
+int x11_window_set_border(struct x11_window *iwin, int16_t ox, int16_t oy)
 {
 	iwin->ox = ox;
 	iwin->oy = oy;
@@ -48,7 +47,7 @@ int Infowin_set_border(struct infowin *iwin, int16_t ox, int16_t oy)
 /**
  * Find the square a particular pixel is part of.
  */
-void pixel_to_square(struct x11_term_data *td,
+void x11_pixel_to_square(struct x11_term_data *td,
 					 int * const x,
 					 int * const y,
 					 const int ox,
@@ -61,11 +60,11 @@ void pixel_to_square(struct x11_term_data *td,
 /**
  * Draw the cursor as a rectangular outline
  */
-int x11_term_curs(struct x11_term_data *td, int x, int y)
+int x11_draw_curs(struct x11_term_data *td, int x, int y)
 {
-	XDrawRectangle(Metadpy->dpy,
+	XDrawRectangle(x11_display->dpy,
 				   td->win->handle,
-				   xor->gc,
+				   xor_cursor_col->gc,
 				   x * td->tile_wid + td->win->ox,
 				   y * td->tile_hgt + td->win->oy,
 				   td->tile_wid - 1,
@@ -77,11 +76,11 @@ int x11_term_curs(struct x11_term_data *td, int x, int y)
 /**
  * Draw the double width cursor as a rectangular outline
  */
-int x11_term_bigcurs(struct x11_term_data *td, int x, int y)
+int x11_draw_bigcurs(struct x11_term_data *td, int x, int y)
 {
-	XDrawRectangle(Metadpy->dpy,
+	XDrawRectangle(x11_display->dpy,
 				   td->win->handle,
-				   xor->gc,
+				   xor_cursor_col->gc,
 				   x * td->tile_wid + td->win->ox,
 				   y * td->tile_hgt + td->win->oy,
 				   td->tile_wid2 - 1,
@@ -129,9 +128,9 @@ static unsigned int xkb_mask_modifier(XkbDescPtr xkb, const char *name)
  *
  * Return -1 if no Display given, and none can be opened.
  */
-int Metadpy_init(Display *dpy, const char *name)
+int x11_display_init(Display *dpy, const char *name)
 {
-	struct metadpy *m = Metadpy;
+	struct x11_display *m = x11_display;
 	XkbDescPtr xkb;
 
 	/* Attempt to create a display if none given, otherwise use the given one */
@@ -173,7 +172,7 @@ int Metadpy_init(Display *dpy, const char *name)
 	m->name = DisplayString(dpy);
 
 	/* Extract the fd */
-	m->fd = ConnectionNumber(Metadpy->dpy);
+	m->fd = ConnectionNumber(x11_display->dpy);
 
 	/* Save the Size and Depth of the screen */
 	m->width = WidthOfScreen(m->screen);
@@ -186,12 +185,12 @@ int Metadpy_init(Display *dpy, const char *name)
 
 	/*** Make some clever Guesses ***/
 
-	/* Guess at the desired 'fg' and 'bg' Pixell's */
+	/* Guess at the desired 'fg' and 'bg' pixell's */
 	m->bg = m->black;
 	m->fg = m->white;
 
 	/* Calculate the Maximum allowed Pixel value.  */
-	m->zg = ((Pixell)1 << m->depth) - 1;
+	m->zg = ((pixell)1 << m->depth) - 1;
 
 	/* Save various default Flag Settings */
 	m->color = ((m->depth > 1) ? 1 : 0);
@@ -205,9 +204,9 @@ int Metadpy_init(Display *dpy, const char *name)
 /**
  * Nuke the current metadpy
  */
-int Metadpy_nuke(void)
+int x11_display_nuke(void)
 {
-	struct metadpy *m = Metadpy;
+	struct x11_display *m = x11_display;
 
 
 	/* If required, Free the Display */
@@ -230,13 +229,13 @@ int Metadpy_nuke(void)
 /**
  * General Flush/ Sync/ Discard routine
  */
-int Metadpy_update(int flush, int sync, int discard)
+int x11_display_update(int flush, int sync, int discard)
 {
 	/* Flush if desired */
-	if (flush) XFlush(Metadpy->dpy);
+	if (flush) XFlush(x11_display->dpy);
 
 	/* Sync if desired, using 'discard' */
-	if (sync) XSync(Metadpy->dpy, discard);
+	if (sync) XSync(x11_display->dpy, discard);
 
 	/* Success */
 	return (0);
@@ -246,10 +245,10 @@ int Metadpy_update(int flush, int sync, int discard)
 /**
  * Make a simple beep
  */
-int Metadpy_do_beep(void)
+int x11_display_do_beep(void)
 {
 	/* Make a simple beep */
-	XBell(Metadpy->dpy, 100);
+	XBell(x11_display->dpy, 100);
 
 	return (0);
 }
@@ -257,9 +256,9 @@ int Metadpy_do_beep(void)
 
 
 /**
- * Set the name (in the title bar) of Infowin
+ * Set the name (in the title bar) of an X11 Window
  */
-int Infowin_set_name(struct infowin *iwin, const char *name)
+int x11_window_set_name(struct x11_window *iwin, const char *name)
 {
 	Status st;
 	XTextProperty tp;
@@ -270,7 +269,7 @@ int Infowin_set_name(struct infowin *iwin, const char *name)
 	st = XStringListToTextProperty(&bp, 1, &tp);
 
 	if (st) {
-		XSetWMName(Metadpy->dpy, iwin->handle, &tp);
+		XSetWMName(x11_display->dpy, iwin->handle, &tp);
 	}
 
 	XFree(tp.value);
@@ -279,14 +278,14 @@ int Infowin_set_name(struct infowin *iwin, const char *name)
 }
 
 /**
- * Nuke Infowin
+ * Nuke an X11 Window
  */
-int Infowin_nuke(struct infowin *iwin)
+int x11_window_nuke(struct x11_window *iwin)
 {
 	/* Nuke if requested */
 	if (iwin->nuke) {
 		/* Destory the old window */
-		XDestroyWindow(Metadpy->dpy, iwin->handle);
+		XDestroyWindow(x11_display->dpy, iwin->handle);
 	}
 
 	/* Success */
@@ -297,7 +296,7 @@ int Infowin_nuke(struct infowin *iwin)
 /**
  * Prepare a new 'infowin'.
  */
-static int Infowin_prepare(struct infowin *iwin, Window xid)
+static int x11_window_prepare(struct x11_window *iwin, Window xid)
 {
 	Window tmp_win;
 	XWindowAttributes xwa;
@@ -308,7 +307,7 @@ static int Infowin_prepare(struct infowin *iwin, Window xid)
 	iwin->handle = xid;
 
 	/* Check For Error XXX Extract some ACTUAL data from 'xid' */
-	XGetGeometry(Metadpy->dpy, xid, &tmp_win, &x, &y, &w, &h, &b, &d);
+	XGetGeometry(x11_display->dpy, xid, &tmp_win, &x, &y, &w, &h, &b, &d);
 
 	/* Apply the above info */
 	iwin->x = x;
@@ -320,7 +319,7 @@ static int Infowin_prepare(struct infowin *iwin, Window xid)
 	iwin->b = b;
 
 	/* Check Error XXX Extract some more ACTUAL data */
-	XGetWindowAttributes(Metadpy->dpy, xid, &xwa);
+	XGetWindowAttributes(x11_display->dpy, xid, &xwa);
 
 	/* Apply the above info */
 	iwin->mask = xwa.your_event_mask;
@@ -342,22 +341,22 @@ static int Infowin_prepare(struct infowin *iwin, Window xid)
  *	w,h: The size of this Window
  *	b,d: The border width and pixel depth
  */
-int Infowin_init(struct infowin *iwin,
+int x11_window_init(struct x11_window *iwin,
 				 int x,
 				 int y,
 				 int w,
 				 int h,
 				 int b,
-				 Pixell fg,
-				 Pixell bg)
+				 pixell fg,
+				 pixell bg)
 {
 	Window xid;
 
 	/* Wipe it clean */
-	memset(iwin, 0, sizeof(struct infowin));
+	memset(iwin, 0, sizeof(struct x11_window));
 
-	xid = XCreateSimpleWindow(Metadpy->dpy,
-							  Metadpy->root,
+	xid = XCreateSimpleWindow(x11_display->dpy,
+							  x11_display->root,
 							  x,
 							  y,
 							  w,
@@ -367,103 +366,103 @@ int Infowin_init(struct infowin *iwin,
 							  bg);
 
 	/* Start out selecting No events */
-	XSelectInput(Metadpy->dpy, xid, 0L);
+	XSelectInput(x11_display->dpy, xid, 0L);
 
 	/* Mark it as nukable */
 	iwin->nuke = 1;
 
 	/* Attempt to Initialize the infowin */
-	return Infowin_prepare(iwin, xid);
+	return x11_window_prepare(iwin, xid);
 }
 
 /**
- * Modify the event mask of an Infowin
+ * Modify the event mask of an X11 Window
  */
-int Infowin_set_mask(struct infowin *iwin, long mask)
+int x11_window_set_mask(struct x11_window *iwin, long mask)
 {
 	/* Save the new setting */
 	iwin->mask = mask;
 
 	/* Execute the Mapping */
-	XSelectInput(Metadpy->dpy, iwin->handle, iwin->mask);
+	XSelectInput(x11_display->dpy, iwin->handle, iwin->mask);
 
 	/* Success */
 	return 0;
 }
 
-int Infowin_set_class_hint(struct infowin *iwin, XClassHint *ch)
+int x11_window_set_class_hint(struct x11_window *iwin, XClassHint *ch)
 {
-	XSetClassHint(Metadpy->dpy, iwin->handle, ch);
+	XSetClassHint(x11_display->dpy, iwin->handle, ch);
 
 	return 0;
 }
 
-int Infowin_set_size_hints(struct infowin *iwin, XSizeHints *sh)
+int x11_window_set_size_hints(struct x11_window *iwin, XSizeHints *sh)
 {
-	XSetWMNormalHints(Metadpy->dpy, iwin->handle, sh);
+	XSetWMNormalHints(x11_display->dpy, iwin->handle, sh);
 
 	return 0;
 }
 
 
 /**
- * Request that Infowin be mapped
+ * Request that an X11 Window be mapped
  */
-int Infowin_map(struct infowin *iwin)
+int x11_window_map(struct x11_window *iwin)
 {
-	XMapWindow(Metadpy->dpy, iwin->handle);
+	XMapWindow(x11_display->dpy, iwin->handle);
 
 	return 0;
 }
 
 /**
- * Request that Infowin be raised
+ * Request that an X11 Window be raised
  */
-int Infowin_raise(struct infowin *iwin)
+int x11_window_raise(struct x11_window *iwin)
 {
-	XRaiseWindow(Metadpy->dpy, iwin->handle);
+	XRaiseWindow(x11_display->dpy, iwin->handle);
 
 	return 0;
 }
 
 /**
- * Request that Infowin be moved to a new location
+ * Request that an X11 Window be moved to a new location
  */
-int Infowin_impell(struct infowin *iwin, int x, int y)
+int x11_window_move(struct x11_window *iwin, int x, int y)
 {
-	XMoveWindow(Metadpy->dpy, iwin->handle, x, y);
+	XMoveWindow(x11_display->dpy, iwin->handle, x, y);
 
 	return 0;
 }
 
 /**
- * Resize an infowin
+ * Resize an X11 Window
  */
-int Infowin_resize(struct infowin *iwin, int w, int h)
+int x11_window_resize(struct x11_window *iwin, int w, int h)
 {
-	XResizeWindow(Metadpy->dpy, iwin->handle, w, h);
+	XResizeWindow(x11_display->dpy, iwin->handle, w, h);
 
 	return 0;
 }
 
 /**
- * Visually clear Infowin
+ * Visually clear an X11 Window
  */
-int Infowin_wipe(struct infowin *iwin)
+int x11_window_wipe(struct x11_window *iwin)
 {
-	XClearWindow(Metadpy->dpy, iwin->handle);
+	XClearWindow(x11_display->dpy, iwin->handle);
 
 	return 0;
 }
 /**
  * Nuke an old 'infoclr'.
  */
-int Infoclr_nuke(struct infoclr *iclr)
+int x11_colour_nuke(struct x11_colour *iclr)
 {
 	/* Deal with 'GC' */
 	if (iclr->nuke) {
 		/* Free the GC */
-		XFreeGC(Metadpy->dpy, iclr->gc);
+		XFreeGC(x11_display->dpy, iclr->gc);
 	}
 
 	/* Success */
@@ -474,26 +473,26 @@ int Infoclr_nuke(struct infoclr *iclr)
  * Initialize an infoclr with some data
  *
  * Inputs:
- *	fg:   The Pixell for the requested Foreground (see above)
- *	bg:   The Pixell for the requested Background (see above)
+ *	fg:   The pixell for the requested Foreground (see above)
+ *	bg:   The pixell for the requested Background (see above)
  *	op:   The Opcode for the requested Operation (see above)
  *	stip: The stipple mode
  */
-int Infoclr_init_data(struct infoclr *iclr,
-					  Pixell fg,
-					  Pixell bg,
-					  enum x11_function f, int stip)
+int x11_colour_init(struct x11_colour *iclr,
+					pixell fg,
+					pixell bg,
+					enum x11_function f, int stip)
 {
 	GC gc;
 	XGCValues gcv;
 	unsigned long gc_mask;
 
-	/* Check the 'Pixells' for realism */
-	if (bg > Metadpy->zg) {
+	/* Check the 'pixells' for realism */
+	if (bg > x11_display->zg) {
 		return -1;
 	}
 
-	if (fg > Metadpy->zg) {
+	if (fg > x11_display->zg) {
 		return -1;
 	}
 
@@ -525,13 +524,13 @@ int Infoclr_init_data(struct infoclr *iclr,
 	           GCFillStyle | GCGraphicsExposures);
 
 	/* Create the GC detailed above */
-	gc = XCreateGC(Metadpy->dpy, Metadpy->root, gc_mask, &gcv);
+	gc = XCreateGC(x11_display->dpy, x11_display->root, gc_mask, &gcv);
 
 
 	/*** Initialize ***/
 
 	/* Wipe the iclr clean */
-	(void)memset(iclr, 0, sizeof(struct infoclr));
+	(void)memset(iclr, 0, sizeof(struct x11_colour));
 
 	/* Assign the GC */
 	iclr->gc = gc;
@@ -555,16 +554,16 @@ int Infoclr_init_data(struct infoclr *iclr,
  * Change the 'fg' for an infoclr
  *
  * Inputs:
- *	fg:   The Pixell for the requested Foreground (see above)
+ *	fg:   The pixell for the requested Foreground (see above)
  */
-int Infoclr_change_fg(struct infoclr *iclr, Pixell fg)
+int x11_colour_change_fg(struct x11_colour *iclr, pixell fg)
 {
-	/* Check the 'Pixells' for realism */
-	if (fg > Metadpy->zg) {
+	/* Check the 'pixells' for realism */
+	if (fg > x11_display->zg) {
 		return -1;
 	}
 
-	XSetForeground(Metadpy->dpy, iclr->gc, fg);
+	XSetForeground(x11_display->dpy, iclr->gc, fg);
 
 	/* Success */
 	return 0;
@@ -575,7 +574,7 @@ int Infoclr_change_fg(struct infoclr *iclr, Pixell fg)
 /**
  * Nuke an old 'infofnt'.
  */
-int Infofnt_nuke(struct infofnt *ifnt)
+int x11_font_nuke(struct x11_font *ifnt)
 {
 	/* Deal with 'name' */
 	if (ifnt->name) {
@@ -586,7 +585,7 @@ int Infofnt_nuke(struct infofnt *ifnt)
 	/* Nuke info if needed */
 	if (ifnt->nuke) {
 		/* Free the font */
-		XFreeFontSet(Metadpy->dpy, ifnt->fs);
+		XFreeFontSet(x11_display->dpy, ifnt->fs);
 	}
 
 	/* Success */
@@ -597,7 +596,7 @@ int Infofnt_nuke(struct infofnt *ifnt)
 /**
  * Prepare a new 'infofnt'
  */
-static int Infofnt_prepare(struct infofnt *ifnt, XFontSet fs)
+static int x11_font_prepare(struct x11_font *ifnt, XFontSet fs)
 {
 	int font_count, i;
 	XFontSetExtents *extents;
@@ -629,7 +628,7 @@ static int Infofnt_prepare(struct infofnt *ifnt, XFontSet fs)
  * Inputs:
  *	name: The name of the requested Font
  */
-int Infofnt_init_data(struct infofnt *ifnt, const char *name)
+int x11_font_init(struct x11_font *ifnt, const char *name)
 {
 	XFontSet fs;
 	char **missing;
@@ -642,7 +641,7 @@ int Infofnt_init_data(struct infofnt *ifnt, const char *name)
 		return -1;
 	}
 
-	fs = XCreateFontSet(Metadpy->dpy, name, &missing, &missing_count, NULL);
+	fs = XCreateFontSet(x11_display->dpy, name, &missing, &missing_count, NULL);
 
 	/* The load failed, try to recover */
 	if (!fs) {
@@ -656,12 +655,12 @@ int Infofnt_init_data(struct infofnt *ifnt, const char *name)
 	/*** Init the font ***/
 
 	/* Wipe the thing */
-	memset(ifnt, 0, sizeof(struct infofnt));
+	memset(ifnt, 0, sizeof(struct x11_font));
 
 	/* Attempt to prepare it */
-	if (Infofnt_prepare(ifnt,fs)) {
+	if (x11_font_prepare(ifnt,fs)) {
 		/* Free the font */
-		XFreeFontSet(Metadpy->dpy, fs);
+		XFreeFontSet(x11_display->dpy, fs);
 
 		/* Fail */
 		return -1;
@@ -684,9 +683,9 @@ int Infofnt_init_data(struct infofnt *ifnt, const char *name)
 /**
  * Standard Text
  */
-int Infofnt_text_std(struct x11_term_data *td,
-					 struct infoclr *fg_col,
-					 struct infoclr *bg_col,
+int x11_font_text_std(struct x11_term_data *td,
+					 struct x11_colour *fg_col,
+					 struct x11_colour *bg_col,
 					 int x,
 					 int y,
 					 const wchar_t *str,
@@ -727,7 +726,7 @@ int Infofnt_text_std(struct x11_term_data *td,
 	h = td->tile_hgt;
 
 	/* Fill the background */
-	XFillRectangle(Metadpy->dpy,
+	XFillRectangle(x11_display->dpy,
 				   td->win->handle,
 				   bg_col->gc,
 				   x,
@@ -744,8 +743,7 @@ int Infofnt_text_std(struct x11_term_data *td,
 	if (td->fnt->mono) {
 		/* Do each character */
 		for (i = 0; i < len; ++i) {
-			/* Note that the Infoclr is set up to contain the Infofnt */
-			XwcDrawImageString(Metadpy->dpy,
+			XwcDrawImageString(x11_display->dpy,
 							   td->win->handle,
 							   td->fnt->fs,
 							   fg_col->gc,
@@ -755,8 +753,7 @@ int Infofnt_text_std(struct x11_term_data *td,
 							   1);
 		}
 	} else {
-		/* Note that the Infoclr is set up to contain the Infofnt */
-		XwcDrawImageString(Metadpy->dpy,
+		XwcDrawImageString(x11_display->dpy,
 						   td->win->handle,
 						   td->fnt->fs,
 						   fg_col->gc,
@@ -773,8 +770,8 @@ int Infofnt_text_std(struct x11_term_data *td,
 /**
  * Painting where text would be
  */
-int Infofnt_text_non(struct x11_term_data *td,
-					 struct infoclr *iclr,
+int x11_font_text_non(struct x11_term_data *td,
+					 struct x11_colour *iclr,
 					 int x,
 					 int y,
 					 const wchar_t *str,
@@ -808,7 +805,7 @@ int Infofnt_text_non(struct x11_term_data *td,
 	/*** Actually 'paint' the area ***/
 
 	/* Just do a Fill Rectangle */
-	XFillRectangle(Metadpy->dpy, td->win->handle, iclr->gc, x, y, w, h);
+	XFillRectangle(x11_display->dpy, td->win->handle, iclr->gc, x, y, w, h);
 
 	/* Success */
 	return 0;

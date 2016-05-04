@@ -125,8 +125,6 @@
 #define DEFAULT_X11_FONT_6		"5x8"
 #define DEFAULT_X11_FONT_7		"5x8"
 
-
-
 /**
  * Notes on Colors:
  *
@@ -148,10 +146,10 @@
 /*
  * Actual color table
  */
-static struct infoclr *clr[MAX_COLORS * BG_MAX];
+static struct x11_colour *clr[MAX_COLORS * BG_MAX];
 
-static bool gamma_table_ready = false;
-static int gamma_val = 0;
+static bool gamma_table_ready;
+static int gamma_val;
 
 /**
  * Color info (unused, red, green, blue).
@@ -169,8 +167,8 @@ static char settings[1024];
  */
 static int term_windows_open;
 
-
 #define X11_TERM_DATA			  ((struct x11_term_data *)Term->data)
+
 /**
  * Hack -- Convert an RGB value to an X11 Pixel, or die.
  */
@@ -182,7 +180,7 @@ static u32b create_pixel(Display *dpy, byte red, byte green, byte blue)
 	if (!gamma_table_ready) {
 		const char *str = getenv("ANGBAND_X11_GAMMA");
 
-		if (str != NULL) {
+		if (str) {
 			gamma_val = atoi(str);
 		}
 
@@ -210,9 +208,9 @@ static u32b create_pixel(Display *dpy, byte red, byte green, byte blue)
 	/* Attempt to Allocate the Parsed color */
 	if (!(XAllocColor(dpy, cmap, &xcolour))) {
 		quit_fmt("Couldn't allocate bitmap color #%04x%04x%04x\n",
-			 xcolour.red,
-			 xcolour.green,
-			 xcolour.blue);
+				 xcolour.red,
+				 xcolour.green,
+				 xcolour.blue);
 	}
 
 	return xcolour.pixel;
@@ -243,35 +241,383 @@ static const char *get_default_font(int term_num)
 		return font;
 	}
 
-	switch (term_num)
-	{
-		case 0:
+	switch (term_num) {
+		case 0: {
 			return DEFAULT_X11_FONT_0;
-		case 1:
+		}
+
+		case 1: {
 			return DEFAULT_X11_FONT_1;
-		case 2:
+		}
+
+		case 2: {
 			return DEFAULT_X11_FONT_2;
-		case 3:
+		}
+
+		case 3: {
 			return DEFAULT_X11_FONT_3;
-		case 4:
+		}
+
+		case 4: {
 			return DEFAULT_X11_FONT_4;
-		case 5:
+		}
+
+		case 5: {
 			return DEFAULT_X11_FONT_5;
-		case 6:
+		}
+
+		case 6: {
 			return DEFAULT_X11_FONT_6;
-		case 7:
+		}
+
+		case 7: {
 			return DEFAULT_X11_FONT_7;
+		}
 	}
 
 	return DEFAULT_X11_FONT;
 }
+
+static int map_keysym(KeySym ks, byte *mods)
+{
+	int ch = 0;
+
+	switch (ks) {
+		case XK_BackSpace: {
+			ch = KC_BACKSPACE;
+			break;
+		}
+
+		case XK_Tab: {
+			ch = KC_TAB;
+			break;
+		}
+
+		case XK_Return: {
+			ch = KC_ENTER;
+			break;
+		}
+
+		case XK_Escape: {
+			ch = ESCAPE;
+			break;
+		}
+
+		case XK_Delete: {
+			ch = KC_DELETE;
+			break;
+		}
+
+		case XK_Home: {
+			ch = KC_HOME;
+			break;
+		}
+
+		case XK_Left: {
+			ch = ARROW_LEFT;
+			break;
+		}
+
+		case XK_Up: {
+			ch = ARROW_UP;
+			break;
+		}
+
+		case XK_Right: {
+			ch = ARROW_RIGHT;
+			break;
+		}
+
+		case XK_Down: {
+			ch = ARROW_DOWN;
+			break;
+		}
+
+		case XK_Page_Up: {
+			ch = KC_PGUP;
+			break;
+		}
+
+		case XK_Page_Down: {
+			ch = KC_PGDOWN;
+			break;
+		}
+
+		case XK_End: {
+			ch = KC_END;
+			break;
+		}
+
+		case XK_Insert: {
+			ch = KC_INSERT;
+			break;
+		}
+
+		case XK_Pause: {
+			ch = KC_PAUSE;
+			break;
+		}
+
+		case XK_Break: {
+			ch = KC_BREAK;
+			break;
+		}
+
+		/* keypad */
+		case XK_KP_0: {
+			ch = '0';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_1: {
+			ch = '1';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_2: {
+			ch = '2';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_3: {
+			ch = '3';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_4: {
+			ch = '4';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_5: {
+			ch = '5';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_6: {
+			ch = '6';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_7: {
+			ch = '7';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_8: {
+			ch = '8';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_9: {
+			ch = '9';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Decimal: {
+			ch = '.';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Divide: {
+			ch = '/';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Multiply: {
+			ch = '*';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Subtract: {
+			ch = '-';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Add: {
+			ch = '+';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Enter: {
+			ch = KC_ENTER;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Equal: {
+			ch = '=';
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Delete: {
+			ch = KC_DELETE;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Home: {
+			ch = KC_HOME;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Left: {
+			ch = ARROW_LEFT;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Up: {
+			ch = ARROW_UP;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Right: {
+			ch = ARROW_RIGHT;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Down: {
+			ch = ARROW_DOWN;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Page_Up: {
+			ch = KC_PGUP;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Page_Down: {
+			ch = KC_PGDOWN;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_End: {
+			ch = KC_END;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Insert: {
+			ch = KC_INSERT;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_KP_Begin: {
+			ch = KC_BEGIN;
+			*mods |= KC_MOD_KEYPAD;
+			break;
+		}
+
+		case XK_F1: {
+			ch = KC_F1;
+			break;
+		}
+
+		case XK_F2: {
+			ch = KC_F2;
+			break;
+		}
+
+		case XK_F3: {
+			ch = KC_F3;
+			break;
+		}
+
+		case XK_F4: {
+			ch = KC_F4;
+			break;
+		}
+
+		case XK_F5: {
+			ch = KC_F5;
+			break;
+		}
+
+		case XK_F6: {
+			ch = KC_F6;
+			break;
+		}
+
+		case XK_F7: {
+			ch = KC_F7;
+			break;
+		}
+
+		case XK_F8: {
+			ch = KC_F8;
+			break;
+		}
+
+		case XK_F9: {
+			ch = KC_F9;
+			break;
+		}
+
+		case XK_F10: {
+			ch = KC_F10;
+			break;
+		}
+
+		case XK_F11: {
+			ch = KC_F11;
+			break;
+		}
+
+		case XK_F12: {
+			ch = KC_F12;
+			break;
+		}
+
+		case XK_F13: {
+			ch = KC_F13;
+			break;
+		}
+
+		case XK_F14: {
+			ch = KC_F14;
+			break;
+		}
+
+		case XK_F15: {
+			ch = KC_F15;
+			break;
+		}
+	}
+
+	return ch;
+}
+
 /**
  * Process a keypress event
  */
 static void react_keypress(XKeyEvent *ev)
 {
 	int n, ch = 0;
-	struct metadpy *m = Metadpy;
+	struct x11_display *m = x11_display;
 
 	KeySym ks;
 
@@ -282,8 +628,6 @@ static void react_keypress(XKeyEvent *ev)
 	int ms = (ev->state & ShiftMask) ? true : false;
 	int mo = (ev->state & m->alt_mask) ? true : false;
 	int mx = (ev->state & m->super_mask) ? true : false;
-	int kp = false;
-
 	byte mods = (mo ? KC_MOD_ALT : 0) | (mx ? KC_MOD_META : 0);
 
 	/* Check for "normal" keypresses */
@@ -291,88 +635,35 @@ static void react_keypress(XKeyEvent *ev)
 	buf[n] = '\0';
 
 	/* Ignore modifier keys by themselves */
-	if (IsModifierKey(ks)) return;
-
-	switch (ks) {
-		case XK_BackSpace: ch = KC_BACKSPACE; break;
-		case XK_Tab: ch = KC_TAB; break;
-		case XK_Return: ch = KC_ENTER; break;
-		case XK_Escape: ch = ESCAPE; break;
-
-		case XK_Delete: ch = KC_DELETE; break;
-		case XK_Home: ch = KC_HOME; break;
-		case XK_Left: ch = ARROW_LEFT; break;
-		case XK_Up: ch = ARROW_UP; break;
-		case XK_Right: ch = ARROW_RIGHT; break;
-		case XK_Down: ch = ARROW_DOWN; break;
-		case XK_Page_Up: ch = KC_PGUP; break;
-		case XK_Page_Down: ch = KC_PGDOWN; break;
-		case XK_End: ch = KC_END; break;
-		case XK_Insert: ch = KC_INSERT; break;
-		case XK_Pause: ch = KC_PAUSE; break;
-		case XK_Break: ch = KC_BREAK; break;
-
-		/* keypad */
-		case XK_KP_0: ch = '0'; kp = true; break;
-		case XK_KP_1: ch = '1'; kp = true; break;
-		case XK_KP_2: ch = '2'; kp = true; break;
-		case XK_KP_3: ch = '3'; kp = true; break;
-		case XK_KP_4: ch = '4'; kp = true; break;
-		case XK_KP_5: ch = '5'; kp = true; break;
-		case XK_KP_6: ch = '6'; kp = true; break;
-		case XK_KP_7: ch = '7'; kp = true; break;
-		case XK_KP_8: ch = '8'; kp = true; break;
-		case XK_KP_9: ch = '9'; kp = true; break;
-
-		case XK_KP_Decimal: ch = '.'; kp = true; break;
-		case XK_KP_Divide: ch = '/'; kp = true; break;
-		case XK_KP_Multiply: ch = '*'; kp = true; break;
-		case XK_KP_Subtract: ch = '-'; kp = true; break;
-		case XK_KP_Add: ch = '+'; kp = true; break;
-		case XK_KP_Enter: ch = KC_ENTER; kp = true; break;
-		case XK_KP_Equal: ch = '='; kp = true; break;
-
-		case XK_KP_Delete: ch = KC_DELETE; kp = true; break;
-		case XK_KP_Home: ch = KC_HOME; kp = true; break;
-		case XK_KP_Left: ch = ARROW_LEFT; kp = true; break;
-		case XK_KP_Up: ch = ARROW_UP; kp = true; break;
-		case XK_KP_Right: ch = ARROW_RIGHT; kp = true; break;
-		case XK_KP_Down: ch = ARROW_DOWN; kp = true; break;
-		case XK_KP_Page_Up: ch = KC_PGUP; kp = true; break;
-		case XK_KP_Page_Down: ch = KC_PGDOWN; kp = true; break;
-		case XK_KP_End: ch = KC_END; kp = true; break;
-		case XK_KP_Insert: ch = KC_INSERT; kp = true; break;
-		case XK_KP_Begin: ch = KC_BEGIN; kp = true; break;
-
-		case XK_F1: ch = KC_F1; break;
-		case XK_F2: ch = KC_F2; break;
-		case XK_F3: ch = KC_F3; break;
-		case XK_F4: ch = KC_F4; break;
-		case XK_F5: ch = KC_F5; break;
-		case XK_F6: ch = KC_F6; break;
-		case XK_F7: ch = KC_F7; break;
-		case XK_F8: ch = KC_F8; break;
-		case XK_F9: ch = KC_F9; break;
-		case XK_F10: ch = KC_F10; break;
-		case XK_F11: ch = KC_F11; break;
-		case XK_F12: ch = KC_F12; break;
-		case XK_F13: ch = KC_F13; break;
-		case XK_F14: ch = KC_F14; break;
-		case XK_F15: ch = KC_F15; break;
+	if (IsModifierKey(ks)) {
+		return;
 	}
 
-	if (kp) mods |= KC_MOD_KEYPAD;
+	/* Map the X Windows KeySym to it's Angband equivalent */
+	ch = map_keysym(ks, &mods);
 
 	if (ch) {
-		if (mc) mods |= KC_MOD_CONTROL;
-		if (ms) mods |= KC_MOD_SHIFT;
+		if (mc) {
+			mods |= KC_MOD_CONTROL;
+		}
+
+		if (ms) {
+			mods |= KC_MOD_SHIFT;
+		}
+
 		Term_keypress(ch, mods);
+
 		return;
 	} else if (n && !IsSpecialKey(ks)) {
 		keycode_t code = buf[0];
 
-		if (mc && MODS_INCLUDE_CONTROL(code)) mods |= KC_MOD_CONTROL;
-		if (ms && MODS_INCLUDE_SHIFT(code)) mods |= KC_MOD_SHIFT;
+		if (mc && MODS_INCLUDE_CONTROL(code)) {
+			mods |= KC_MOD_CONTROL;
+		}
+
+		if (ms && MODS_INCLUDE_SHIFT(code)) {
+			mods |= KC_MOD_SHIFT;
+		}
 
 		Term_keypress(code, mods);
 	}
@@ -381,7 +672,7 @@ static void react_keypress(XKeyEvent *ev)
 /**
  * Process events
  */
-static errr CheckEvent(bool wait)
+static errr check_event(bool wait)
 {
 	struct term *old_term = Term;
 
@@ -392,17 +683,14 @@ static errr CheckEvent(bool wait)
 	int i;
 	int window = 0;
 
-	plog("CheckEvent() - Begin");
-
 	/* Do not wait unless requested */
-	if (!wait && !XPending(Metadpy->dpy)) {
-		plog("CheckEvent() - !wait && !XPending");
-		return (1);
+	if (!wait && !XPending(x11_display->dpy)) {
+		return 1;
 	}
 
 	/* Wait in 0.02s increments while updating animations every 0.2s */
 	i = 0;
-	while (!XPending(Metadpy->dpy)) {
+	while (!XPending(x11_display->dpy)) {
 		if (i == 0) {
 			idle_update();
 		}
@@ -412,21 +700,16 @@ static errr CheckEvent(bool wait)
 	}
 
 	/* Load the Event */
-	XNextEvent(Metadpy->dpy, xev);
-
+	XNextEvent(x11_display->dpy, xev);
 
 	/* Notice new keymaps */
 	if (xev->type == MappingNotify) {
 		XRefreshKeyboardMapping(&xev->xmapping);
-
-		plog("CheckEvent() - xev->type == MappingNotify");
 		return 0;
 	}
 
-
 	/* Scan the windows */
 	for (i = 0; i < ANGBAND_TERM_MAX; i++) {
-
 		td = (struct x11_term_data *)angband_term[i]->data;
 
 		if (xev->xany.window == td->win->handle) {
@@ -444,10 +727,8 @@ static errr CheckEvent(bool wait)
 	Term_activate(angband_term[window]);
 
 	/* Switch on the Type */
-	switch (xev->type)
-	{
-		case ButtonPress:
-		{
+	switch (xev->type) {
+		case ButtonPress: {
 			bool press = (xev->type == ButtonPress);
 
 			int z = 0;
@@ -472,11 +753,11 @@ static errr CheckEvent(bool wait)
 			}
 
 			/* The co-ordinates are only used in Angband format. */
-			pixel_to_square((struct x11_term_data *)Term->data,
-					&x,
-					&y,
-					x,
-					y);
+			x11_pixel_to_square((struct x11_term_data *)Term->data,
+								&x,
+								&y,
+								x,
+								y);
 
 			if (press) {
 				Term_mousepress(x, y, z);
@@ -485,19 +766,17 @@ static errr CheckEvent(bool wait)
 			break;
 		}
 
-		case KeyPress:
-		{
+		case KeyPress: {
 			/* Hack -- use "old" term */
 			Term_activate(old_term);
 
 			/* Process the key */
-			react_keypress(&(xev->xkey));
+			react_keypress(&xev->xkey);
 
 			break;
 		}
 
-		case Expose:
-		{
+		case Expose: {
 			int x1, x2, y1, y2;
 
 			x1 = (xev->xexpose.x - td->win->ox) / td->tile_wid;
@@ -513,23 +792,20 @@ static errr CheckEvent(bool wait)
 			break;
 		}
 
-		case MapNotify:
-		{
+		case MapNotify:	{
 			td->win->mapped = 1;
 			Term->mapped_flag = true;
 			break;
 		}
 
-		case UnmapNotify:
-		{
+		case UnmapNotify: {
 			td->win->mapped = 0;
 			Term->mapped_flag = false;
 			break;
 		}
 
 		/* Move and/or Resize */
-		case ConfigureNotify:
-		{
+		case ConfigureNotify: {
 			int cols, rows, wid, hgt, force_resize;
 
 			int ox = td->win->ox;
@@ -546,8 +822,13 @@ static errr CheckEvent(bool wait)
 			rows = ((td->win->h - (oy + oy)) / td->tile_hgt);
 
 			/* Hack -- minimal size */
-			if (cols < 1) cols = 1;
-			if (rows < 1) rows = 1;
+			if (cols < 1) {
+				cols = 1;
+			}
+
+			if (rows < 1) {
+				rows = 1;
+			}
 
 			if (window == 0) {
 				/* Hack the main window must be at least 80x24 */
@@ -568,7 +849,7 @@ static errr CheckEvent(bool wait)
 					hgt = rows * td->tile_hgt + (oy + oy);
 
 					/* Resize window */
-					Infowin_resize(td->win, wid, hgt);
+					x11_window_resize(td->win, wid, hgt);
 				}
 			}
 
@@ -585,11 +866,10 @@ static errr CheckEvent(bool wait)
 	return 0;
 }
 
-
 /**
  * Handle "activation" of a term
  */
-static errr Term_xtra_x11_level(int v)
+static errr x11_term_xtra_level(int v)
 {
 	/* Handle "activate" */
 	if (v) {
@@ -600,22 +880,21 @@ static errr Term_xtra_x11_level(int v)
 	return 0;
 }
 
-
 /**
  * React to changes
  */
-static errr Term_xtra_x11_react(void)
+static errr x11_term_xtra_react(void)
 {
 	int i;
 
-	if (Metadpy->color) {
+	if (x11_display->color) {
 		/* Check the colors */
 		for (i = 0; i < MAX_COLORS; i++) {
 			if ((color_table_x11[i][0] != angband_color_table[i][0]) ||
-			    (color_table_x11[i][1] != angband_color_table[i][1]) ||
-			    (color_table_x11[i][2] != angband_color_table[i][2]) ||
-			    (color_table_x11[i][3] != angband_color_table[i][3])) {
-				Pixell pixel;
+				(color_table_x11[i][1] != angband_color_table[i][1]) ||
+				(color_table_x11[i][2] != angband_color_table[i][2]) ||
+				(color_table_x11[i][3] != angband_color_table[i][3])) {
+				pixell pixel;
 
 				/* Save new values */
 				color_table_x11[i][0] = angband_color_table[i][0];
@@ -624,55 +903,53 @@ static errr Term_xtra_x11_react(void)
 				color_table_x11[i][3] = angband_color_table[i][3];
 
 				/* Create pixel */
-				pixel = create_pixel(Metadpy->dpy,
-						     color_table_x11[i][1],
-						     color_table_x11[i][2],
-						     color_table_x11[i][3]);
+				pixel = create_pixel(x11_display->dpy,
+									 color_table_x11[i][1],
+									 color_table_x11[i][2],
+									 color_table_x11[i][3]);
 
 				/* Change the foreground */
-				Infoclr_change_fg(clr[i], pixel);
+				x11_colour_change_fg(clr[i], pixel);
 			}
 		}
 	}
 
 	/* Success */
-	return (0);
+	return 0;
 }
-
 
 /**
  * Handle a "special request"
  */
-static errr Term_xtra_x11(int n, int v)
+static errr x11_term_xtra(int n, int v)
 {
 	/* Handle a subset of the legal requests */
-	switch (n)
-	{
+	switch (n) {
 		/* Make a noise */
 		case TERM_XTRA_NOISE: {
-			Metadpy_do_beep();
+			x11_display_do_beep();
 			return 0;
 		}
 
 		/* Flush the output XXX XXX */
 		case TERM_XTRA_FRESH: {
-			Metadpy_update(1, 0, 0);
+			x11_display_update(1, 0, 0);
 			return 0;
 		}
 
 		/* Process random events XXX */
 		case TERM_XTRA_BORED: {
-			return CheckEvent(0);
+			return check_event(0);
 		}
 
 		/* Process Events XXX */
 		case TERM_XTRA_EVENT: {
-			return CheckEvent(v);
+			return check_event(v);
 		}
 
 		/* Flush the events XXX */
 		case TERM_XTRA_FLUSH: {
-			while (!CheckEvent(false)) {
+			while (!check_event(false)) {
 				;
 			}
 
@@ -681,12 +958,12 @@ static errr Term_xtra_x11(int n, int v)
 
 		/* Handle change in the "level" */
 		case TERM_XTRA_LEVEL: {
-			return Term_xtra_x11_level(v);
+			return x11_term_xtra_level(v);
 		}
 
 		/* Clear the screen */
 		case TERM_XTRA_CLEAR: {
-			Infowin_wipe(X11_TERM_DATA->win);
+			x11_window_wipe(X11_TERM_DATA->win);
 			 return 0;
 		}
 
@@ -701,7 +978,7 @@ static errr Term_xtra_x11(int n, int v)
 
 		/* React to changes */
 		case TERM_XTRA_REACT: {
-			return Term_xtra_x11_react();
+			return x11_term_xtra_react();
 		}
 	}
 
@@ -709,45 +986,39 @@ static errr Term_xtra_x11(int n, int v)
 	return 1;
 }
 
-
-
-
 /**
  * Erase some characters.
  */
-static errr Term_wipe_x11(int x, int y, int n)
+static errr x11_term_wipe(int x, int y, int n)
 {
 	/* Mega-Hack -- Erase some space */
-	Infofnt_text_non(X11_TERM_DATA,
-					 clr[COLOUR_DARK],
-					 x,
-					 y,
-					 L"",
-					 n);
+	x11_font_text_non(X11_TERM_DATA,
+					  clr[COLOUR_DARK],
+					  x,
+					  y,
+					  L"",
+					  n);
 
 	/* Success */
-	return (0);
+	return 0;
 }
 
 /**
  * Draw some textual characters.
  */
-static errr Term_text_x11(int x, int y, int n, int a, const wchar_t *s)
+static errr x11_term_text(int x, int y, int n, int a, const wchar_t *s)
 {
 	/* Draw the text */
-	Infofnt_text_std(X11_TERM_DATA,
-					 clr[a],
-					 clr[COLOUR_DARK],
-					 x,
-					 y,
-					 s,
-					 n);
+	x11_font_text_std(X11_TERM_DATA,
+					  clr[a],
+					  clr[COLOUR_DARK],
+					  x,
+					  y,
+					  s,
+					  n);
 
 	return 0;
 }
-
-
-
 
 static void save_prefs(void)
 {
@@ -756,7 +1027,10 @@ static void save_prefs(void)
 
 	/* Open the settings file */
 	fff = file_open(settings, MODE_WRITE, FTYPE_TEXT);
-	if (!fff) return;
+
+	if (!fff) {
+		return;
+	}
 
 	/* Header */
 	file_putf(fff, "# %s X11 settings\n\n", VERSION_NAME);
@@ -768,68 +1042,70 @@ static void save_prefs(void)
 	for (i = 0; i < ANGBAND_TERM_MAX; i++) {
 		struct x11_term_data *td;
 
-		td = (struct x11_term_data *)angband_term[i]->data;
+		if (angband_term[i]) {
+			td = (struct x11_term_data *)angband_term[i]->data;
 
-		if (angband_term[i]->mapped_flag) {
-			continue;
+			if (!angband_term[i]->mapped_flag) {
+				continue;
+			}
+
+			/* Header */
+			file_putf(fff, "# Term %d\n", i);
+
+			/*
+			 * This doesn't seem to work under various WMs
+			 * since the decoration messes the position up
+			 *
+			 * Hack -- Use saved window positions.
+			 * This means that we won't remember ingame repositioned
+			 * windows, but also means that WMs won't screw predefined
+			 * positions up. -CJN-
+			 */
+
+			/* Window specific location (x) */
+			file_putf(fff, "AT_X_%d=%d\n", i, td->win->x);
+
+			/* Window specific location (y) */
+			file_putf(fff, "AT_Y_%d=%d\n", i, td->win->y);
+
+			/* Window specific cols */
+			file_putf(fff, "COLS_%d=%d\n", i, angband_term[i]->wid);
+
+			/* Window specific rows */
+			file_putf(fff, "ROWS_%d=%d\n", i, angband_term[i]->hgt);
+
+			/* Window specific inner border offset (ox) */
+			file_putf(fff, "IBOX_%d=%d\n", i, td->win->ox);
+
+			/* Window specific inner border offset (oy) */
+			file_putf(fff, "IBOY_%d=%d\n", i, td->win->oy);
+
+			/* Window specific font name */
+			file_putf(fff, "FONT_%d=%s\n", i, td->fnt->name);
+
+			/* Window specific tile width */
+			file_putf(fff, "TILE_WIDTH_%d=%d\n", i, td->tile_wid);
+
+			/* Window specific tile height */
+			file_putf(fff, "TILE_HEIGHT_%d=%d\n", i, td->tile_hgt);
+
+			/* Footer */
+			file_putf(fff, "\n");
 		}
-
-		/* Header */
-		file_putf(fff, "# Term %d\n", i);
-
-		/*
-		 * This doesn't seem to work under various WMs
-		 * since the decoration messes the position up
-		 *
-		 * Hack -- Use saved window positions.
-		 * This means that we won't remember ingame repositioned
-		 * windows, but also means that WMs won't screw predefined
-		 * positions up. -CJN-
-		 */
-
-		/* Window specific location (x) */
-		file_putf(fff, "AT_X_%d=%d\n", i, td->win->x_save);
-
-		/* Window specific location (y) */
-		file_putf(fff, "AT_Y_%d=%d\n", i, td->win->y_save);
-
-		/* Window specific cols */
-		file_putf(fff, "COLS_%d=%d\n", i, angband_term[i]->wid);
-
-		/* Window specific rows */
-		file_putf(fff, "ROWS_%d=%d\n", i, angband_term[i]->hgt);
-
-		/* Window specific inner border offset (ox) */
-		file_putf(fff, "IBOX_%d=%d\n", i, td->win->ox);
-
-		/* Window specific inner border offset (oy) */
-		file_putf(fff, "IBOY_%d=%d\n", i, td->win->oy);
-
-		/* Window specific font name */
-		file_putf(fff, "FONT_%d=%s\n", i, td->fnt->name);
-
-		/* Window specific tile width */
-		file_putf(fff, "TILE_WIDTH_%d=%d\n", i, td->tile_wid);
-
-		/* Window specific tile height */
-		file_putf(fff, "TILE_HEIGHT_%d=%d\n", i, td->tile_hgt);
-
-		/* Footer */
-		file_putf(fff, "\n");
 	}
 
 	/* Close */
 	file_close(fff);
 }
 
-static int term_curs_x11(int x, int y)
+static int x11_term_curs(int x, int y)
 {
-	return x11_term_curs((struct x11_term_data *)Term->data, x, y);
+	return x11_draw_curs((struct x11_term_data *)Term->data, x, y);
 }
 
-static int term_bigcurs_x11(int x, int y)
+static int x11_term_bigcurs(int x, int y)
 {
-	return x11_term_bigcurs((struct x11_term_data *)Term->data, x, y);
+	return x11_draw_bigcurs((struct x11_term_data *)Term->data, x, y);
 }
 
 /**
@@ -899,14 +1175,16 @@ static errr term_data_init(struct term *t, int i)
 			}
 
 			/* Skip comments */
-			if (buf[0] == '#') continue;
+			if (buf[0] == '#') {
+				continue;
+			}
 
 			/* Window specific location (x) */
 			strnfmt(cmd, sizeof(cmd), "AT_X_%d", i);
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				x = (str != NULL) ? atoi(str + 1) : -1;
+				x = str ? atoi(str + 1) : -1;
 
 				continue;
 			}
@@ -916,7 +1194,7 @@ static errr term_data_init(struct term *t, int i)
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				y = (str != NULL) ? atoi(str + 1) : -1;
+				y = str ? atoi(str + 1) : -1;
 
 				continue;
 			}
@@ -926,7 +1204,7 @@ static errr term_data_init(struct term *t, int i)
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				val = (str != NULL) ? atoi(str + 1) : -1;
+				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
 					cols = val;
@@ -940,7 +1218,7 @@ static errr term_data_init(struct term *t, int i)
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				val = (str != NULL) ? atoi(str + 1) : -1;
+				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
 					rows = val;
@@ -954,7 +1232,7 @@ static errr term_data_init(struct term *t, int i)
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				val = (str != NULL) ? atoi(str + 1) : -1;
+				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
 					ox = val;
@@ -968,7 +1246,7 @@ static errr term_data_init(struct term *t, int i)
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				val = (str != NULL) ? atoi(str + 1) : -1;
+				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
 					oy = val;
@@ -983,7 +1261,7 @@ static errr term_data_init(struct term *t, int i)
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
 
-				if (str != NULL) {
+				if (str) {
 					my_strcpy(font_name, str + 1, sizeof(font_name));
 					font = font_name;
 				}
@@ -996,7 +1274,7 @@ static errr term_data_init(struct term *t, int i)
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				val = (str != NULL) ? atoi(str + 1) : -1;
+				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
 					td->tile_wid = val;
@@ -1010,7 +1288,7 @@ static errr term_data_init(struct term *t, int i)
 
 			if (prefix(buf, cmd)) {
 				str = strstr(buf, "=");
-				val = (str != NULL) ? atoi(str + 1) : -1;
+				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
 					td->tile_hgt = val;
@@ -1031,7 +1309,7 @@ static errr term_data_init(struct term *t, int i)
 	/* Window specific location (x) */
 	strnfmt(buf, sizeof(buf), "ANGBAND_X11_AT_X_%d", i);
 	str = getenv(buf);
-	val = (str != NULL) ? atoi(str) : -1;
+	val = str ? atoi(str) : -1;
 
 	if (val > 0) {
 		x = val;
@@ -1040,7 +1318,7 @@ static errr term_data_init(struct term *t, int i)
 	/* Window specific location (y) */
 	strnfmt(buf, sizeof(buf), "ANGBAND_X11_AT_Y_%d", i);
 	str = getenv(buf);
-	val = (str != NULL) ? atoi(str) : -1;
+	val = str ? atoi(str) : -1;
 
 	if (val > 0) {
 		y = val;
@@ -1049,7 +1327,7 @@ static errr term_data_init(struct term *t, int i)
 	/* Window specific cols */
 	strnfmt(buf, sizeof(buf), "ANGBAND_X11_COLS_%d", i);
 	str = getenv(buf);
-	val = (str != NULL) ? atoi(str) : -1;
+	val = str ? atoi(str) : -1;
 
 	if (val > 0) {
 		cols = val;
@@ -1058,7 +1336,7 @@ static errr term_data_init(struct term *t, int i)
 	/* Window specific rows */
 	strnfmt(buf, sizeof(buf), "ANGBAND_X11_ROWS_%d", i);
 	str = getenv(buf);
-	val = (str != NULL) ? atoi(str) : -1;
+	val = str ? atoi(str) : -1;
 
 	if (val > 0) {
 		rows = val;
@@ -1067,7 +1345,7 @@ static errr term_data_init(struct term *t, int i)
 	/* Window specific inner border offset (ox) */
 	strnfmt(buf, sizeof(buf), "ANGBAND_X11_IBOX_%d", i);
 	str = getenv(buf);
-	val = (str != NULL) ? atoi(str) : -1;
+	val = str ? atoi(str) : -1;
 
 	if (val > 0) {
 		ox = val;
@@ -1076,7 +1354,7 @@ static errr term_data_init(struct term *t, int i)
 	/* Window specific inner border offset (oy) */
 	strnfmt(buf, sizeof(buf), "ANGBAND_X11_IBOY_%d", i);
 	str = getenv(buf);
-	val = (str != NULL) ? atoi(str) : -1;
+	val = str ? atoi(str) : -1;
 
 	if (val > 0) {
 		oy = val;
@@ -1102,9 +1380,9 @@ static errr term_data_init(struct term *t, int i)
 	}
 
 	/* Prepare the standard font */
-	td->fnt = mem_zalloc(sizeof(struct infofnt));
+	td->fnt = mem_zalloc(sizeof(struct x11_font));
 
-	if (Infofnt_init_data(td->fnt, font)) {
+	if (x11_font_init(td->fnt, font)) {
 		quit_fmt("Couldn't load the requested font. (%s)", font);
 	}
 
@@ -1128,34 +1406,34 @@ static errr term_data_init(struct term *t, int i)
 	hgt = rows * td->tile_hgt + (oy + oy);
 
 	/* Create a top-window */
-	td->win = mem_zalloc(sizeof(struct infowin));
+	td->win = mem_zalloc(sizeof(struct x11_window));
 
-	Infowin_init(td->win,
-				 x,
-				 y,
-				 wid,
-				 hgt,
-				 0,
-				 Metadpy->fg,
-				 Metadpy->bg);
+	x11_window_init(td->win,
+					x,
+					y,
+					wid,
+					hgt,
+					0,
+					x11_display->fg,
+					x11_display->bg);
 
 	/* Ask for certain events */
-	Infowin_set_mask(td->win,
-					 ExposureMask |
-					 StructureNotifyMask |
-					 KeyPressMask |
-					 ButtonPressMask);
+	x11_window_set_mask(td->win,
+						ExposureMask |
+						StructureNotifyMask |
+						KeyPressMask |
+						ButtonPressMask);
 
 	/* Set the window name */
-	Infowin_set_name(td->win, name);
+	x11_window_set_name(td->win, name);
 
 	/* Save the inner border */
-	Infowin_set_border(td->win, ox, oy);
+	x11_window_set_border(td->win, ox, oy);
 
 	/* Make Class Hints */
 	ch = XAllocClassHint();
 
-	if (ch == NULL) {
+	if (!ch) {
 		quit("XAllocClassHint failed");
 	}
 
@@ -1166,13 +1444,13 @@ static errr term_data_init(struct term *t, int i)
 	my_strcpy(res_class, "Angband", sizeof(res_class));
 	ch->res_class = res_class;
 
-	Infowin_set_class_hint(td->win, ch);
+	x11_window_set_class_hint(td->win, ch);
 
 	/* Make Size Hints */
 	sh = XAllocSizeHints();
 
 	/* Oops */
-	if (sh == NULL) {
+	if (!sh) {
 		quit("XAllocSizeHints failed");
 	}
 
@@ -1209,10 +1487,10 @@ static errr term_data_init(struct term *t, int i)
 	sh->base_height = (oy + oy);
 
 	/* Use the size hints */
-	Infowin_set_size_hints(td->win, sh);
+	x11_window_set_size_hints(td->win, sh);
 
 	/* Map the window */
-	Infowin_map(td->win);
+	x11_window_map(td->win);
 
 	/* Set pointers to allocated data */
 	td->sizeh = sh;
@@ -1220,7 +1498,7 @@ static errr term_data_init(struct term *t, int i)
 
 	/* Move the window to requested location */
 	if ((x >= 0) && (y >= 0)) {
-		Infowin_impell(td->win, x, y);
+		x11_window_move(td->win, x, y);
 	}
 
 	/* Initialize the term */
@@ -1237,11 +1515,11 @@ static errr term_data_init(struct term *t, int i)
 	t->complex_input = true;
 
 	/* Hooks */
-	t->xtra_hook = Term_xtra_x11;
-	t->curs_hook = term_curs_x11;
-	t->bigcurs_hook = term_bigcurs_x11;
-	t->wipe_hook = Term_wipe_x11;
-	t->text_hook = Term_text_x11;
+	t->xtra_hook = x11_term_xtra;
+	t->curs_hook = x11_term_curs;
+	t->bigcurs_hook = x11_term_bigcurs;
+	t->wipe_hook = x11_term_wipe;
+	t->text_hook = x11_term_text;
 
 	/* Save the data */
 	t->data = td;
@@ -1250,9 +1528,8 @@ static errr term_data_init(struct term *t, int i)
 	Term_activate(t);
 
 	/* Success */
-	return (0);
+	return 0;
 }
-
 
 const char help_x11[] = "Basic X11, subopts -d<display> -n<windows> -x<file>";
 
@@ -1277,13 +1554,12 @@ static void hook_quit(const char *str)
 		/* Free class hints */
 		XFree(td->classh);
 
-
 		/* Free fonts */
-		Infofnt_nuke(td->fnt);
+		x11_font_nuke(td->fnt);
 		mem_free(td->fnt);
 
 		/* Free window */
-		Infowin_nuke(td->win);
+		x11_window_nuke(td->win);
 		mem_free(td->win);
 
 		mem_free(td);
@@ -1298,14 +1574,13 @@ static void hook_quit(const char *str)
 	x11_free_cursor_col();
 
 	for (i = 0; i < MAX_COLORS * BG_MAX; ++i) {
-		Infoclr_nuke(clr[i]);
+		x11_colour_nuke(clr[i]);
 		mem_free(clr[i]);
 	}
 
 	/* Close link to display */
-	(void)Metadpy_nuke();
+	x11_display_nuke();
 }
-
 
 /*
  * Initialization function for an "X11" module to Angband
@@ -1348,15 +1623,16 @@ errr init_x11(int argc, char **argv)
 		plog_fmt("Ignoring option: %s", argv[i]);
 	}
 
+	/* Build the filename */
+	path_build(settings,
+			   sizeof(settings),
+			   ANGBAND_DIR_USER,
+			   x11_prefs);
+
+	plog(settings);
 
 	if (num_term == -1) {
 		num_term = 1;
-
-		/* Build the filename */
-		(void)path_build(settings,
-				 sizeof(settings),
-				 ANGBAND_DIR_USER,
-				 "x11-settings.prf");
 
 		/* Open the file */
 		fff = file_open(settings, MODE_READ, FTYPE_TEXT);
@@ -1367,24 +1643,26 @@ errr init_x11(int argc, char **argv)
 			while (file_getl(fff, buf, sizeof(buf))) {
 				/* Count lines */
 				line++;
-	
+
 				/* Skip "empty" lines */
-				if (!buf[0]) continue;
-	
+				if (!buf[0]) {
+					continue;
+				}
+
 				/* Skip "blank" lines */
 				if (isspace((unsigned char)buf[0])) {
 					continue;
 				}
-	
+
 				/* Skip comments */
 				if (buf[0] == '#') {
 					continue;
 				}
-	
+
 				/* Number of terminal windows */
 				if (prefix(buf, "TERM_WINS")) {
 					str = strstr(buf, "=");
-					val = (str != NULL) ? atoi(str + 1) : -1;
+					val = str ? atoi(str + 1) : -1;
 
 					if (val > 0) {
 						num_term = val;
@@ -1393,15 +1671,14 @@ errr init_x11(int argc, char **argv)
 					continue;
 				}
 			}
-	
+
 			/* Close */
 			file_close(fff);
 		}
 	}
 
-
-	/* Init the Metadpy if possible */
-	if (Metadpy_init(NULL, dpy_name)) {
+	/* Init the x11_display if possible */
+	if (x11_display_init(NULL, dpy_name)) {
 		return -1;
 	}
 
@@ -1413,9 +1690,9 @@ errr init_x11(int argc, char **argv)
 
 	/* Prepare normal colors */
 	for (i = 0; i < MAX_COLORS * BG_MAX; ++i) {
-		Pixell pixel;
+		pixell pixel;
 
-		clr[i] = mem_zalloc(sizeof(struct infoclr));
+		clr[i] = mem_zalloc(sizeof(struct x11_colour));
 
 		/* Acquire Angband colors */
 		color_table_x11[i % MAX_COLORS][0] =
@@ -1428,64 +1705,66 @@ errr init_x11(int argc, char **argv)
 			angband_color_table[i % MAX_COLORS][3];
 
 		/* Default to monochrome */
-		pixel = ((i == 0) ? Metadpy->bg : Metadpy->fg);
+		pixel = ((i == 0) ? x11_display->bg : x11_display->fg);
 
-		/* Handle color 
-		   This block of code has added support for background colours
-                   (from Sil) */
-		if (Metadpy->color) {
-			Pixell backpixel;
+		/*
+		 * Handle color
+		 * This block of code has added support for background colours
+		 * (from Sil)
+		 */
+		if (x11_display->color) {
+			pixell bp;
+
 			/* Create pixel */
-			pixel = create_pixel(Metadpy->dpy,
-					     color_table_x11[i % MAX_COLORS][1],
-					     color_table_x11[i % MAX_COLORS][2],
-					     color_table_x11[i % MAX_COLORS][3]);
+			pixel = create_pixel(x11_display->dpy,
+								 color_table_x11[i % MAX_COLORS][1],
+								 color_table_x11[i % MAX_COLORS][2],
+								 color_table_x11[i % MAX_COLORS][3]);
 
-			switch (i / MAX_COLORS)
-			{
+			switch (i / MAX_COLORS) {
 				case BG_BLACK: {
 					/* Default Background */
-					Infoclr_init_data(clr[i],
-									  pixel,
-									  Metadpy->bg,
-									  CPY,
-									  0);
+					x11_colour_init(clr[i],
+									pixel,
+									x11_display->bg,
+									CPY,
+									0);
 					break;
 				}
 
 				case BG_SAME: {
 					/* Background same as foreground */
-					backpixel = create_pixel(Metadpy->dpy,
-								color_table_x11[i % MAX_COLORS][1],
-								color_table_x11[i % MAX_COLORS][2],
-								color_table_x11[i % MAX_COLORS][3]);
+					bp = create_pixel(x11_display->dpy,
+									  color_table_x11[i % MAX_COLORS][1],
+									  color_table_x11[i % MAX_COLORS][2],
+									  color_table_x11[i % MAX_COLORS][3]);
 
-					Infoclr_init_data(clr[i],
-									  pixel,
-									  backpixel,
-									  CPY,
-									  0);
+					x11_colour_init(clr[i],
+									pixel,
+									bp,
+									CPY,
+									0);
 					break;
 				}
 
 				case BG_DARK: {
 					/* Highlight Background */
-					backpixel = create_pixel(Metadpy->dpy,
-								 color_table_x11[COLOUR_SHADE][1],
-								 color_table_x11[COLOUR_SHADE][2],
-								 color_table_x11[COLOUR_SHADE][3]);
+					bp = create_pixel(x11_display->dpy,
+									  color_table_x11[COLOUR_SHADE][1],
+									  color_table_x11[COLOUR_SHADE][2],
+									  color_table_x11[COLOUR_SHADE][3]);
 
-					Infoclr_init_data(clr[i],
-									  pixel,
-									  backpixel,
-									  CPY,
-									  0);
+					x11_colour_init(clr[i],
+									pixel,
+									bp,
+									CPY,
+									0);
 					break;
 				}
 			}
 		} else {
 			/* Handle monochrome */
-			Infoclr_init_data(clr[i], pixel, Metadpy->bg, CPY, 0);
+			x11_colour_init(clr[i], pixel, x11_display->bg, CPY, 0);
 		}
 	}
 
@@ -1498,7 +1777,7 @@ errr init_x11(int argc, char **argv)
 	}
 
 	/* Raise the "Angband" window */
-	Infowin_raise(((struct x11_term_data *)angband_term[0]->data)->win);
+	x11_window_raise(((struct x11_term_data *)angband_term[0]->data)->win);
 
 	/* Activate the "Angband" window screen */
 	Term_activate(angband_term[0]);
@@ -1506,7 +1785,6 @@ errr init_x11(int argc, char **argv)
 	/* Activate hook */
 	quit_aux = hook_quit;
 
-	/* Success */
-	return (0);
+	return 0;
 }
 

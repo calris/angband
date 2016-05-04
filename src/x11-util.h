@@ -19,7 +19,7 @@
 /**
  * An X11 pixell specifier
  */
-typedef unsigned long Pixell;
+typedef unsigned long pixell;
 
 /**
  * A structure summarizing a given Display.
@@ -39,18 +39,18 @@ typedef unsigned long Pixell;
  *	- The height of the display screen (from a macro)
  *	- The bit depth of the display screen (from a macro)
  *
- *	- The black Pixell (from a macro)
- *	- The white Pixell (from a macro)
+ *	- The black pixell (from a macro)
+ *	- The white pixell (from a macro)
  *
- *	- The background Pixell (default: black)
- *	- The foreground Pixell (default: white)
- *	- The maximal Pixell (Equals: ((2 ^ depth)-1), is usually ugly)
+ *	- The background pixell (default: black)
+ *	- The foreground pixell (default: white)
+ *	- The maximal pixell (Equals: ((2 ^ depth)-1), is usually ugly)
  *
  *	- Bit Flag: Force all colors to black and white (default: !color)
  *	- Bit Flag: Allow the use of color (default: depth > 1)
  *	- Bit Flag: We created 'dpy', and so should nuke it when done.
  */
-struct metadpy {
+struct x11_display {
 	Display *dpy;
 	Screen *screen;
 	Window root;
@@ -66,12 +66,12 @@ struct metadpy {
 	unsigned int height;
 	unsigned int depth;
 
-	Pixell black;
-	Pixell white;
+	pixell black;
+	pixell white;
 
-	Pixell bg;
-	Pixell fg;
-	Pixell zg;
+	pixell bg;
+	pixell fg;
+	pixell zg;
 
 	unsigned int mono:1;
 	unsigned int color:1;
@@ -105,7 +105,7 @@ struct metadpy {
  *	- Bit Flag: 3rd extra flag
  *	- Bit Flag: 4th extra flag
  */
-struct infowin {
+struct x11_window {
 	Window handle;
 	long mask;
 
@@ -135,18 +135,18 @@ struct infowin {
  *
  *	- The actual GC corresponding to this info
  *
- *	- The Foreground Pixell Value
- *	- The Background Pixell Value
+ *	- The Foreground pixell Value
+ *	- The Background pixell Value
  *
  *	- Num (0-15): The operation code (As in Clear, Xor, etc)
  *	- Bit Flag: The GC is in stipple mode
  *	- Bit Flag: Destroy 'gc' at Nuke time.
  */
-struct infoclr {
+struct x11_colour {
 	GC gc;
 
-	Pixell fg;
-	Pixell bg;
+	pixell fg;
+	pixell bg;
 
 	unsigned int code:4;
 	unsigned int stip:1;
@@ -169,7 +169,7 @@ struct infoclr {
  *	- Flag: Force monospacing via 'wid'
  *	- Flag: Nuke info when done
  */
-struct infofnt {
+struct x11_font {
 	XFontSet	fs;
 
 	const char *name;
@@ -189,8 +189,8 @@ struct infofnt {
  * A structure for each "term"
  */
 struct x11_term_data {
-	struct infofnt *fnt;
-	struct infowin *win;
+	struct x11_font *fnt;
+	struct x11_window *win;
 
 	int tile_wid;
 	int tile_wid2; /* Tile-width with bigscreen */
@@ -209,69 +209,67 @@ enum x11_function {
 void x11_alloc_cursor_col(void);
 void x11_free_cursor_col(void);
 
-void pixel_to_square(struct x11_term_data *td,
-		     int * const x,
-		     int * const y,
-		     const int ox,
-		     const int oy);
+void x11_pixel_to_square(struct x11_term_data *td,
+						 int * const x,
+						 int * const y,
+						 const int ox,
+						 const int oy);
 
-int x11_term_curs(struct x11_term_data *td, int x, int y);
-int x11_term_bigcurs(struct x11_term_data *td, int x, int y);
+int x11_draw_curs(struct x11_term_data *td, int x, int y);
+int x11_draw_bigcurs(struct x11_term_data *td, int x, int y);
 
-int Metadpy_init(Display *dpy, const char *name);
-int Metadpy_nuke(void);
-int Metadpy_update(int flush, int sync, int discard);
-int Metadpy_do_beep(void);
+int x11_display_init(Display *dpy, const char *name);
+int x11_display_nuke(void);
+int x11_display_update(int flush, int sync, int discard);
+int x11_display_do_beep(void);
 
-int Infowin_init(struct infowin *iwin,
-				 int x,
-				 int y,
-				 int w,
-				 int h,
-				 int b,
-				 Pixell fg,
-				 Pixell bg);
-int Infowin_nuke(struct infowin *iwin);
-int Infowin_set_border(struct infowin *iwin, int16_t ox, int16_t oy);
-int Infowin_set_name(struct infowin *iwin, const char *name);
-int Infowin_set_mask(struct infowin *iwin, long mask);
-int Infowin_map(struct infowin *iwin);
-int Infowin_set_class_hint(struct infowin *iwin, XClassHint *ch);
-int Infowin_set_size_hints(struct infowin *iwin, XSizeHints *sh);
-int Infowin_raise(struct infowin *iwin);
-int Infowin_impell(struct infowin *iwin, int x, int y);
-int Infowin_resize(struct infowin *iwin, int w, int h);
-int Infowin_wipe(struct infowin *iwin);
+int x11_window_init(struct x11_window *iwin,
+					int x,
+					int y,
+					int w,
+					int h,
+					int b,
+					pixell fg,
+					pixell bg);
+int x11_window_nuke(struct x11_window *iwin);
+int x11_window_set_border(struct x11_window *iwin, int16_t ox, int16_t oy);
+int x11_window_set_name(struct x11_window *iwin, const char *name);
+int x11_window_set_mask(struct x11_window *iwin, long mask);
+int x11_window_map(struct x11_window *iwin);
+int x11_window_set_class_hint(struct x11_window *iwin, XClassHint *ch);
+int x11_window_set_size_hints(struct x11_window *iwin, XSizeHints *sh);
+int x11_window_raise(struct x11_window *iwin);
+int x11_window_move(struct x11_window *iwin, int x, int y);
+int x11_window_resize(struct x11_window *iwin, int w, int h);
+int x11_window_wipe(struct x11_window *iwin);
 
-int Infoclr_init_data(struct infoclr *iclr,
-					  Pixell fg,
-					  Pixell bg,
-					  enum x11_function f,
-					  int stip);
-int Infoclr_nuke(struct infoclr *iclr);
-int Infoclr_change_fg(struct infoclr *iclr, Pixell fg);
+int x11_colour_init(struct x11_colour *iclr,
+					pixell fg,
+					pixell bg,
+					enum x11_function f,
+					int stip);
+int x11_colour_nuke(struct x11_colour *iclr);
+int x11_colour_change_fg(struct x11_colour *iclr, pixell fg);
 
-void Infofnt_set(struct infofnt *ifnt);
-int Infofnt_nuke(struct infofnt *ifnt);
-int Infofnt_init_data(struct infofnt *ifnt, const char *name);
+int x11_font_init(struct x11_font *ifnt, const char *name);
+int x11_font_nuke(struct x11_font *ifnt);
 
-int Infofnt_text_std(struct x11_term_data *td,
-					 struct infoclr *fg_col,
-					 struct infoclr *bg_col,
+int x11_font_text_std(struct x11_term_data *td,
+					 struct x11_colour *fg_col,
+					 struct x11_colour *bg_col,
 					 int x,
 					 int y,
 					 const wchar_t *str,
 					 int len);
 
-int Infofnt_text_non(struct x11_term_data *td,
-					 struct infoclr *iclr,
+int x11_font_text_non(struct x11_term_data *td,
+					 struct x11_colour *iclr,
 					 int x,
 					 int y,
 					 const wchar_t *str,
 					 int len);
 
-extern struct metadpy *Metadpy;
-extern struct infowin *Infowin;
+extern struct x11_display *x11_display;
 
 
 #ifndef IsModifierKey
