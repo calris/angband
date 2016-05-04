@@ -146,7 +146,7 @@
 /*
  * Actual color table
  */
-static struct x11_colour *clr[MAX_COLORS * BG_MAX];
+static struct x11_color *clr[MAX_COLORS * BG_MAX];
 
 static bool gamma_table_ready;
 static int gamma_val;
@@ -172,10 +172,9 @@ static int term_windows_open;
 /**
  * Hack -- Convert an RGB value to an X11 Pixel, or die.
  */
-static u32b create_pixel(Display *dpy, byte red, byte green, byte blue)
+static u32b create_pixel(byte red, byte green, byte blue)
 {
-	XColor xcolour;
-	Colormap cmap = DefaultColormapOfScreen(DefaultScreenOfDisplay(dpy));
+	XColor xcolor;
 
 	if (!gamma_table_ready) {
 		const char *str = getenv("ANGBAND_X11_GAMMA");
@@ -200,20 +199,20 @@ static u32b create_pixel(Display *dpy, byte red, byte green, byte blue)
 	}
 
 	/* Build the color */
-	xcolour.red   = red * 257;
-	xcolour.green = green * 257;
-	xcolour.blue  = blue * 257;
-	xcolour.flags = DoRed | DoGreen | DoBlue;
+	xcolor.red   = red * 257;
+	xcolor.green = green * 257;
+	xcolor.blue  = blue * 257;
+	xcolor.flags = DoRed | DoGreen | DoBlue;
 
 	/* Attempt to Allocate the Parsed color */
-	if (!(XAllocColor(dpy, cmap, &xcolour))) {
+	if (!x11_color_allocate(&xcolor)) {
 		quit_fmt("Couldn't allocate bitmap color #%04x%04x%04x\n",
-				 xcolour.red,
-				 xcolour.green,
-				 xcolour.blue);
+				 xcolor.red,
+				 xcolor.green,
+				 xcolor.blue);
 	}
 
-	return xcolour.pixel;
+	return xcolor.pixel;
 }
 
 /**
@@ -617,17 +616,17 @@ static int map_keysym(KeySym ks, byte *mods)
 static void react_keypress(XKeyEvent *ev)
 {
 	int n, ch = 0;
-	struct x11_display *m = x11_display;
 
 	KeySym ks;
 
 	char buf[128];
 
 	/* Extract "modifier flags" */
-	int mc = (ev->state & ControlMask) ? true : false;
-	int ms = (ev->state & ShiftMask) ? true : false;
-	int mo = (ev->state & m->alt_mask) ? true : false;
-	int mx = (ev->state & m->super_mask) ? true : false;
+	int mc = x11_display_mask_control(ev);
+	int ms = x11_display_mask_shift(ev);
+	int mo = x11_display_mask_alt(ev);
+	int mx = x11_display_mask_super(ev);
+
 	byte mods = (mo ? KC_MOD_ALT : 0) | (mx ? KC_MOD_META : 0);
 
 	/* Check for "normal" keypresses */
@@ -676,35 +675,20 @@ static errr check_event(bool wait)
 {
 	struct term *old_term = Term;
 
-	XEvent xev_body, *xev = &xev_body;
+	XEvent xev;
 
 	struct x11_term_data *td = NULL;
 
 	int i;
 	int window = 0;
 
-	/* Do not wait unless requested */
-	if (!wait && !XPending(x11_display->dpy)) {
+	if (x11_event_get(&xev, wait, idle_update) == 1) {
 		return 1;
 	}
 
-	/* Wait in 0.02s increments while updating animations every 0.2s */
-	i = 0;
-	while (!XPending(x11_display->dpy)) {
-		if (i == 0) {
-			idle_update();
-		}
-
-		usleep(20000);
-		i = (i + 1) % 10;
-	}
-
-	/* Load the Event */
-	XNextEvent(x11_display->dpy, xev);
-
 	/* Notice new keymaps */
-	if (xev->type == MappingNotify) {
-		XRefreshKeyboardMapping(&xev->xmapping);
+	if (xev.type == MappingNotify) {
+		XRefreshKeyboardMapping(&xev.xmapping);
 		return 0;
 	}
 
@@ -712,7 +696,7 @@ static errr check_event(bool wait)
 	for (i = 0; i < ANGBAND_TERM_MAX; i++) {
 		td = (struct x11_term_data *)angband_term[i]->data;
 
-		if (xev->xany.window == td->win->handle) {
+		if (xev.xany.window == td->win->handle) {
 			window = i;
 			break;
 		}
@@ -727,26 +711,26 @@ static errr check_event(bool wait)
 	Term_activate(angband_term[window]);
 
 	/* Switch on the Type */
-	switch (xev->type) {
+	switch (xev.type) {
 		case ButtonPress: {
-			bool press = (xev->type == ButtonPress);
+			bool press = (xev.type == ButtonPress);
 
 			int z = 0;
 
 			/* Where is the mouse */
-			int x = xev->xbutton.x;
-			int y = xev->xbutton.y;
+			int x = xev.xbutton.x;
+			int y = xev.xbutton.y;
 
 			/* Which button is involved */
-			if (xev->xbutton.button == Button1) {
+			if (xev.xbutton.button == Button1) {
 				z = 1;
-			} else if (xev->xbutton.button == Button2) {
+			} else if (xev.xbutton.button == Button2) {
 				z = 2;
-			} else if (xev->xbutton.button == Button3) {
+			} else if (xev.xbutton.button == Button3) {
 				z = 3;
-			} else if (xev->xbutton.button == Button4) {
+			} else if (xev.xbutton.button == Button4) {
 				z = 4;
-			} else if (xev->xbutton.button == Button5) {
+			} else if (xev.xbutton.button == Button5) {
 				z = 5;
 			} else {
 				z = 0;
@@ -771,7 +755,7 @@ static errr check_event(bool wait)
 			Term_activate(old_term);
 
 			/* Process the key */
-			react_keypress(&xev->xkey);
+			react_keypress(&xev.xkey);
 
 			break;
 		}
@@ -779,28 +763,16 @@ static errr check_event(bool wait)
 		case Expose: {
 			int x1, x2, y1, y2;
 
-			x1 = (xev->xexpose.x - td->win->ox) / td->tile_wid;
-			x2 = (xev->xexpose.x + xev->xexpose.width - td->win->ox) /
-				td->tile_wid;
+			x1 = (xev.xexpose.x - td->win->ox) / td->tile_width;
+			x2 = (xev.xexpose.x + xev.xexpose.width - td->win->ox) /
+				td->tile_width;
 
-			y1 = (xev->xexpose.y - td->win->oy) / td->tile_hgt;
-			y2 = (xev->xexpose.y + xev->xexpose.height - td->win->oy) /
-				td->tile_hgt;
+			y1 = (xev.xexpose.y - td->win->oy) / td->tile_height;
+			y2 = (xev.xexpose.y + xev.xexpose.height - td->win->oy) /
+				td->tile_height;
 
 			Term_redraw_section(x1, y1, x2, y2);
 
-			break;
-		}
-
-		case MapNotify:	{
-			td->win->mapped = 1;
-			Term->mapped_flag = true;
-			break;
-		}
-
-		case UnmapNotify: {
-			td->win->mapped = 0;
-			Term->mapped_flag = false;
 			break;
 		}
 
@@ -812,14 +784,14 @@ static errr check_event(bool wait)
 			int oy = td->win->oy;
 
 			/* Save the new Window Parms */
-			td->win->x = xev->xconfigure.x;
-			td->win->y = xev->xconfigure.y;
-			td->win->w = xev->xconfigure.width;
-			td->win->h = xev->xconfigure.height;
+			td->win->x = xev.xconfigure.x;
+			td->win->y = xev.xconfigure.y;
+			td->win->w = xev.xconfigure.width;
+			td->win->h = xev.xconfigure.height;
 
 			/* Determine "proper" number of rows/cols */
-			cols = ((td->win->w - (ox + ox)) / td->tile_wid);
-			rows = ((td->win->h - (oy + oy)) / td->tile_hgt);
+			cols = ((td->win->w - (ox + ox)) / td->tile_width);
+			rows = ((td->win->h - (oy + oy)) / td->tile_height);
 
 			/* Hack -- minimal size */
 			if (cols < 1) {
@@ -845,11 +817,11 @@ static errr check_event(bool wait)
 				/* Resize the windows if any "change" is needed */
 				if (force_resize) {
 					/* Desired size of window */
-					wid = cols * td->tile_wid + (ox + ox);
-					hgt = rows * td->tile_hgt + (oy + oy);
+					wid = cols * td->tile_width + (ox + ox);
+					hgt = rows * td->tile_height + (oy + oy);
 
 					/* Resize window */
-					x11_window_resize(td->win, wid, hgt);
+					x11_window_resize(td, wid, hgt);
 				}
 			}
 
@@ -887,7 +859,7 @@ static errr x11_term_xtra_react(void)
 {
 	int i;
 
-	if (x11_display->color) {
+	if (x11_display_is_color()) {
 		/* Check the colors */
 		for (i = 0; i < MAX_COLORS; i++) {
 			if ((color_table_x11[i][0] != angband_color_table[i][0]) ||
@@ -903,13 +875,12 @@ static errr x11_term_xtra_react(void)
 				color_table_x11[i][3] = angband_color_table[i][3];
 
 				/* Create pixel */
-				pixel = create_pixel(x11_display->dpy,
-									 color_table_x11[i][1],
+				pixel = create_pixel(color_table_x11[i][1],
 									 color_table_x11[i][2],
 									 color_table_x11[i][3]);
 
 				/* Change the foreground */
-				x11_colour_change_fg(clr[i], pixel);
+				x11_color_change_fg(clr[i], pixel);
 			}
 		}
 	}
@@ -963,7 +934,7 @@ static errr x11_term_xtra(int n, int v)
 
 		/* Clear the screen */
 		case TERM_XTRA_CLEAR: {
-			x11_window_wipe(X11_TERM_DATA->win);
+			x11_window_wipe(X11_TERM_DATA);
 			 return 0;
 		}
 
@@ -1081,13 +1052,13 @@ static void save_prefs(void)
 			file_putf(fff, "IBOY_%d=%d\n", i, td->win->oy);
 
 			/* Window specific font name */
-			file_putf(fff, "FONT_%d=%s\n", i, td->fnt->name);
+			file_putf(fff, "FONT_%d=%s\n", i, td->font->name);
 
 			/* Window specific tile width */
-			file_putf(fff, "TILE_WIDTH_%d=%d\n", i, td->tile_wid);
+			file_putf(fff, "TILE_WIDTH_%d=%d\n", i, td->tile_width);
 
 			/* Window specific tile height */
-			file_putf(fff, "TILE_HEIGHT_%d=%d\n", i, td->tile_hgt);
+			file_putf(fff, "TILE_HEIGHT_%d=%d\n", i, td->tile_height);
 
 			/* Footer */
 			file_putf(fff, "\n");
@@ -1277,7 +1248,7 @@ static errr term_data_init(struct term *t, int i)
 				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
-					td->tile_wid = val;
+					td->tile_width = val;
 				}
 
 				continue;
@@ -1291,7 +1262,7 @@ static errr term_data_init(struct term *t, int i)
 				val = str ? atoi(str + 1) : -1;
 
 				if (val > 0) {
-					td->tile_hgt = val;
+					td->tile_height = val;
 				}
 
 				continue;
@@ -1380,55 +1351,45 @@ static errr term_data_init(struct term *t, int i)
 	}
 
 	/* Prepare the standard font */
-	td->fnt = mem_zalloc(sizeof(struct x11_font));
+	td->font = mem_zalloc(sizeof(struct x11_font));
 
-	if (x11_font_init(td->fnt, font)) {
+	if (x11_font_init(td->font, font)) {
 		quit_fmt("Couldn't load the requested font. (%s)", font);
 	}
 
 	/* Use proper tile size */
-	if (td->tile_wid <= 0) {
-		td->tile_wid = td->fnt->twid;
+	if (td->tile_width <= 0) {
+		td->tile_width = td->font->width;
 	}
 
-	if (td->tile_hgt <= 0) {
-		td->tile_hgt = td->fnt->hgt;
+	if (td->tile_height <= 0) {
+		td->tile_height = td->font->height;
 	}
 
 	/* Don't allow bigtile mode - one day maybe NRM */
-	td->tile_wid2 = td->tile_wid;
+	td->tile_width2 = td->tile_width;
 
 	/* Hack -- key buffer size */
 	num = ((i == 0) ? 1024 : 16);
 
 	/* Assume full size windows */
-	wid = cols * td->tile_wid + (ox + ox);
-	hgt = rows * td->tile_hgt + (oy + oy);
+	wid = cols * td->tile_width + (ox + ox);
+	hgt = rows * td->tile_height + (oy + oy);
 
-	/* Create a top-window */
-	td->win = mem_zalloc(sizeof(struct x11_window));
-
-	x11_window_init(td->win,
-					x,
-					y,
-					wid,
-					hgt,
-					0,
-					x11_display->fg,
-					x11_display->bg);
+	x11_window_init(td, x, y, wid, hgt, 0);
 
 	/* Ask for certain events */
-	x11_window_set_mask(td->win,
+	x11_window_set_mask(td,
 						ExposureMask |
 						StructureNotifyMask |
 						KeyPressMask |
 						ButtonPressMask);
 
 	/* Set the window name */
-	x11_window_set_name(td->win, name);
+	x11_window_set_name(td, name);
 
 	/* Save the inner border */
-	x11_window_set_border(td->win, ox, oy);
+	x11_window_set_border(td, ox, oy);
 
 	/* Make Class Hints */
 	ch = XAllocClassHint();
@@ -1444,7 +1405,7 @@ static errr term_data_init(struct term *t, int i)
 	my_strcpy(res_class, "Angband", sizeof(res_class));
 	ch->res_class = res_class;
 
-	x11_window_set_class_hint(td->win, ch);
+	x11_window_set_class_hint(td, ch);
 
 	/* Make Size Hints */
 	sh = XAllocSizeHints();
@@ -1463,23 +1424,23 @@ static errr term_data_init(struct term *t, int i)
 	if (i == 0) {
 		/* Main window min size is 80x24 */
 		sh->flags |= (PMinSize | PMaxSize);
-		sh->min_width = 80 * td->tile_wid + (ox + ox);
-		sh->min_height = 24 * td->tile_hgt + (oy + oy);
-		sh->max_width = 255 * td->tile_wid + (ox + ox);
-		sh->max_height = 255 * td->tile_hgt + (oy + oy);
+		sh->min_width = 80 * td->tile_width + (ox + ox);
+		sh->min_height = 24 * td->tile_height + (oy + oy);
+		sh->max_width = 255 * td->tile_width + (ox + ox);
+		sh->max_height = 255 * td->tile_height + (oy + oy);
 	} else {
 		/* Other windows */
 		sh->flags |= (PMinSize | PMaxSize);
-		sh->min_width = td->tile_wid + (ox + ox);
-		sh->min_height = td->tile_hgt + (oy + oy);
-		sh->max_width = 255 * td->tile_wid + (ox + ox);
-		sh->max_height = 255 * td->tile_hgt + (oy + oy);
+		sh->min_width = td->tile_width + (ox + ox);
+		sh->min_height = td->tile_height + (oy + oy);
+		sh->max_width = 255 * td->tile_width + (ox + ox);
+		sh->max_height = 255 * td->tile_height + (oy + oy);
 	}
 
 	/* Resize increment */
 	sh->flags |= PResizeInc;
-	sh->width_inc = td->tile_wid;
-	sh->height_inc = td->tile_hgt;
+	sh->width_inc = td->tile_width;
+	sh->height_inc = td->tile_height;
 
 	/* Base window size */
 	sh->flags |= PBaseSize;
@@ -1487,10 +1448,10 @@ static errr term_data_init(struct term *t, int i)
 	sh->base_height = (oy + oy);
 
 	/* Use the size hints */
-	x11_window_set_size_hints(td->win, sh);
+	x11_window_set_size_hints(td, sh);
 
 	/* Map the window */
-	x11_window_map(td->win);
+	x11_window_map(td);
 
 	/* Set pointers to allocated data */
 	td->sizeh = sh;
@@ -1498,7 +1459,7 @@ static errr term_data_init(struct term *t, int i)
 
 	/* Move the window to requested location */
 	if ((x >= 0) && (y >= 0)) {
-		x11_window_move(td->win, x, y);
+		x11_window_move(td, x, y);
 	}
 
 	/* Initialize the term */
@@ -1555,12 +1516,11 @@ static void hook_quit(const char *str)
 		XFree(td->classh);
 
 		/* Free fonts */
-		x11_font_nuke(td->fnt);
-		mem_free(td->fnt);
+		x11_font_nuke(td->font);
+		mem_free(td->font);
 
 		/* Free window */
-		x11_window_nuke(td->win);
-		mem_free(td->win);
+		x11_window_nuke(td);
 
 		mem_free(td);
 
@@ -1574,7 +1534,7 @@ static void hook_quit(const char *str)
 	x11_free_cursor_col();
 
 	for (i = 0; i < MAX_COLORS * BG_MAX; ++i) {
-		x11_colour_nuke(clr[i]);
+		x11_color_nuke(clr[i]);
 		mem_free(clr[i]);
 	}
 
@@ -1588,7 +1548,7 @@ static void hook_quit(const char *str)
 errr init_x11(int argc, char **argv)
 {
 	int i;
-	const char *dpy_name = "";
+	const char *display_name = "";
 	int num_term = -1;
 	ang_file *fff;
 	char buf[1024];
@@ -1599,7 +1559,7 @@ errr init_x11(int argc, char **argv)
 	/* Parse args */
 	for (i = 1; i < argc; i++) {
 		if (prefix(argv[i], "-d")) {
-			dpy_name = &argv[i][2];
+			display_name = &argv[i][2];
 			continue;
 		}
 
@@ -1678,7 +1638,7 @@ errr init_x11(int argc, char **argv)
 	}
 
 	/* Init the x11_display if possible */
-	if (x11_display_init(NULL, dpy_name)) {
+	if (x11_display_init(NULL, display_name)) {
 		return -1;
 	}
 
@@ -1692,7 +1652,7 @@ errr init_x11(int argc, char **argv)
 	for (i = 0; i < MAX_COLORS * BG_MAX; ++i) {
 		pixell pixel;
 
-		clr[i] = mem_zalloc(sizeof(struct x11_colour));
+		clr[i] = mem_zalloc(sizeof(struct x11_color));
 
 		/* Acquire Angband colors */
 		color_table_x11[i % MAX_COLORS][0] =
@@ -1705,66 +1665,63 @@ errr init_x11(int argc, char **argv)
 			angband_color_table[i % MAX_COLORS][3];
 
 		/* Default to monochrome */
-		pixel = ((i == 0) ? x11_display->bg : x11_display->fg);
+		pixel = ((i == 0) ? x11_display_color_bg() : x11_display_color_fg());
 
 		/*
 		 * Handle color
-		 * This block of code has added support for background colours
+		 * This block of code has added support for background colors
 		 * (from Sil)
 		 */
-		if (x11_display->color) {
+		if (x11_display_is_color()) {
 			pixell bp;
 
 			/* Create pixel */
-			pixel = create_pixel(x11_display->dpy,
-								 color_table_x11[i % MAX_COLORS][1],
+			pixel = create_pixel(color_table_x11[i % MAX_COLORS][1],
 								 color_table_x11[i % MAX_COLORS][2],
 								 color_table_x11[i % MAX_COLORS][3]);
 
 			switch (i / MAX_COLORS) {
 				case BG_BLACK: {
 					/* Default Background */
-					x11_colour_init(clr[i],
-									pixel,
-									x11_display->bg,
-									CPY,
-									0);
+					x11_color_init(clr[i],
+								   pixel,
+								   x11_display_color_bg(),
+								   CPY,
+								   0);
 					break;
 				}
 
 				case BG_SAME: {
 					/* Background same as foreground */
-					bp = create_pixel(x11_display->dpy,
-									  color_table_x11[i % MAX_COLORS][1],
+					bp = create_pixel(color_table_x11[i % MAX_COLORS][1],
 									  color_table_x11[i % MAX_COLORS][2],
 									  color_table_x11[i % MAX_COLORS][3]);
 
-					x11_colour_init(clr[i],
-									pixel,
-									bp,
-									CPY,
-									0);
+					x11_color_init(clr[i],
+								   pixel,
+								   bp,
+								   CPY,
+								   0);
 					break;
 				}
 
 				case BG_DARK: {
 					/* Highlight Background */
-					bp = create_pixel(x11_display->dpy,
-									  color_table_x11[COLOUR_SHADE][1],
+					bp = create_pixel(color_table_x11[COLOUR_SHADE][1],
 									  color_table_x11[COLOUR_SHADE][2],
 									  color_table_x11[COLOUR_SHADE][3]);
 
-					x11_colour_init(clr[i],
-									pixel,
-									bp,
-									CPY,
-									0);
+					x11_color_init(clr[i],
+								   pixel,
+								   bp,
+								   CPY,
+								   0);
 					break;
 				}
 			}
 		} else {
 			/* Handle monochrome */
-			x11_colour_init(clr[i], pixel, x11_display->bg, CPY, 0);
+			x11_color_init(clr[i], pixel, x11_display_color_bg(), CPY, 0);
 		}
 	}
 
@@ -1777,7 +1734,7 @@ errr init_x11(int argc, char **argv)
 	}
 
 	/* Raise the "Angband" window */
-	x11_window_raise(((struct x11_term_data *)angband_term[0]->data)->win);
+	x11_window_raise(((struct x11_term_data *)angband_term[0]->data));
 
 	/* Activate the "Angband" window screen */
 	Term_activate(angband_term[0]);

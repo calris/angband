@@ -11,50 +11,98 @@
 #include <X11/keysymdef.h>
 #include <X11/XKBlib.h>
 
-#include "x11-util.h"
+#include "h-basic.h"
 #include "z-virt.h"
 #include "z-util.h"
 
-static struct x11_display metadpy_default;
-struct x11_display *x11_display = &metadpy_default;
+#include "x11-util.h"
+
+/**
+ * A structure summarizing a given Display.
+ *
+ *	- The Display itself
+ *	- The default Screen for the display
+ *	- The virtual root (usually just the root)
+ *	- The default colormap (from a macro)
+ *  - The Alt key modifier mask
+ *  - The Super key modifier mask
+ *
+ *	- The "name" of the display
+ *
+ *	- The socket to listen to for events
+ *
+ *	- The width of the display screen (from a macro)
+ *	- The height of the display screen (from a macro)
+ *	- The bit depth of the display screen (from a macro)
+ *
+ *	- The black pixell (from a macro)
+ *	- The white pixell (from a macro)
+ *
+ *	- The background pixell (default: black)
+ *	- The foreground pixell (default: white)
+ *	- The maximal pixell (Equals: ((2 ^ depth)-1), is usually ugly)
+ *
+ *	- Bit Flag: Force all colors to black and white (default: !color)
+ *	- Bit Flag: Allow the use of color (default: depth > 1)
+ *	- Bit Flag: We created 'display', and so should nuke it when done.
+ */
+struct x11_display {
+	Display *display;
+	Screen *screen;
+	Window root;
+	Colormap cmap;
+	unsigned int alt_mask;
+	unsigned int super_mask;
+
+	char *name;
+
+	int fd;
+
+	unsigned int width;
+	unsigned int height;
+	unsigned int depth;
+
+	pixell black;
+	pixell white;
+
+	pixell bg;
+	pixell fg;
+	pixell zg;
+
+	bool color;
+	bool nuke;
+};
+
+static struct x11_display x11_display;
 
 /**
  * Hack -- cursor color
  */
-static struct x11_colour *xor_cursor_col;
+static struct x11_color *xor_cursor_col;
 
 void x11_alloc_cursor_col(void)
 {
-	xor_cursor_col = mem_zalloc(sizeof(struct x11_colour));
-	x11_colour_init(xor_cursor_col, x11_display->fg, x11_display->bg, XOR, 0);
+	xor_cursor_col = mem_zalloc(sizeof(struct x11_color));
+	x11_color_init(xor_cursor_col, x11_display.fg, x11_display.bg, XOR, 0);
 }
 
 void x11_free_cursor_col(void)
 {
-	x11_colour_nuke(xor_cursor_col);
+	x11_color_nuke(xor_cursor_col);
 	mem_free(xor_cursor_col);
-}
-
-
-int x11_window_set_border(struct x11_window *iwin, int16_t ox, int16_t oy)
-{
-	iwin->ox = ox;
-	iwin->oy = oy;
-
-	return 0;
 }
 
 /**
  * Find the square a particular pixel is part of.
  */
 void x11_pixel_to_square(struct x11_term_data *td,
-					 int * const x,
-					 int * const y,
-					 const int ox,
-					 const int oy)
+						 int * const x,
+						 int * const y,
+						 const int ox,
+						 const int oy)
 {
-	*x = (ox - td->win->ox) / td->tile_wid;
-	*y = (oy - td->win->oy) / td->tile_hgt;
+	*x = (ox - td->win->ox) / td->tile_width;
+	*y = (oy - td->win->oy) / td->tile_height;
 }
 
 /**
@@ -62,13 +110,13 @@ void x11_pixel_to_square(struct x11_term_data *td,
  */
 int x11_draw_curs(struct x11_term_data *td, int x, int y)
 {
-	XDrawRectangle(x11_display->dpy,
+	XDrawRectangle(x11_display.display,
 				   td->win->handle,
 				   xor_cursor_col->gc,
-				   x * td->tile_wid + td->win->ox,
-				   y * td->tile_hgt + td->win->oy,
-				   td->tile_wid - 1,
-				   td->tile_hgt - 1);
+				   x * td->tile_width + td->win->ox,
+				   y * td->tile_height + td->win->oy,
+				   td->tile_width - 1,
+				   td->tile_height - 1);
 
 	return 0;
 }
@@ -78,13 +126,13 @@ int x11_draw_curs(struct x11_term_data *td, int x, int y)
  */
 int x11_draw_bigcurs(struct x11_term_data *td, int x, int y)
 {
-	XDrawRectangle(x11_display->dpy,
+	XDrawRectangle(x11_display.display,
 				   td->win->handle,
 				   xor_cursor_col->gc,
-				   x * td->tile_wid + td->win->ox,
-				   y * td->tile_hgt + td->win->oy,
-				   td->tile_wid2 - 1,
-				   td->tile_hgt - 1);
+				   x * td->tile_width + td->win->ox,
+				   y * td->tile_height + td->win->oy,
+				   td->tile_width2 - 1,
+				   td->tile_height - 1);
 
 	return 0;
 }
@@ -101,235 +149,229 @@ static unsigned int xkb_mask_modifier(XkbDescPtr xkb, const char *name)
 	}
 
 	for (int i = 0; (!mask) && (i <= XkbNumVirtualMods); i++) {
-		char* mod_str = XGetAtomName(xkb->dpy, xkb->names->vmods[i]);
+		char *mod_str = XGetAtomName(xkb->dpy, xkb->names->vmods[i]);
 
 		if (mod_str) {
 			if (!strcmp(name, mod_str)) {
-				XkbVirtualModsToReal(xkb, 1 << i, &mask);
+				if (!XkbVirtualModsToReal(xkb, 1 << i, &mask)) {
+					return 0;
+				}
 			}
 
 			XFree(mod_str);
 		}
 	}
-	return 0;
+
+	return mask;
 }
 
 /**
  * Init the current metadpy, with various initialization stuff.
  *
  * Inputs:
- *	dpy:  The Display* to use (if NULL, create it)
+ *	display:  The Display* to use (if NULL, create it)
  *	name: The name of the Display (if NULL, the current)
  *
  * Notes:
- *	If 'name' is NULL, but 'dpy' is set, extract name from dpy
- *	If 'dpy' is NULL, then Create the named Display
- *	If 'name' is NULL, and so is 'dpy', use current Display
+ *	If 'name' is NULL, but 'display' is set, extract name from display
+ *	If 'display' is NULL, then Create the named Display
+ *	If 'name' is NULL, and so is 'display', use current Display
  *
  * Return -1 if no Display given, and none can be opened.
  */
-int x11_display_init(Display *dpy, const char *name)
+int x11_display_init(Display *display, const char *name)
 {
-	struct x11_display *m = x11_display;
 	XkbDescPtr xkb;
 
-	/* Attempt to create a display if none given, otherwise use the given one */
-	if (!dpy) {
+	/*
+	 * Attempt to create a display if none given,
+	 * otherwise use the given one
+	 */
+	if (!display) {
 		/* Attempt to open the display */
-		dpy = XOpenDisplay(name);
+		display = XOpenDisplay(name);
 
 		/* Failure */
-		if (!dpy) return (-1);
+		if (!display) {
+			return -1;
+		}
 
 		/* We will have to nuke it when done */
-		m->nuke = 1;
+		x11_display.nuke = true;
 	} else {
 		/* We will not have to nuke it when done */
-		m->nuke = 0;
+		x11_display.nuke = false;
 	}
 
 	/* Save the Display itself */
-	m->dpy = dpy;
+	x11_display.display = display;
 
 	/* Get the Screen and Virtual Root Window */
-	m->screen = DefaultScreenOfDisplay(dpy);
-	m->root = RootWindowOfScreen(m->screen);
+	x11_display.screen = DefaultScreenOfDisplay(display);
+	x11_display.root = RootWindowOfScreen(x11_display.screen);
 
 	/* get the modifier key layout */
-	m->alt_mask = Mod1Mask;
-	m->super_mask = Mod4Mask;
-	xkb = XkbGetKeyboard(dpy, XkbAllComponentsMask, XkbUseCoreKbd);
-	if (xkb != NULL) {
-		m->alt_mask = xkb_mask_modifier( xkb, "Alt" );
-		m->super_mask = xkb_mask_modifier( xkb, "Super" );
-		XkbFreeKeyboard( xkb, 0, True );
+	x11_display.alt_mask = Mod1Mask;
+	x11_display.super_mask = Mod4Mask;
+
+	xkb = XkbGetKeyboard(display, XkbAllComponentsMask, XkbUseCoreKbd);
+
+	if (xkb) {
+		x11_display.alt_mask = xkb_mask_modifier(xkb, "Alt");
+		x11_display.super_mask = xkb_mask_modifier(xkb, "Super");
+
+		XkbFreeKeyboard(xkb, 0, true);
 	}
 
 	/* Get the default colormap */
-	m->cmap = DefaultColormapOfScreen(m->screen);
+	x11_display.cmap = DefaultColormapOfScreen(x11_display.screen);
 
 	/* Extract the true name of the display */
-	m->name = DisplayString(dpy);
+	x11_display.name = DisplayString(display);
 
 	/* Extract the fd */
-	m->fd = ConnectionNumber(x11_display->dpy);
+	x11_display.fd = ConnectionNumber(x11_display.display);
 
 	/* Save the Size and Depth of the screen */
-	m->width = WidthOfScreen(m->screen);
-	m->height = HeightOfScreen(m->screen);
-	m->depth = DefaultDepthOfScreen(m->screen);
+	x11_display.width = WidthOfScreen(x11_display.screen);
+	x11_display.height = HeightOfScreen(x11_display.screen);
+	x11_display.depth = DefaultDepthOfScreen(x11_display.screen);
 
 	/* Save the Standard Colors */
-	m->black = BlackPixelOfScreen(m->screen);
-	m->white = WhitePixelOfScreen(m->screen);
-
-	/*** Make some clever Guesses ***/
+	x11_display.black = BlackPixelOfScreen(x11_display.screen);
+	x11_display.white = WhitePixelOfScreen(x11_display.screen);
 
 	/* Guess at the desired 'fg' and 'bg' pixell's */
-	m->bg = m->black;
-	m->fg = m->white;
+	x11_display.bg = x11_display.black;
+	x11_display.fg = x11_display.white;
 
 	/* Calculate the Maximum allowed Pixel value.  */
-	m->zg = ((pixell)1 << m->depth) - 1;
+	x11_display.zg = ((pixell)1 << x11_display.depth) - 1;
 
 	/* Save various default Flag Settings */
-	m->color = ((m->depth > 1) ? 1 : 0);
-	m->mono = ((m->color) ? 0 : 1);
+	x11_display.color = ((x11_display.depth > 1) ? true : false);
 
-	/* Return "success" */
-	return (0);
+	return 0;
 }
-
 
 /**
  * Nuke the current metadpy
  */
 int x11_display_nuke(void)
 {
-	struct x11_display *m = x11_display;
+	if (x11_display.nuke) {
+		XCloseDisplay(x11_display.display);
 
-
-	/* If required, Free the Display */
-	if (m->nuke) {
-		/* Close the Display */
-		XCloseDisplay(m->dpy);
-
-		/* Forget the Display */
-		m->dpy = (Display*)(NULL);
-
-		/* Do not nuke it again */
-		m->nuke = 0;
+		x11_display.display = NULL;
+		x11_display.nuke = false;
 	}
 
-	/* Return Success */
-	return (0);
+	return 0;
 }
-
 
 /**
  * General Flush/ Sync/ Discard routine
  */
 int x11_display_update(int flush, int sync, int discard)
 {
-	/* Flush if desired */
-	if (flush) XFlush(x11_display->dpy);
+	if (flush) {
+		XFlush(x11_display.display);
+	}
 
-	/* Sync if desired, using 'discard' */
-	if (sync) XSync(x11_display->dpy, discard);
+	if (sync) {
+		XSync(x11_display.display, discard);
+	}
 
-	/* Success */
-	return (0);
+	return 0;
 }
-
 
 /**
  * Make a simple beep
  */
 int x11_display_do_beep(void)
 {
-	/* Make a simple beep */
-	XBell(x11_display->dpy, 100);
-
-	return (0);
-}
-
-
-
-/**
- * Set the name (in the title bar) of an X11 Window
- */
-int x11_window_set_name(struct x11_window *iwin, const char *name)
-{
-	Status st;
-	XTextProperty tp;
-	char buf[128];
-	char *bp = buf;
-
-	my_strcpy(buf, name, sizeof(buf));
-	st = XStringListToTextProperty(&bp, 1, &tp);
-
-	if (st) {
-		XSetWMName(x11_display->dpy, iwin->handle, &tp);
-	}
-
-	XFree(tp.value);
+	XBell(x11_display.display, 100);
 
 	return 0;
 }
 
-/**
- * Nuke an X11 Window
- */
-int x11_window_nuke(struct x11_window *iwin)
+bool x11_display_is_color(void)
 {
-	/* Nuke if requested */
-	if (iwin->nuke) {
-		/* Destory the old window */
-		XDestroyWindow(x11_display->dpy, iwin->handle);
-	}
-
-	/* Success */
-	return (0);
+	return x11_display.color;
 }
 
+bool x11_display_mask_control(XKeyEvent *ev)
+{
+	return (ev->state & ControlMask) ? true : false;
+}
+
+bool x11_display_mask_shift(XKeyEvent *ev)
+{
+	return (ev->state & ShiftMask) ? true : false;
+}
+
+bool x11_display_mask_alt(XKeyEvent *ev)
+{
+	return (ev->state & x11_display.alt_mask) ? true : false;
+}
+
+bool x11_display_mask_super(XKeyEvent *ev)
+{
+	return (ev->state & x11_display.super_mask) ? true : false;
+}
+
+pixell x11_display_color_bg(void)
+{
+	return x11_display.bg;
+}
+
+pixell x11_display_color_fg(void)
+{
+	return x11_display.fg;
+}
+
+static Colormap x11_display_colormap(void)
+{
+	Screen *default_screen = DefaultScreenOfDisplay(x11_display.display);
+
+	return DefaultColormapOfScreen(default_screen);
+}
 
 /**
  * Prepare a new 'infowin'.
  */
-static int x11_window_prepare(struct x11_window *iwin, Window xid)
+static int x11_window_prepare(struct x11_window *iwin)
 {
 	Window tmp_win;
 	XWindowAttributes xwa;
 	int x, y;
 	unsigned int w, h, b, d;
 
-	/* Assign stuff */
-	iwin->handle = xid;
-
 	/* Check For Error XXX Extract some ACTUAL data from 'xid' */
-	XGetGeometry(x11_display->dpy, xid, &tmp_win, &x, &y, &w, &h, &b, &d);
+	XGetGeometry(x11_display.display,
+				 iwin->handle,
+				 &tmp_win,
+				 &x,
+				 &y,
+				 &w,
+				 &h,
+				 &b,
+				 &d);
 
 	/* Apply the above info */
 	iwin->x = x;
 	iwin->y = y;
-	iwin->x_save = x;
-	iwin->y_save = y;
 	iwin->w = w;
 	iwin->h = h;
 	iwin->b = b;
 
 	/* Check Error XXX Extract some more ACTUAL data */
-	XGetWindowAttributes(x11_display->dpy, xid, &xwa);
+	XGetWindowAttributes(x11_display.display, iwin->handle, &xwa);
 
 	/* Apply the above info */
 	iwin->mask = xwa.your_event_mask;
-	iwin->mapped = ((xwa.map_state == IsUnmapped) ? 0 : 1);
 
-	/* And assume that we are exposed */
-	iwin->redraw = 1;
-
-	/* Success */
-	return (0);
+	return 0;
 }
 
 /**
@@ -341,76 +383,118 @@ static int x11_window_prepare(struct x11_window *iwin, Window xid)
  *	w,h: The size of this Window
  *	b,d: The border width and pixel depth
  */
-int x11_window_init(struct x11_window *iwin,
-				 int x,
-				 int y,
-				 int w,
-				 int h,
-				 int b,
-				 pixell fg,
-				 pixell bg)
+int x11_window_init(struct x11_term_data *td,
+					int x,
+					int y,
+					int w,
+					int h,
+					int b)
 {
 	Window xid;
 
-	/* Wipe it clean */
-	memset(iwin, 0, sizeof(struct x11_window));
+	/* Create a top-window */
+	td->win = mem_zalloc(sizeof(struct x11_window));
 
-	xid = XCreateSimpleWindow(x11_display->dpy,
-							  x11_display->root,
+	/* Wipe it clean */
+	memset(td->win, 0, sizeof(struct x11_window));
+
+	xid = XCreateSimpleWindow(x11_display.display,
+							  x11_display.root,
 							  x,
 							  y,
 							  w,
 							  h,
 							  b,
-							  fg,
-							  bg);
+							  x11_display.fg,
+							  x11_display.bg);
 
 	/* Start out selecting No events */
-	XSelectInput(x11_display->dpy, xid, 0L);
+	XSelectInput(x11_display.display, xid, 0L);
 
-	/* Mark it as nukable */
-	iwin->nuke = 1;
+	td->win->handle = xid;
 
 	/* Attempt to Initialize the infowin */
-	return x11_window_prepare(iwin, xid);
+	return x11_window_prepare(td->win);
+}
+
+/**
+ * Nuke an X11 Window
+ */
+int x11_window_nuke(struct x11_term_data *td)
+{
+	if (td->win) {
+		XDestroyWindow(x11_display.display, td->win->handle);
+		mem_free(td->win);
+	}
+
+	return 0;
+}
+
+int x11_window_set_border(struct x11_term_data *td, s16b ox, s16b oy)
+{
+	td->win->ox = ox;
+	td->win->oy = oy;
+
+	return 0;
+}
+
+/**
+ * Set the name (in the title bar) of an X11 Window
+ */
+int x11_window_set_name(struct x11_term_data *td, const char *name)
+{
+	Status st;
+	XTextProperty tp;
+	char buf[128];
+	char *bp = buf;
+
+	my_strcpy(buf, name, sizeof(buf));
+	st = XStringListToTextProperty(&bp, 1, &tp);
+
+	if (st) {
+		XSetWMName(x11_display.display, td->win->handle, &tp);
+	}
+
+	XFree(tp.value);
+
+	return 0;
 }
 
 /**
  * Modify the event mask of an X11 Window
  */
-int x11_window_set_mask(struct x11_window *iwin, long mask)
+int x11_window_set_mask(struct x11_term_data *td, long mask)
 {
 	/* Save the new setting */
-	iwin->mask = mask;
+	td->win->mask = mask;
 
 	/* Execute the Mapping */
-	XSelectInput(x11_display->dpy, iwin->handle, iwin->mask);
+	XSelectInput(x11_display.display, td->win->handle, td->win->mask);
 
 	/* Success */
 	return 0;
 }
 
-int x11_window_set_class_hint(struct x11_window *iwin, XClassHint *ch)
-{
-	XSetClassHint(x11_display->dpy, iwin->handle, ch);
-
-	return 0;
-}
-
-int x11_window_set_size_hints(struct x11_window *iwin, XSizeHints *sh)
-{
-	XSetWMNormalHints(x11_display->dpy, iwin->handle, sh);
-
-	return 0;
-}
-
-
 /**
  * Request that an X11 Window be mapped
  */
-int x11_window_map(struct x11_window *iwin)
+int x11_window_map(struct x11_term_data *td)
 {
-	XMapWindow(x11_display->dpy, iwin->handle);
+	XMapWindow(x11_display.display, td->win->handle);
+
+	return 0;
+}
+
+int x11_window_set_class_hint(struct x11_term_data *td, XClassHint *ch)
+{
+	XSetClassHint(x11_display.display, td->win->handle, ch);
+
+	return 0;
+}
+
+int x11_window_set_size_hints(struct x11_term_data *td, XSizeHints *sh)
+{
+	XSetWMNormalHints(x11_display.display, td->win->handle, sh);
 
 	return 0;
 }
@@ -418,9 +502,9 @@ int x11_window_map(struct x11_window *iwin)
 /**
  * Request that an X11 Window be raised
  */
-int x11_window_raise(struct x11_window *iwin)
+int x11_window_raise(struct x11_term_data *td)
 {
-	XRaiseWindow(x11_display->dpy, iwin->handle);
+	XRaiseWindow(x11_display.display, td->win->handle);
 
 	return 0;
 }
@@ -428,9 +512,9 @@ int x11_window_raise(struct x11_window *iwin)
 /**
  * Request that an X11 Window be moved to a new location
  */
-int x11_window_move(struct x11_window *iwin, int x, int y)
+int x11_window_move(struct x11_term_data *td, int x, int y)
 {
-	XMoveWindow(x11_display->dpy, iwin->handle, x, y);
+	XMoveWindow(x11_display.display, td->win->handle, x, y);
 
 	return 0;
 }
@@ -438,9 +522,9 @@ int x11_window_move(struct x11_window *iwin, int x, int y)
 /**
  * Resize an X11 Window
  */
-int x11_window_resize(struct x11_window *iwin, int w, int h)
+int x11_window_resize(struct x11_term_data *td, int w, int h)
 {
-	XResizeWindow(x11_display->dpy, iwin->handle, w, h);
+	XResizeWindow(x11_display.display, td->win->handle, w, h);
 
 	return 0;
 }
@@ -448,25 +532,23 @@ int x11_window_resize(struct x11_window *iwin, int w, int h)
 /**
  * Visually clear an X11 Window
  */
-int x11_window_wipe(struct x11_window *iwin)
+int x11_window_wipe(struct x11_term_data *td)
 {
-	XClearWindow(x11_display->dpy, iwin->handle);
+	XClearWindow(x11_display.display, td->win->handle);
 
 	return 0;
 }
+
 /**
  * Nuke an old 'infoclr'.
  */
-int x11_colour_nuke(struct x11_colour *iclr)
+int x11_color_nuke(struct x11_color *iclr)
 {
-	/* Deal with 'GC' */
 	if (iclr->nuke) {
-		/* Free the GC */
-		XFreeGC(x11_display->dpy, iclr->gc);
+		XFreeGC(x11_display.display, iclr->gc);
 	}
 
-	/* Success */
-	return (0);
+	return 0;
 }
 
 /**
@@ -478,21 +560,22 @@ int x11_colour_nuke(struct x11_colour *iclr)
  *	op:   The Opcode for the requested Operation (see above)
  *	stip: The stipple mode
  */
-int x11_colour_init(struct x11_colour *iclr,
-					pixell fg,
-					pixell bg,
-					enum x11_function f, int stip)
+int x11_color_init(struct x11_color *iclr,
+				   pixell fg,
+				   pixell bg,
+				   enum x11_function f,
+				   int stip)
 {
 	GC gc;
 	XGCValues gcv;
 	unsigned long gc_mask;
 
 	/* Check the 'pixells' for realism */
-	if (bg > x11_display->zg) {
+	if (bg > x11_display.zg) {
 		return -1;
 	}
 
-	if (fg > x11_display->zg) {
+	if (fg > x11_display.zg) {
 		return -1;
 	}
 
@@ -517,38 +600,34 @@ int x11_colour_init(struct x11_colour *iclr,
 	gcv.fill_style = (stip ? FillStippled : FillSolid);
 
 	/* Turn off 'Give exposure events for pixmap copying' */
-	gcv.graphics_exposures = False;
+	gcv.graphics_exposures = false;
 
 	/* Set up the GC mask */
-	gc_mask = (GCFunction | GCBackground | GCForeground |
-	           GCFillStyle | GCGraphicsExposures);
+	gc_mask = (GCFunction |
+			   GCBackground |
+			   GCForeground |
+			   GCFillStyle |
+			   GCGraphicsExposures);
 
 	/* Create the GC detailed above */
-	gc = XCreateGC(x11_display->dpy, x11_display->root, gc_mask, &gcv);
-
-
-	/*** Initialize ***/
+	gc = XCreateGC(x11_display.display, x11_display.root, gc_mask, &gcv);
 
 	/* Wipe the iclr clean */
-	(void)memset(iclr, 0, sizeof(struct x11_colour));
+	memset(iclr, 0, sizeof(struct x11_color));
 
 	/* Assign the GC */
 	iclr->gc = gc;
 
 	/* Nuke it when done */
-	iclr->nuke = 1;
+	iclr->nuke = true;
 
 	/* Assign the parms */
 	iclr->fg = fg;
 	iclr->bg = bg;
-	iclr->code = (int)f;
-	iclr->stip = stip ? 1 : 0;
 
 	/* Success */
-	return (0);
+	return 0;
 }
-
-
 
 /**
  * Change the 'fg' for an infoclr
@@ -556,42 +635,25 @@ int x11_colour_init(struct x11_colour *iclr,
  * Inputs:
  *	fg:   The pixell for the requested Foreground (see above)
  */
-int x11_colour_change_fg(struct x11_colour *iclr, pixell fg)
+int x11_color_change_fg(struct x11_color *iclr, pixell fg)
 {
 	/* Check the 'pixells' for realism */
-	if (fg > x11_display->zg) {
+	if (fg > x11_display.zg) {
 		return -1;
 	}
 
-	XSetForeground(x11_display->dpy, iclr->gc, fg);
+	XSetForeground(x11_display.display, iclr->gc, fg);
 
 	/* Success */
 	return 0;
 }
 
-
-
-/**
- * Nuke an old 'infofnt'.
- */
-int x11_font_nuke(struct x11_font *ifnt)
+bool x11_color_allocate(XColor *color)
 {
-	/* Deal with 'name' */
-	if (ifnt->name) {
-		/* Free the name */
-		string_free((void *) ifnt->name);
-	}
+	Colormap cmap = x11_display_colormap();
 
-	/* Nuke info if needed */
-	if (ifnt->nuke) {
-		/* Free the font */
-		XFreeFontSet(x11_display->dpy, ifnt->fs);
-	}
-
-	/* Success */
-	return (0);
+	return XAllocColor(x11_display.display, cmap, color) ? true : false;
 }
-
 
 /**
  * Prepare a new 'infofnt'
@@ -599,28 +661,27 @@ int x11_font_nuke(struct x11_font *ifnt)
 static int x11_font_prepare(struct x11_font *ifnt, XFontSet fs)
 {
 	int font_count, i;
+	char **names;
 	XFontSetExtents *extents;
 	XFontStruct **fonts;
-	char **names;
 
-	/* Assign the struct */
 	ifnt->fs = fs;
 	extents = XExtentsOfFontSet(fs);
-
 	font_count = XFontsOfFontSet(fs, &fonts, &names);
-	ifnt->asc = 0;
-	for (i = 0; i < font_count; i++, fonts++)
-	   if (ifnt->asc < (*fonts)->ascent) ifnt->asc = (*fonts)->ascent;
+	ifnt->ascent = 0;
+
+	for (i = 0; i < font_count; i++, fonts++) {
+		if (ifnt->ascent < (*fonts)->ascent) {
+			ifnt->ascent = (*fonts)->ascent;
+		}
+	}
 
 	/* Extract default sizing info */
-	ifnt->hgt = extents->max_logical_extent.height;
-	ifnt->wid = extents->max_logical_extent.width;
-	ifnt->twid = extents->max_logical_extent.width;
+	ifnt->height = extents->max_logical_extent.height;
+	ifnt->width = extents->max_logical_extent.width;
 
-	/* Success */
-	return (0);
+	return 0;
 }
-
 
 /**
  * Init an infofnt by its Name
@@ -634,16 +695,16 @@ int x11_font_init(struct x11_font *ifnt, const char *name)
 	char **missing;
 	int missing_count;
 
-	/*** Load the info Fresh, using the name ***/
-
-	/* If the name is not given, report an error */
 	if (!name) {
 		return -1;
 	}
 
-	fs = XCreateFontSet(x11_display->dpy, name, &missing, &missing_count, NULL);
+	fs = XCreateFontSet(x11_display.display,
+						name,
+						&missing,
+						&missing_count,
+						NULL);
 
-	/* The load failed, try to recover */
 	if (!fs) {
 		return -1;
 	}
@@ -652,44 +713,73 @@ int x11_font_init(struct x11_font *ifnt, const char *name)
 		XFreeStringList(missing);
 	}
 
-	/*** Init the font ***/
-
-	/* Wipe the thing */
 	memset(ifnt, 0, sizeof(struct x11_font));
 
-	/* Attempt to prepare it */
-	if (x11_font_prepare(ifnt,fs)) {
-		/* Free the font */
-		XFreeFontSet(x11_display->dpy, fs);
+	if (x11_font_prepare(ifnt, fs)) {
+		XFreeFontSet(x11_display.display, fs);
 
-		/* Fail */
+		ifnt->nuke = false;
+
 		return -1;
 	}
 
-	/* Save a copy of the font name */
 	ifnt->name = string_make(name);
+	ifnt->nuke = true;
 
-	/* Mark it as nukable */
-	ifnt->nuke = 1;
-
-	/* HACK - force all fonts to be printed character by character */
-	ifnt->mono = 1;
-
-	/* Success */
-	return (0);
+	return 0;
 }
 
+/**
+ * Nuke an old 'infofnt'.
+ */
+int x11_font_nuke(struct x11_font *ifnt)
+{
+	if (ifnt->name) {
+		string_free(ifnt->name);
+	}
+
+	if (ifnt->nuke) {
+		XFreeFontSet(x11_display.display, ifnt->fs);
+	}
+
+	return 0;
+}
+
+int x11_event_get(XEvent *xev, bool wait, void (*idle_update)(void))
+{
+	int i = 0;
+
+	/* Do not wait unless requested */
+	if (!wait && !XPending(x11_display.display)) {
+		return 1;
+	}
+
+	/* Wait in 0.02s increments while updating animations every 0.2s */
+	while (!XPending(x11_display.display)) {
+		if (i == 0) {
+			idle_update();
+		}
+
+		usleep(20000);
+		i = (i + 1) % 10;
+	}
+
+	/* Load the Event */
+	XNextEvent(x11_display.display, xev);
+
+	return 0;
+}
 
 /**
  * Standard Text
  */
 int x11_font_text_std(struct x11_term_data *td,
-					 struct x11_colour *fg_col,
-					 struct x11_colour *bg_col,
-					 int x,
-					 int y,
-					 const wchar_t *str,
-					 int len)
+					  struct x11_color *fg_col,
+					  struct x11_color *bg_col,
+					  int x,
+					  int y,
+					  const wchar_t *str,
+					  int len)
 {
 	int i;
 	int w, h;
@@ -706,27 +796,13 @@ int x11_font_text_std(struct x11_term_data *td,
 		len = wcslen(str);
 	}
 
-	/*** Decide where to place the string, vertically ***/
-
-	/* Ignore Vertical Justifications */
-	y = (y * td->tile_hgt) + td->win->oy;
-
-
-	/*** Decide where to place the string, horizontally ***/
-
-	/* Line up with x at left edge of column 'x' */
-	x = (x * td->tile_wid) + td->win->ox;
-
-	/*** Erase the background ***/
-
-	/* The total width will be 'len' chars * standard width */
-	w = len * td->tile_wid;
-
-	/* Simply do 'td->tile_hgt' (a single row) high */
-	h = td->tile_hgt;
+	x = (x * td->tile_width) + td->win->ox;
+	y = (y * td->tile_height) + td->win->oy;
+	w = len * td->tile_width;
+	h = td->tile_height;
 
 	/* Fill the background */
-	XFillRectangle(x11_display->dpy,
+	XFillRectangle(x11_display.display,
 				   td->win->handle,
 				   bg_col->gc,
 				   x,
@@ -735,47 +811,32 @@ int x11_font_text_std(struct x11_term_data *td,
 				   h);
 
 	/*** Actually draw 'str' onto the infowin ***/
-	y += td->fnt->asc;
+	y += td->font->ascent;
 
-	/*** Handle the fake mono we can enforce on fonts ***/
-
-	/* Monotize the font */
-	if (td->fnt->mono) {
-		/* Do each character */
-		for (i = 0; i < len; ++i) {
-			XwcDrawImageString(x11_display->dpy,
-							   td->win->handle,
-							   td->fnt->fs,
-							   fg_col->gc,
-							   x + i * td->tile_wid + td->fnt->off,
-							   y,
-							   str + i,
-							   1);
-		}
-	} else {
-		XwcDrawImageString(x11_display->dpy,
+	/* Print each character of the string, monospaced*/
+	for (i = 0; i < len; ++i) {
+		XwcDrawImageString(x11_display.display,
 						   td->win->handle,
-						   td->fnt->fs,
+						   td->font->fs,
 						   fg_col->gc,
-						   x,
+						   x + i * td->tile_width + td->font->off,
 						   y,
-						   str,
-						   len);
+						   str + i,
+						   1);
 	}
 
 	return 0;
 }
 
-
 /**
  * Painting where text would be
  */
 int x11_font_text_non(struct x11_term_data *td,
-					 struct x11_colour *iclr,
-					 int x,
-					 int y,
-					 const wchar_t *str,
-					 int len)
+					  struct x11_color *iclr,
+					  int x,
+					  int y,
+					  const wchar_t *str,
+					  int len)
 {
 	int w, h;
 
@@ -787,17 +848,17 @@ int x11_font_text_non(struct x11_term_data *td,
 	}
 
 	/* The total width will be 'len' chars * standard width */
-	w = len * td->tile_wid;
+	w = len * td->tile_width;
 
 	/*** Find the X dimensions ***/
 
 	/* Line up with x at left edge of column 'x' */
-	x = x * td->tile_wid + td->win->ox;
+	x = x * td->tile_width + td->win->ox;
 
 	/*** Find other dimensions ***/
 
-	/* Simply do 'td->tile_hgt' (a single row) high */
-	h = td->tile_hgt;
+	/* Simply do 'td->tile_height' (a single row) high */
+	h = td->tile_height;
 
 	/* Simply do "at top" in row 'y' */
 	y = y * h + td->win->oy;
@@ -805,7 +866,7 @@ int x11_font_text_non(struct x11_term_data *td,
 	/*** Actually 'paint' the area ***/
 
 	/* Just do a Fill Rectangle */
-	XFillRectangle(x11_display->dpy, td->win->handle, iclr->gc, x, y, w, h);
+	XFillRectangle(x11_display.display, td->win->handle, iclr->gc, x, y, w, h);
 
 	/* Success */
 	return 0;
