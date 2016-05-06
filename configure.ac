@@ -249,7 +249,7 @@ if test "$enable_x11" = "yes"; then
 	else
 		AC_DEFINE(USE_X11, 1, [Define to 1 if using the X11 frontend and X11 libraries are found.])
 		CFLAGS="$CFLAGS $X_CFLAGS"
-		LIBS="${LIBS} ${X_PRE_LIBS} ${X_LIBS} -lX11 ${X_EXTRA_LIBS}"
+		LIBS="${LIBS} ${X_PRE_LIBS} ${X_LIBS} -lX11 -lpng ${X_EXTRA_LIBS}"
 		MAINFILES="${MAINFILES} \$(X11MAINFILES)"
 		with_x11=yes
 	fi

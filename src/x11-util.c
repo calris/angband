@@ -14,6 +14,7 @@
 #include "h-basic.h"
 #include "z-virt.h"
 #include "z-util.h"
+#include "z-form.h"
 
 #include "x11-util.h"
 
@@ -44,13 +45,16 @@
  *
  *	- Bit Flag: Force all colors to black and white (default: !color)
  *	- Bit Flag: Allow the use of color (default: depth > 1)
- *	- Bit Flag: We created 'display', and so should nuke it when done.
  */
 struct x11_display {
 	Display *display;
 	Screen *screen;
 	Window root;
-	Colormap cmap;
+	Colormap colormap;
+	bool custom_colormap;
+	XVisualInfo *visual_list;
+	Visual *visual;
+
 	unsigned int alt_mask;
 	unsigned int super_mask;
 
@@ -70,10 +74,16 @@ struct x11_display {
 	pixell zg;
 
 	bool color;
-	bool nuke;
 };
 
+static int x11_display_init_visual(void);
+
 static struct x11_display x11_display;
+
+Display *x11_display_get()
+{
+	return x11_display.display;
+}
 
 /**
  * Hack -- cursor color
@@ -95,14 +105,10 @@ void x11_free_cursor_col(void)
 /**
  * Find the square a particular pixel is part of.
  */
-void x11_pixel_to_square(struct x11_term_data *td,
-						 int * const x,
-						 int * const y,
-						 const int ox,
-						 const int oy)
+void x11_pixel_to_square(struct x11_term_data *td, int *x, int *y)
 {
-	*x = (ox - td->win->ox) / td->tile_width;
-	*y = (oy - td->win->oy) / td->tile_height;
+	*x = (*x - td->win->ox) / td->tile_width;
+	*y = (*y - td->win->oy) / td->tile_height;
 }
 
 /**
@@ -179,42 +185,31 @@ static unsigned int xkb_mask_modifier(XkbDescPtr xkb, const char *name)
  *
  * Return -1 if no Display given, and none can be opened.
  */
-int x11_display_init(Display *display, const char *name)
+int x11_display_init(const char *name)
 {
 	XkbDescPtr xkb;
 
-	/*
-	 * Attempt to create a display if none given,
-	 * otherwise use the given one
-	 */
-	if (!display) {
-		/* Attempt to open the display */
-		display = XOpenDisplay(name);
+	/* Attempt to open the display */
+	x11_display.display = XOpenDisplay(name);
 
-		/* Failure */
-		if (!display) {
+	/* Failure */
+	if (!x11_display.display) {
 			return -1;
-		}
-
-		/* We will have to nuke it when done */
-		x11_display.nuke = true;
-	} else {
-		/* We will not have to nuke it when done */
-		x11_display.nuke = false;
 	}
 
-	/* Save the Display itself */
-	x11_display.display = display;
-
 	/* Get the Screen and Virtual Root Window */
-	x11_display.screen = DefaultScreenOfDisplay(display);
+	x11_display.screen = DefaultScreenOfDisplay(x11_display.display);
 	x11_display.root = RootWindowOfScreen(x11_display.screen);
+	x11_display.depth = DisplayPlanes(x11_display.display,
+									  DefaultScreen(x11_display.display));
 
 	/* get the modifier key layout */
 	x11_display.alt_mask = Mod1Mask;
 	x11_display.super_mask = Mod4Mask;
 
-	xkb = XkbGetKeyboard(display, XkbAllComponentsMask, XkbUseCoreKbd);
+	xkb = XkbGetKeyboard(x11_display.display,
+						 XkbAllComponentsMask,
+						 XkbUseCoreKbd);
 
 	if (xkb) {
 		x11_display.alt_mask = xkb_mask_modifier(xkb, "Alt");
@@ -223,11 +218,14 @@ int x11_display_init(Display *display, const char *name)
 		XkbFreeKeyboard(xkb, 0, true);
 	}
 
-	/* Get the default colormap */
-	x11_display.cmap = DefaultColormapOfScreen(x11_display.screen);
+	if (x11_display_init_visual() != 0) {
+		x11_display_nuke();
+
+		return -1;
+	}
 
 	/* Extract the true name of the display */
-	x11_display.name = DisplayString(display);
+	x11_display.name = DisplayString(x11_display.display);
 
 	/* Extract the fd */
 	x11_display.fd = ConnectionNumber(x11_display.display);
@@ -235,7 +233,6 @@ int x11_display_init(Display *display, const char *name)
 	/* Save the Size and Depth of the screen */
 	x11_display.width = WidthOfScreen(x11_display.screen);
 	x11_display.height = HeightOfScreen(x11_display.screen);
-	x11_display.depth = DefaultDepthOfScreen(x11_display.screen);
 
 	/* Save the Standard Colors */
 	x11_display.black = BlackPixelOfScreen(x11_display.screen);
@@ -259,11 +256,19 @@ int x11_display_init(Display *display, const char *name)
  */
 int x11_display_nuke(void)
 {
-	if (x11_display.nuke) {
+	if (x11_display.display) {
 		XCloseDisplay(x11_display.display);
-
 		x11_display.display = NULL;
-		x11_display.nuke = false;
+	}
+
+	if (x11_display.visual_list) {
+		XFree(x11_display.visual_list);
+		x11_display.visual_list = NULL;
+	}
+
+	if (x11_display.custom_colormap) {
+		XFreeColormap(x11_display.display, x11_display.colormap);
+		x11_display.colormap = 0;
 	}
 
 	return 0;
@@ -330,11 +335,24 @@ pixell x11_display_color_fg(void)
 	return x11_display.fg;
 }
 
-static Colormap x11_display_colormap(void)
+unsigned int x11_display_depth(void)
 {
-	Screen *default_screen = DefaultScreenOfDisplay(x11_display.display);
+	return x11_display.depth;
+}
 
-	return DefaultColormapOfScreen(default_screen);
+unsigned long x11_visual_red_mask(void)
+{
+	return x11_display.visual->red_mask;
+}
+
+unsigned long x11_visual_green_mask(void)
+{
+	return x11_display.visual->green_mask;
+}
+
+unsigned long x11_visual_blue_mask(void)
+{
+	return x11_display.visual->blue_mask;
 }
 
 /**
@@ -422,6 +440,11 @@ int x11_window_init(struct x11_term_data *td,
  */
 int x11_window_nuke(struct x11_term_data *td)
 {
+	if (td->win->gc) {
+		XFreeGC(x11_display.display,td->win->gc);
+		td->win->gc = 0;
+	}
+
 	if (td->win) {
 		XDestroyWindow(x11_display.display, td->win->handle);
 		mem_free(td->win);
@@ -480,7 +503,11 @@ int x11_window_set_mask(struct x11_term_data *td, long mask)
  */
 int x11_window_map(struct x11_term_data *td)
 {
+	XGCValues gcv;
+
 	XMapWindow(x11_display.display, td->win->handle);
+
+	td->win->gc = XCreateGC(x11_display.display, td->win->handle, 0, &gcv);
 
 	return 0;
 }
@@ -650,9 +677,9 @@ int x11_color_change_fg(struct x11_color *iclr, pixell fg)
 
 bool x11_color_allocate(XColor *color)
 {
-	Colormap cmap = x11_display_colormap();
+	Colormap colormap = x11_display.colormap;
 
-	return XAllocColor(x11_display.display, cmap, color) ? true : false;
+	return XAllocColor(x11_display.display, colormap, color) ? true : false;
 }
 
 /**
@@ -871,3 +898,121 @@ int x11_font_text_non(struct x11_term_data *td,
 	/* Success */
 	return 0;
 }
+
+static int x11_display_init_visual(void)
+{
+	bool need_colormap = false;
+	XVisualInfo visual_info;
+
+	if (x11_display.depth != 16 &&
+		x11_display.depth != 24 &&
+		x11_display.depth != 32) {
+		int visuals_matched = 0;
+
+		plog_fmt("default depth is %d:  checking other visuals",
+				 x11_display.depth);
+
+		/* 24-bit first */
+		visual_info.screen = DefaultScreen(x11_display.display);
+		visual_info.depth = 24;
+		x11_display.visual_list = XGetVisualInfo(x11_display.display,
+												 VisualScreenMask |
+												 VisualDepthMask,
+												 &visual_info,
+												 &visuals_matched);
+
+		if (visuals_matched == 0) {
+			plog_fmt("screen depth %d not supported, and 24-bit visuals found",
+					 x11_display.depth);
+			return 2;
+		}
+
+		plog_fmt("XGetVisualInfo() returned %d 24-bit visuals",
+				 visuals_matched);
+
+		x11_display.visual = x11_display.visual_list[0].visual;
+		x11_display.depth = x11_display.visual_list[0].depth;
+
+		need_colormap = true;
+	} else {
+		XMatchVisualInfo(x11_display.display,
+						 DefaultScreen(x11_display.display),
+						 x11_display.depth,
+						 TrueColor,
+						 &visual_info);
+		x11_display.visual = visual_info.visual;
+	}
+
+	if (x11_display.depth == 8 || need_colormap) {
+		plog("Creating custom Colormap");
+
+		x11_display.colormap = XCreateColormap(x11_display.display,
+											   x11_display.root,
+											   x11_display.visual,
+											   AllocNone);
+
+		if (!x11_display.colormap) {
+			plog("XCreateColormap() failed");
+			return 2;
+		}
+
+		x11_display.custom_colormap = true;
+	} else {
+		plog("Using default Colormap");
+		x11_display.colormap = DefaultColormapOfScreen(x11_display.screen);
+		x11_display.custom_colormap = false;
+	}
+
+	return 0;
+}
+
+XImage *x11_ximage_init(int format,
+						int offset,
+						char* data,
+						unsigned int width,
+						unsigned int height,
+						int bitmap_pad,
+						int bytes_per_line)
+{
+	if ((!x11_display.display) ||
+		(!x11_display.visual) ||
+		(!x11_display.depth)) {
+		return NULL;
+	}
+
+	return XCreateImage(x11_display.display,
+						x11_display.visual,
+						x11_display.depth,
+						format,
+						offset,
+						data,
+						width,
+						height,
+						bitmap_pad,
+						bytes_per_line);
+}
+
+bool x11_draw_tile(struct x11_term_data *td,
+				   XImage *tiles,
+				   int src_x,
+				   int src_y,
+				   int dest_x,
+				   int dest_y,
+				   unsigned int width,
+				   unsigned int height)
+{
+	XPutImage(x11_display.display,
+			  td->win->handle,
+			  td->win->gc,
+			  tiles,
+			  src_x,
+			  src_y,
+			  dest_x,
+			  dest_y,
+			  width,
+			  height);
+
+	return true;
+}
+
+

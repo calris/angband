@@ -15,13 +15,23 @@
  *    and not for profit purposes provided that this copyright and statement
  *    are included in all such copies.  Other copyrights may also apply.
  */
+#include <png.h>
+
 #include "angband.h"
 #include "buildid.h"
 #include "game-world.h"
 #include "init.h"
 #include "ui-display.h"
 #include "ui-game.h"
+#include "ui-prefs.h"
+#include "grafmode.h"
+#include "x11-png.h"
+
 #include "x11-util.h"
+
+static bool init_graphics(void);
+
+struct x11_tileset tileset;
 
 /**
  * This file helps Angband work with UNIX/X11 computers.
@@ -166,6 +176,8 @@ static char settings[1024];
  * Remember the number of terminal windows open
  */
 static int term_windows_open;
+
+
 
 #define X11_TERM_DATA			  ((struct x11_term_data *)Term->data)
 
@@ -713,39 +725,21 @@ static errr check_event(bool wait)
 	/* Switch on the Type */
 	switch (xev.type) {
 		case ButtonPress: {
-			bool press = (xev.type == ButtonPress);
-
-			int z = 0;
+			char button = 0;
 
 			/* Where is the mouse */
 			int x = xev.xbutton.x;
 			int y = xev.xbutton.y;
 
-			/* Which button is involved */
-			if (xev.xbutton.button == Button1) {
-				z = 1;
-			} else if (xev.xbutton.button == Button2) {
-				z = 2;
-			} else if (xev.xbutton.button == Button3) {
-				z = 3;
-			} else if (xev.xbutton.button == Button4) {
-				z = 4;
-			} else if (xev.xbutton.button == Button5) {
-				z = 5;
-			} else {
-				z = 0;
+			if ((xev.xbutton.button >= Button1) &&
+				(xev.xbutton.button <= Button5)) {
+				button = (char)xev.xbutton.button;
 			}
 
-			/* The co-ordinates are only used in Angband format. */
-			x11_pixel_to_square((struct x11_term_data *)Term->data,
-								&x,
-								&y,
-								x,
-								y);
+			/* Translate the pixel coordinate to an Angband term coordinate */
+			x11_pixel_to_square(X11_TERM_DATA, &x, &y);
 
-			if (press) {
-				Term_mousepress(x, y, z);
-			}
+			Term_mousepress(x, y, button);
 
 			break;
 		}
@@ -885,8 +879,101 @@ static errr x11_term_xtra_react(void)
 		}
 	}
 
-	/* Success */
+	/* Handle "arg_graphics" */
+	if (arg_graphics != GRAPHICS_NONE) {
+		/* Free the bitmap stuff */
+		/* Initialize (if needed) */
+		if (arg_graphics && !init_graphics()) {
+			/* Warning */
+			plog("Cannot initialize graphics!");
+
+			/* Cannot enable */
+			arg_graphics = GRAPHICS_NONE;
+		} else {
+			/* Reset visuals */
+			reset_visuals(true);
+		}
+	}
+
 	return 0;
+}
+
+/**
+ * Initialize graphics
+ */
+static bool init_graphics(void)
+{
+	/* Initialize once */
+	char buf[1024];
+	graphics_mode *mode = NULL;
+
+	x11_png_image_t *png_image;
+
+	if (arg_graphics) {
+		mode = get_graphics_mode(arg_graphics);
+	}
+
+	if (!mode) {
+		mode = get_graphics_mode(1);
+	}
+
+	if (mode) {
+		if (!mode->pref[0]) {
+			plog_fmt("invalid tile prefname '%s'", mode->menuname);
+			return false;
+		}
+
+		tileset.tile_width = mode->cell_width;
+		tileset.tile_height = mode->cell_height;
+
+		if ((tileset.tile_width < 2) || (tileset.tile_height < 2)) {
+			plog_fmt("invalid tile dimensions in tileset: '%s'",
+					 mode->menuname);
+			return false;
+		}
+
+		tileset.path = mode->path;
+		tileset.name = mode->file;
+		tileset.overdraw = mode->overdrawRow;
+		tileset.overdrawmax = mode->overdrawMax;
+		tileset.alphablend = mode->alphablend;
+
+		current_graphics_mode = mode;
+	} else {
+		plog("could not find graphics mode");
+		return false;
+	}
+
+	/* Access the bitmap file */
+	path_build(buf, sizeof(buf), tileset.path, tileset.name);
+
+	/* Load the image or quit */
+	if (tileset.alphablend) {
+			char modname[1024];
+			my_strcpy(modname, buf,1024);
+
+			plog_fmt("Load alphablend tileset from: %s", buf);
+			/* TODO: Load PNG File */
+	} else {
+		plog_fmt("Load non-alphablend tileset from: %s", buf);
+
+		png_image = x11_png_image_init();
+
+		if (png_image) {
+			if (x11_png_image_load(png_image, buf)) {
+				plog_fmt("Successfuly loaded tileset");
+			}
+
+			tileset.ximage = x11_png_create_ximage(png_image);
+
+			if (tileset.ximage) {
+				plog_fmt("Successfuly converted tiles to ximage");
+			}
+
+		}
+	}
+
+	return arg_graphics;
 }
 
 /**
@@ -1071,14 +1158,75 @@ static void save_prefs(void)
 
 static int x11_term_curs(int x, int y)
 {
-	return x11_draw_curs((struct x11_term_data *)Term->data, x, y);
+	return x11_draw_curs(X11_TERM_DATA, x, y);
 }
 
 static int x11_term_bigcurs(int x, int y)
 {
-	return x11_draw_bigcurs((struct x11_term_data *)Term->data, x, y);
+	return x11_draw_bigcurs(X11_TERM_DATA, x, y);
 }
 
+/**
+ * Low level graphics.  Assumes valid input.
+ *
+ * Draw an array of "special" attr/char pairs at the given location.
+ *
+ * We use the "Term_pict_win()" function for "graphic" data, which are
+ * encoded by setting the "high-bits" of both the "attr" and the "char"
+ * data.  We use the "attr" to represent the "row" of the main bitmap,
+ * and the "char" to represent the "col" of the main bitmap.  The use
+ * of this function is induced by the "higher_pict" flag.
+ *
+ * If "graphics" is not available, we simply "wipe" the given grids.
+ */
+static errr x11_term_pict(int x,
+						  int y,
+						  int n,
+						  const int *ap,
+						  const wchar_t *cp,
+						  const int *tap,
+						  const wchar_t *tcp)
+{
+	int i;
+	int x1, y1, w1, h1;
+	int x2, y2, w2, h2;
+
+	/* Size of bitmap cell */
+	w1 = tileset.tile_width;
+	h1 = tileset.tile_height;
+	w2 = tileset.tile_width;
+	h2 = tileset.tile_height;
+
+	/* Location of window cell */
+	x2 = x * w2; // td->size_ow1;
+	y2 = y * h2; // td->size_oh1;
+
+	/* Draw attr/char pairs */
+	for (i = n-1; i >= 0; i--, x2 -= w2) {
+		int a = ap[i];
+		wchar_t c = cp[i];
+
+		/* Extract picture */
+		int row = (a & 0x7F);
+		int col = (c & 0x7F);
+
+		/* Location of bitmap cell */
+		x1 = col * w1;
+		y1 = row * h1;
+
+		x11_draw_tile(X11_TERM_DATA,
+					  tileset.ximage,
+					  x1,
+					  y1,
+					  x2,
+					  y2,
+					  w2,
+					  h2);
+	}
+
+	return 0;
+
+}
 /**
  * Initialize a term_data
  */
@@ -1482,6 +1630,11 @@ static errr term_data_init(struct term *t, int i)
 	t->wipe_hook = x11_term_wipe;
 	t->text_hook = x11_term_text;
 
+	t->pict_hook = x11_term_pict;
+	/* Use "Term_pict" for "graphic" data */
+	t->higher_pict = true;
+
+
 	/* Save the data */
 	t->data = td;
 
@@ -1637,8 +1790,15 @@ errr init_x11(int argc, char **argv)
 		}
 	}
 
+	/* load the possible graphics modes */
+	if (!init_graphics_modes()) {
+		plog_fmt("Graphics list load failed");
+	}
+
+	use_graphics = true;
+
 	/* Init the x11_display if possible */
-	if (x11_display_init(NULL, display_name)) {
+	if (x11_display_init(display_name)) {
 		return -1;
 	}
 

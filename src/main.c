@@ -370,10 +370,18 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'g':
-				/* Default graphics tile */
-				/* in graphics.txt, 2 corresponds to adam bolt's tiles */
-				arg_graphics = 2; 
-				if (*arg) arg_graphics = atoi(arg);
+				/* See graphics.txt for numbers*/
+				if (*arg) {
+					arg_graphics = atoi(arg);
+
+					while (*arg && (*arg != ' ')) {
+						arg++;
+					}
+
+				} else {
+					/* Default to adam bolt's tiles */
+					arg_graphics = 2;
+				}
 				break;
 
 			case 'u': {

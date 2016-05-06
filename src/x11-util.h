@@ -52,6 +52,7 @@ typedef unsigned long pixell;
  */
 struct x11_window {
 	Window handle;
+	GC gc;
 	long mask;
 
 	s16b ox, oy;
@@ -127,24 +128,36 @@ struct x11_term_data {
 	XSizeHints *sizeh;
 };
 
+struct x11_tileset {
+	XImage *ximage;
+
+	int overdraw;
+	int overdrawmax;
+	int alphablend;
+
+	int tile_width;
+	int tile_height;
+
+	const char *name;
+	const char *path;
+};
+
 enum x11_function {
 	CPY = 3,
 	XOR = 6
 };
 
+Display *x11_display_get();
+
 void x11_alloc_cursor_col(void);
 void x11_free_cursor_col(void);
 
-void x11_pixel_to_square(struct x11_term_data *td,
-						 int * const x,
-						 int * const y,
-						 const int ox,
-						 const int oy);
+void x11_pixel_to_square(struct x11_term_data *td, int *x, int *y);
 
 int x11_draw_curs(struct x11_term_data *td, int x, int y);
 int x11_draw_bigcurs(struct x11_term_data *td, int x, int y);
 
-int x11_display_init(Display *display, const char *name);
+int x11_display_init(const char *name);
 int x11_display_nuke(void);
 int x11_display_update(int flush, int sync, int discard);
 int x11_display_do_beep(void);
@@ -155,6 +168,11 @@ bool x11_display_mask_alt(XKeyEvent *ev);
 bool x11_display_mask_super(XKeyEvent *ev);
 pixell x11_display_color_bg(void);
 pixell x11_display_color_fg(void);
+unsigned int x11_display_depth(void);
+
+unsigned long x11_visual_red_mask(void);
+unsigned long x11_visual_green_mask(void);
+unsigned long x11_visual_blue_mask(void);
 
 int x11_window_init(struct x11_term_data *td,
 					int x,
@@ -203,6 +221,22 @@ int x11_font_text_non(struct x11_term_data *td,
 
 int x11_event_get(XEvent *xev, bool wait, void (*idle_update)(void));
 
+XImage *x11_ximage_init(int format,
+						int offset,
+						char* data,
+						unsigned int width,
+						unsigned int height,
+						int bitmap_pad,
+						int bytes_per_line);
+
+bool x11_draw_tile(struct x11_term_data *td,
+				   XImage *tiles,
+				   int src_x,
+				   int src_y,
+				   int dest_x,
+				   int dest_y,
+				   unsigned int width,
+				   unsigned int height);
 /**
  * Checks if the keysym is a special key or a normal key
  * Assume that XK_MISCELLANY keysyms are special
