@@ -1797,8 +1797,6 @@ errr init_x11(int argc, char **argv)
 		plog_fmt("Graphics list load failed");
 	}
 
-	use_graphics = true;
-
 	/* Init the x11_display if possible */
 	if (x11_display_init(display_name)) {
 		return -1;
