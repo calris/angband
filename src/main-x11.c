@@ -881,15 +881,15 @@ static errr x11_term_xtra_react(void)
 
 	/* Handle "arg_graphics" */
 	if (arg_graphics != GRAPHICS_NONE) {
-		/* Free the bitmap stuff */
-		/* Initialize (if needed) */
-		if (arg_graphics && !init_graphics()) {
+		if (!init_graphics()) {
 			/* Warning */
 			plog("Cannot initialize graphics!");
 
 			/* Cannot enable */
 			arg_graphics = GRAPHICS_NONE;
 		} else {
+			use_graphics = arg_graphics;
+
 			/* Reset visuals */
 			reset_visuals(true);
 		}
@@ -1630,9 +1630,11 @@ static errr term_data_init(struct term *t, int i)
 	t->wipe_hook = x11_term_wipe;
 	t->text_hook = x11_term_text;
 
-	t->pict_hook = x11_term_pict;
 	/* Use "Term_pict" for "graphic" data */
-	t->higher_pict = true;
+	if (arg_graphics) {
+		t->pict_hook = x11_term_pict;
+		t->higher_pict = true;
+	}
 
 
 	/* Save the data */
