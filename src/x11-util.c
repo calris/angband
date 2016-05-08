@@ -1013,12 +1013,12 @@ bool x11_draw_tile(struct x11_term_data *td,
 				   int src_y,
 				   int dest_x,
 				   int dest_y,
-				   unsigned int width,
-				   unsigned int height)
+				   int width,
+				   int height)
 {
 	/* Do not draw anything that will go out of window bounds */
-	if (((dest_x + width) > td->win->x) ||
-		((dest_y + height) > td->win->y)) {
+	if (((dest_x + width) > td->win->w) ||
+		((dest_y + height) > td->win->h)) {
 		return false;
 	}
 

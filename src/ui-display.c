@@ -1096,7 +1096,6 @@ static void update_maps(game_event_type type, game_event_data *data, void *user)
 			vx = kx;
 		}
 
-
 		/* Redraw the grid spot */
 		map_info(data->point.y, data->point.x, &g);
 		grid_data_as_text(&g, &a, &c, &ta, &tc);

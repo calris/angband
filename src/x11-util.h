@@ -235,8 +235,8 @@ bool x11_draw_tile(struct x11_term_data *td,
 				   int src_y,
 				   int dest_x,
 				   int dest_y,
-				   unsigned int width,
-				   unsigned int height);
+				   int width,
+				   int height);
 /**
  * Checks if the keysym is a special key or a normal key
  * Assume that XK_MISCELLANY keysyms are special
