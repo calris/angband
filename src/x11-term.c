@@ -19,6 +19,7 @@
 
 #define X11_TERM_DATA			((struct x11_term_data *)Term->data)
 #define X11_TERM_0_DATA			((struct x11_term_data *)angband_term[0]->data)
+#define X11_CAVE_TERM_DATA		((struct x11_term_data *)cave_view_term.data)
 
 static int map_keysym(KeySym ks, byte *mods)
 {
@@ -553,6 +554,27 @@ static errr check_event(bool wait)
 			/* Resize the Term (if needed) */
 			Term_resize(cols, rows);
 
+			/*
+			 * HACK: If this is the main window, also resize the cave view
+			 * virtual terminal
+			 */
+			if (window == 0) {
+				int cave_term_width = SCREEN_COLS * td->tile_width;
+				int cave_cols = cave_term_width / X11_CAVE_TERM_DATA->tile_width;
+				int cave_term_height = SCREEN_ROWS * td->tile_height;
+				int cave_rows = cave_term_height / X11_CAVE_TERM_DATA->tile_height;
+
+				plog_fmt("Screen size is %ix%i", SCREEN_COLS, SCREEN_ROWS);
+
+				plog_fmt("Cave term size is %ix%i", cave_term_width, cave_term_height);
+				plog_fmt("Cave term cells is %ix%i", cave_cols, cave_rows);
+
+
+				Term_activate(&cave_view_term);
+				Term_resize(cave_cols, cave_rows);
+				Term_activate(angband_term[0]);
+			}
+
 			break;
 		}
 	}
@@ -600,16 +622,13 @@ static errr x11_term_xtra_react(void)
 			use_graphics = arg_graphics;
 
 			/* TODO: Horrible hack */
-			if (!X11_TERM_0_DATA) {
-				plog("No Term 0 Data");
+			if (!X11_CAVE_TERM_DATA) {
+				plog("No Cave Term Data");
 			}
 
-			plog_fmt("");
-
-			X11_TERM_0_DATA->tile_height = tileset.tile_height;
-			X11_TERM_0_DATA->tile_width = tileset.tile_width;
-			X11_TERM_0_DATA->tile_width2 = tileset.tile_width;
-
+			X11_CAVE_TERM_DATA->tile_height = tileset.tile_height;
+			X11_CAVE_TERM_DATA->tile_width = tileset.tile_width;
+			X11_CAVE_TERM_DATA->tile_width2 = tileset.tile_width;
 
 			/* Reset visuals */
 			reset_visuals(true);
@@ -793,7 +812,7 @@ static int x11_term_bigcurs(int x, int y)
 	return x11_draw_bigcurs(X11_TERM_DATA, x, y);
 }
 
-void x11_term_install_hooks(struct term *t)
+void x11_term_install_hooks(struct term *t, bool graphical_term)
 {
 	/* Hooks */
 	t->xtra_hook = x11_term_xtra;
@@ -803,7 +822,7 @@ void x11_term_install_hooks(struct term *t)
 	t->text_hook = x11_term_text;
 
 	/* Use "Term_pict" for "graphic" data */
-	if (arg_graphics) {
+	if (arg_graphics && graphical_term) {
 		t->pict_hook = x11_term_pict;
 		t->higher_pict = true;
 	}

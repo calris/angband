@@ -3071,6 +3071,7 @@ void do_cmd_locate(void)
 
 		/* Apply the motion */
 		change_panel(dir);
+		virterm_change_panel(dir);
 
 		/* Handle stuff */
 		handle_stuff(player);

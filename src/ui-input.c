@@ -1133,8 +1133,8 @@ bool textui_get_rep_dir(int *dp, bool allow_5)
 		/* Check mouse coordinates, or get keypresses until a dir is chosen */
 		if (ke.type == EVT_MOUSE) {
 			if (ke.mouse.button == 1) {
-				int y = KEY_GRID_Y(ke);
-				int x = KEY_GRID_X(ke);
+				int y = KEY_GRID_Y(ke);		/* TODO: VIRTUAL_TERM - Mouse */
+				int x = KEY_GRID_X(ke);		/* TODO: VIRTUAL_TERM - Mouse */
 				struct loc from = loc(player->px, player->py);
 				struct loc to = loc(x, y);
 

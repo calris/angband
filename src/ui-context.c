@@ -986,8 +986,8 @@ void textui_process_click(ui_event e)
 
 	if (!OPT(mouse_movement)) return;
 
-	y = KEY_GRID_Y(e);
-	x = KEY_GRID_X(e);
+	y = KEY_GRID_Y(e); 		/* TODO: VIRTUAL_TERM - Mouse */
+	x = KEY_GRID_X(e);		/* TODO: VIRTUAL_TERM - Mouse */
 
 	/* Check for a valid location */
 	if (!square_in_bounds_fully(cave, y, x)) return;

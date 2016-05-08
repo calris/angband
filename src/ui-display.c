@@ -1038,6 +1038,69 @@ static void trace_map_updates(game_event_type type, game_event_data *data,
 }
 #endif
 
+
+/**
+ * Update either a single map grid or a whole map
+ */
+static void virterm_update_maps(game_event_type type, game_event_data *data, void *user)
+{
+	term *t = &cave_view_term;
+
+	if (data->point.x == -1 && data->point.y == -1) {
+		/* This signals a whole-map redraw. */
+		virterm_prt_map();
+	} else {
+		/* Single point to be redrawn */
+		struct grid_data g;
+		int a, ta;
+		wchar_t c, tc;
+
+		int ky, kx;
+		int vy, vx;
+
+		/* Location relative to panel */
+		ky = data->point.y - t->offset_y;
+		kx = data->point.x - t->offset_x;
+
+		/* Verify location */
+		if ((ky < 0) || (ky >= t->hgt)) {
+			return;
+		}
+
+		/* Verify location */
+		if ((kx < 0) || (kx >= t->wid)) {
+			return;
+		}
+
+		/* Location in window */
+		vy = ky;
+		vx = kx;
+
+		/* Redraw the grid spot */
+		map_info(data->point.y, data->point.x, &g);
+		grid_data_as_text(&g, &a, &c, &ta, &tc);
+		Term_queue_char(t, vx, vy, a, c, ta, tc);
+#ifdef MAP_DEBUG
+		/* Plot 'spot' updates in light green to make them visible */
+		Term_queue_char(t, vx, vy, COLOUR_L_GREEN, c, ta, tc);
+#endif
+	}
+
+	/* Refresh the main screen unless the map needs to center */
+	if (player->upkeep->update & (PU_PANEL) && OPT(center_player)) {
+		int hgt = t->hgt / 2;
+		int wid = t->wid / 2;
+
+		if (virterm_panel_should_modify(t, player->py - hgt, player->px - wid)) {
+			return;
+		}
+	}
+
+	Term_fresh();
+}
+
+
+
 /**
  * Update either a single map grid or a whole map
  */
@@ -1045,9 +1108,12 @@ static void update_maps(game_event_type type, game_event_data *data, void *user)
 {
 	term *t = user;
 
+	virterm_update_maps(type, data, user);
+
 	/* This signals a whole-map redraw. */
-	if (data->point.x == -1 && data->point.y == -1)
+	if (data->point.x == -1 && data->point.y == -1) {
 		prt_map();
+	}
 
 	/* Single point to be redrawn */
 	else {

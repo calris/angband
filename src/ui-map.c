@@ -485,8 +485,6 @@ static void print_rel_map(wchar_t c, byte a, int y, int x)
 	}
 }
 
-
-
 /**
  * Display an attr/char pair at the given map location
  *
@@ -528,6 +526,36 @@ void print_rel(wchar_t c, byte a, int y, int x)
   
 }
 
+void virterm_print_rel(wchar_t c, byte a, int y, int x)
+{
+	int ky, kx;
+	int vy, vx;
+
+	term *t = &cave_view_term;
+
+	/* Location relative to panel */
+	ky = y - Term->offset_y;
+
+	/* Verify location */
+	if ((ky < 0) || (ky >= t->hgt)) {
+		return;
+	}
+
+	/* Location relative to panel */
+	kx = x - Term->offset_x;
+
+	/* Verify location */
+	if ((kx < 0) || (kx >= t->wid)) {
+		return;
+	}
+
+	/* Get right position */
+	vx = kx;
+	vy = ky;
+
+	/* Hack -- Queue it */
+	Term_queue_char(Term, vx, vy, a, c, 0, 0);
+}
 
 static void prt_map_aux(void)
 {
@@ -575,8 +603,6 @@ static void prt_map_aux(void)
 	}
 }
 
-
-
 /**
  * Redraw (on the screen) the current map panel
  *
@@ -617,6 +643,38 @@ void prt_map(void)
 			if ((tile_width > 1) || (tile_height > 1))
 				Term_big_queue_char(Term, vx, vy, a, c, COLOUR_WHITE, L' ');
 		}
+}
+
+void virterm_prt_map(void)
+{
+	int a, ta;
+	wchar_t c, tc;
+	struct grid_data g;
+
+	int y, x;
+	int vy, vx;
+	int ty, tx;
+
+	term *t = &cave_view_term;
+
+	/* Assume screen */
+	ty = Term->offset_y;
+	tx = Term->offset_x;
+
+	/* Dump the map */
+	for (y = t->offset_y; y < ty; vy+=tile_height, y++) {
+		for (x = t->offset_x; x < tx; vx+=tile_width, x++) {
+			/* Check bounds */
+			if (!square_in_bounds(cave, y, x)) {
+				continue;
+			}
+
+			/* Determine what is there */
+			map_info(y, x, &g);
+			grid_data_as_text(&g, &a, &c, &ta, &tc);
+			Term_queue_char(t, vx, vy, a, c, ta, tc);
+		}
+	}
 }
 
 /**

@@ -104,9 +104,14 @@ bool textui_map_is_visible(void);
  * Miscellaneous things
  * ------------------------------------------------------------------------ */
 void window_make(int origin_x, int origin_y, int end_x, int end_y);
+
 bool panel_should_modify(term *t, int wy, int wx);
+bool virterm_panel_should_modify(term *t, int wy, int wx);
 bool modify_panel(term *t, int wy, int wx);
+bool virterm_modify_panel(term *t, int wy, int wx);
 bool change_panel(int dir);
+bool virterm_change_panel(int dir);
+
 void verify_panel(void);
 void center_panel(void);
 void textui_get_panel(int *min_y, int *min_x, int *max_y, int *max_x);

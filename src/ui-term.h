@@ -261,9 +261,14 @@ struct term
 #define SCREEN_HGT    ((int) (SCREEN_ROWS / tile_height))
 
 /**
+ * Number of text columns in each map screen, regardless of tile size
+ */
+#define SCREEN_COLS	(Term->wid - COL_MAP - 1)
+
+/**
  * Number of grids in each screen (horizontally)
  */
-#define SCREEN_WID	((int)((Term->wid - COL_MAP - 1) / tile_width))
+#define SCREEN_WID	((int)(SCREEN_COLS / tile_width))
 
 #define ROW_MAP			1
 #define COL_MAP			13
@@ -348,7 +353,10 @@ extern u32b window_flag[ANGBAND_TERM_MAX];
  */
 #define term_screen	(angband_term[0])
 
-
+/*
+ * Hack -- A special term for the cave view
+ */
+extern term cave_view_term;
 
 /**
  * ------------------------------------------------------------------------

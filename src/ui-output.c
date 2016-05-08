@@ -595,6 +595,115 @@ static void verify_panel_int(bool centered)
 	}
 }
 
+bool virterm_panel_should_modify(term *t, int wy, int wx)
+{
+	int dungeon_hgt = cave->height;
+	int dungeon_wid = cave->width;
+
+	/* Verify wy, adjust if needed */
+	if (wy > dungeon_hgt - t->hgt) {
+		wy = dungeon_hgt - t->hgt;
+	}
+
+	if (wy < 0) wy = 0;
+
+	/* Verify wx, adjust if needed */
+	if (wx > dungeon_wid - t->wid) {
+		wx = dungeon_wid - t->wid;
+	}
+
+	if (wx < 0) {
+		wx = 0;
+	}
+
+	/* Needs changes? */
+	return ((t->offset_y != wy) || (t->offset_x != wx));
+}
+
+bool virterm_modify_panel(term *t, int wy, int wx)
+{
+	int dungeon_hgt = cave->height;
+	int dungeon_wid = cave->width;
+
+	/* Verify wy, adjust if needed */
+	if (wy > dungeon_hgt - t->hgt) {
+		wy = dungeon_hgt - t->hgt;
+	}
+
+	if (wy < 0) {
+		wy = 0;
+	}
+
+	/* Verify wx, adjust if needed */
+	if (wx > dungeon_wid - t->wid) {
+		wx = dungeon_wid - t->wid;
+	}
+
+	if (wx < 0) {
+		wx = 0;
+	}
+
+	/* React to changes */
+	if (virterm_panel_should_modify(t, wy, wx)) {
+		/* Save wy, wx */
+		t->offset_y = wy;
+		t->offset_x = wx;
+
+		/* Redraw map */
+		player->upkeep->redraw |= (PR_MAP);
+
+		/* Changed */
+		return true;
+	}
+
+	/* No change */
+	return false;
+}
+
+static void virterm_verify_panel_int(bool centered)
+{
+	int wy, wx;
+	int screen_hgt, screen_wid;
+
+	int panel_wid, panel_hgt;
+
+	int py = player->py;
+	int px = player->px;
+
+	/* Scan windows */
+	term *t = &cave_view_term;
+
+	wy = t->offset_y;
+	wx = t->offset_x;
+
+	screen_hgt = t->hgt;
+	screen_wid = t->wid;
+
+	panel_wid = screen_wid / 2;
+	panel_hgt = screen_hgt / 2;
+
+
+	if (centered && !player->upkeep->running && (py != wy + panel_hgt)) {
+		/* Scroll screen vertically when off-center */
+		wy = py - panel_hgt;
+	} else if ((py < wy + 3) || (py >= wy + screen_hgt - 3)) {
+		/* Scroll screen vertically when 3 grids from top/bottom edge */
+		wy = py - panel_hgt;
+	}
+
+	if (centered && !player->upkeep->running && (px != wx + panel_wid)) {
+		/* Scroll screen horizontally when off-center */
+		wx = px - panel_wid;
+	} else if ((px < wx + 3) || (px >= wx + screen_wid - 3)) {
+		/* Scroll screen horizontally when 3 grids from left/right edge */
+		wx = px - panel_wid;
+	}
+
+	/* Scroll if needed */
+	virterm_modify_panel(t, wy, wx);
+}
+
+
 /**
  * Change the current panel to the panel lying in the given direction.
  *
@@ -633,6 +742,29 @@ bool change_panel(int dir)
 	return (changed);
 }
 
+bool virterm_change_panel(int dir)
+{
+	bool changed = false;
+
+	int screen_hgt, screen_wid;
+	int wx, wy;
+
+	term *t = &cave_view_term;
+
+	screen_hgt = t->hgt;
+	screen_wid = t->wid;
+
+	/* Shift by half a panel */
+	wy = t->offset_y + ddy[dir] * screen_hgt / 2;
+	wx = t->offset_x + ddx[dir] * screen_wid / 2;
+
+	/* Use "modify_panel" */
+	if (virterm_modify_panel(t, wy, wx)) {
+		changed = true;
+	}
+
+	return (changed);
+}
 
 /**
  * Verify the current panel (relative to the player location).
@@ -648,11 +780,13 @@ bool change_panel(int dir)
 void verify_panel(void)
 {
 	verify_panel_int(OPT(center_player));
+	virterm_verify_panel_int(OPT(center_player));
 }
 
 void center_panel(void)
 {
 	verify_panel_int(true);
+	virterm_verify_panel_int(true);
 }
 
 void textui_get_panel(int *min_y, int *min_x, int *max_y, int *max_x)

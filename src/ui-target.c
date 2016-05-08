@@ -1185,7 +1185,7 @@ bool target_set_interactive(int mode, int x, int y)
 					int old_wx = Term->offset_x;
 
 					/* Change if legal */
-					if (change_panel(d)) {
+					if (change_panel(d) || virterm_change_panel(d)) {
 						/* Recalculate interesting grids */
 						point_set_dispose(targets);
 						targets = target_get_monsters(mode);

@@ -25,12 +25,14 @@
 /**
  * Convert a "key event" into a "location" (Y)
  */
+/* TODO: VIRTUAL_TERM - Mouse */
 #define KEY_GRID_Y(K) \
   ((int) (((K.mouse.y - ROW_MAP) / tile_height) + Term->offset_y))
 
 /**
  * Convert a "key event" into a "location" (X)
  */
+/* TODO: VIRTUAL_TERM - Mouse */
 #define KEY_GRID_X(K) \
 	((int) (((K.mouse.x - COL_MAP) / tile_width) + Term->offset_x))
 

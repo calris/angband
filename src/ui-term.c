@@ -270,6 +270,7 @@
  */
 term *angband_term[ANGBAND_TERM_MAX];
 
+term cave_view_term;
 
 /**
  * The array[ANGBAND_TERM_MAX] of window names (modifiable?)
@@ -658,21 +659,21 @@ void Term_queue_chars(int x, int y, int n, int a, const wchar_t *s)
  *
  * Display text using "Term_pict()"
  */
-static void Term_fresh_row_pict(int y, int x1, int x2)
+static void Term_fresh_row_pict(term *t, int y, int x1, int x2)
 {
 	int x;
 
-	int *old_aa = Term->old->a[y];
-	wchar_t *old_cc = Term->old->c[y];
+	int *old_aa = t->old->a[y];
+	wchar_t *old_cc = t->old->c[y];
 
-	int *scr_aa = Term->scr->a[y];
-	wchar_t *scr_cc = Term->scr->c[y];
+	int *scr_aa = t->scr->a[y];
+	wchar_t *scr_cc = t->scr->c[y];
 
-	int *old_taa = Term->old->ta[y];
-	wchar_t *old_tcc = Term->old->tc[y];
+	int *old_taa = t->old->ta[y];
+	wchar_t *old_tcc = t->old->tc[y];
 
-	int *scr_taa = Term->scr->ta[y];
-	wchar_t *scr_tcc = Term->scr->tc[y];
+	int *scr_taa = t->scr->ta[y];
+	wchar_t *scr_tcc = t->scr->tc[y];
 
 	int ota;
 	wchar_t otc;
@@ -713,7 +714,7 @@ static void Term_fresh_row_pict(int y, int x1, int x2)
 			/* Flush */
 			if (fn) {
 				/* Draw pending attr/char pairs */
-				(void)((*Term->pict_hook)(fx, y, fn, &scr_aa[fx], &scr_cc[fx],
+				(void)((*t->pict_hook)(fx, y, fn, &scr_aa[fx], &scr_cc[fx],
 										  &scr_taa[fx], &scr_tcc[fx]));
 
 				/* Forget */
@@ -738,7 +739,7 @@ static void Term_fresh_row_pict(int y, int x1, int x2)
 	/* Flush */
 	if (fn) {
 		/* Draw pending attr/char pairs */
-		(void)((*Term->pict_hook)(fx, y, fn, &scr_aa[fx], &scr_cc[fx],
+		(void)((*t->pict_hook)(fx, y, fn, &scr_aa[fx], &scr_cc[fx],
 								  &scr_taa[fx], &scr_tcc[fx]));
 	}
 }
@@ -751,19 +752,19 @@ static void Term_fresh_row_pict(int y, int x1, int x2)
  * Display text using "Term_text()" and "Term_wipe()",
  * but use "Term_pict()" for high-bit attr/char pairs
  */
-static void Term_fresh_row_both(int y, int x1, int x2)
+static void Term_fresh_row_both(term *t, int y, int x1, int x2)
 {
 	int x;
 
-	int *old_aa = Term->old->a[y];
-	wchar_t *old_cc = Term->old->c[y];
-	int *scr_aa = Term->scr->a[y];
-	wchar_t *scr_cc = Term->scr->c[y];
+	int *old_aa = t->old->a[y];
+	wchar_t *old_cc = t->old->c[y];
+	int *scr_aa = t->scr->a[y];
+	wchar_t *scr_cc = t->scr->c[y];
 
-	int *old_taa = Term->old->ta[y];
-	wchar_t *old_tcc = Term->old->tc[y];
-	int *scr_taa = Term->scr->ta[y];
-	wchar_t *scr_tcc = Term->scr->tc[y];
+	int *old_taa = t->old->ta[y];
+	wchar_t *old_tcc = t->old->tc[y];
+	int *scr_taa = t->scr->ta[y];
+	wchar_t *scr_tcc = t->scr->tc[y];
 
 	int ota;
 	wchar_t otc;
@@ -771,7 +772,7 @@ static void Term_fresh_row_both(int y, int x1, int x2)
 	wchar_t ntc;
 
 	/* The "always_text" flag */
-	int always_text = Term->always_text;
+	int always_text = t->always_text;
 
 	/* Pending length */
 	int fn = 0;
@@ -780,7 +781,7 @@ static void Term_fresh_row_both(int y, int x1, int x2)
 	int fx = 0;
 
 	/* Pending attr */
-	int fa = Term->attr_blank;
+	int fa = t->attr_blank;
 
 	int oa;
 	wchar_t oc;
@@ -810,9 +811,9 @@ static void Term_fresh_row_both(int y, int x1, int x2)
 			if (fn) {
 				/* Draw pending chars (normal or black) */
 				if (fa || always_text)
-					(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
+					(void)((*t->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
 				else
-					(void)((*Term->wipe_hook)(fx, y, fn));
+					(void)((*t->wipe_hook)(fx, y, fn));
 
 				/* Forget */
 				fn = 0;
@@ -834,9 +835,9 @@ static void Term_fresh_row_both(int y, int x1, int x2)
 			if (fn) {
 				/* Draw pending chars (normal or black) */
 				if (fa || always_text)
-					(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
+					(void)((*t->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
 				else
-					(void)((*Term->wipe_hook)(fx, y, fn));
+					(void)((*t->wipe_hook)(fx, y, fn));
 
 				/* Forget */
 				fn = 0;
@@ -846,7 +847,7 @@ static void Term_fresh_row_both(int y, int x1, int x2)
 			if (na == 255) continue;
 
 			/* Hack -- Draw the special attr/char pair */
-			(void)((*Term->pict_hook)(x, y, 1, &na, &nc, &nta, &ntc));
+			(void)((*t->pict_hook)(x, y, 1, &na, &nc, &nta, &ntc));
 
 			/* Skip */
 			continue;
@@ -858,9 +859,9 @@ static void Term_fresh_row_both(int y, int x1, int x2)
 			if (fn) {
 				/* Draw the pending chars, erase leading spaces */
 				if (fa || always_text)
-					(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
+					(void)((*t->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
 				else
-					(void)((*Term->wipe_hook)(fx, y, fn));
+					(void)((*t->wipe_hook)(fx, y, fn));
 
 				/* Forget */
 				fn = 0;
@@ -878,9 +879,9 @@ static void Term_fresh_row_both(int y, int x1, int x2)
 	if (fn) {
 		/* Draw pending chars (normal or black) */
 		if (fa || always_text)
-			(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
+			(void)((*t->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
 		else
-			(void)((*Term->wipe_hook)(fx, y, fn));
+			(void)((*t->wipe_hook)(fx, y, fn));
 	}
 }
 
@@ -890,18 +891,18 @@ static void Term_fresh_row_both(int y, int x1, int x2)
  *
  * Display text using "Term_text()" and "Term_wipe()"
  */
-static void Term_fresh_row_text(int y, int x1, int x2)
+static void Term_fresh_row_text(term *t, int y, int x1, int x2)
 {
 	int x;
 
-	int *old_aa = Term->old->a[y];
-	wchar_t *old_cc = Term->old->c[y];
+	int *old_aa = t->old->a[y];
+	wchar_t *old_cc = t->old->c[y];
 
-	int *scr_aa = Term->scr->a[y];
-	wchar_t *scr_cc = Term->scr->c[y];
+	int *scr_aa = t->scr->a[y];
+	wchar_t *scr_cc = t->scr->c[y];
 
 	/* The "always_text" flag */
-	int always_text = Term->always_text;
+	int always_text = t->always_text;
 
 	/* Pending length */
 	int fn = 0;
@@ -910,7 +911,7 @@ static void Term_fresh_row_text(int y, int x1, int x2)
 	int fx = 0;
 
 	/* Pending attr */
-	int fa = Term->attr_blank;
+	int fa = t->attr_blank;
 
 	int oa;
 	wchar_t oc;
@@ -935,9 +936,9 @@ static void Term_fresh_row_text(int y, int x1, int x2)
 			if (fn) 	{
 				/* Draw pending chars (normal or black) */
 				if (fa || always_text)
-					(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
+					(void)((*t->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
 				else
-					(void)((*Term->wipe_hook)(fx, y, fn));
+					(void)((*t->wipe_hook)(fx, y, fn));
 
 				/* Forget */
 				fn = 0;
@@ -957,9 +958,9 @@ static void Term_fresh_row_text(int y, int x1, int x2)
 			if (fn) {
 				/* Draw the pending chars, erase leading spaces */
 				if (fa || always_text)
-					(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
+					(void)((*t->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
 				else
-					(void)((*Term->wipe_hook)(fx, y, fn));
+					(void)((*t->wipe_hook)(fx, y, fn));
 
 				/* Forget */
 				fn = 0;
@@ -977,9 +978,9 @@ static void Term_fresh_row_text(int y, int x1, int x2)
 	if (fn) {
 		/* Draw pending chars (normal or black) */
 		if (fa || always_text)
-			(void)((*Term->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
+			(void)((*t->text_hook)(fx, y, fn, fa, &scr_cc[fx]));
 		else
-			(void)((*Term->wipe_hook)(fx, y, fn));
+			(void)((*t->wipe_hook)(fx, y, fn));
 	}
 }
 
@@ -1015,7 +1016,6 @@ byte tile_height = 1;           /* Tile height in units of font height */
  */
 bool bigcurs = false;
 bool smlcurs = true;
-
 
 /**
  * Actually perform all requested changes to the window
@@ -1129,22 +1129,21 @@ bool smlcurs = true;
  * Currently, the use of "Term->icky_corner" and "Term->soft_cursor"
  * together may result in undefined behavior.
  */
-errr Term_fresh(void)
+static errr do_term_fresh(term *t)
 {
 	int x, y;
 
-	int w = Term->wid;
-	int h = Term->hgt;
+	int w = t->wid;
+	int h = t->hgt;
 
-	int y1 = Term->y1;
-	int y2 = Term->y2;
+	int y1 = t->y1;
+	int y2 = t->y2;
 
-	term_win *old = Term->old;
-	term_win *scr = Term->scr;
-
+	term_win *old = t->old;
+	term_win *scr = t->scr;
 
 	/* Do nothing unless "mapped" */
-	if (!Term->mapped_flag) return (1);
+	if (!t->mapped_flag) return (1);
 
 
 	/* Trivial Refresh */
@@ -1153,24 +1152,24 @@ errr Term_fresh(void)
 	    (scr->cv == old->cv) &&
 	    (scr->cx == old->cx) &&
 	    (scr->cy == old->cy) &&
-	    !(Term->total_erase)) {
+	    !(t->total_erase)) {
 		/* Nothing */
 		return (1);
 	}
 
 
 	/* Paranoia -- use "fake" hooks to prevent core dumps */
-	if (!Term->curs_hook) Term->curs_hook = Term_curs_hack;
-	if (!Term->bigcurs_hook) Term->bigcurs_hook = Term->curs_hook;
-	if (!Term->wipe_hook) Term->wipe_hook = Term_wipe_hack;
-	if (!Term->text_hook) Term->text_hook = Term_text_hack;
-	if (!Term->pict_hook) Term->pict_hook = Term_pict_hack;
+	if (!t->curs_hook) t->curs_hook = Term_curs_hack;
+	if (!t->bigcurs_hook) t->bigcurs_hook = t->curs_hook;
+	if (!t->wipe_hook) t->wipe_hook = Term_wipe_hack;
+	if (!t->text_hook) t->text_hook = Term_text_hack;
+	if (!t->pict_hook) t->pict_hook = Term_pict_hack;
 
 
 	/* Handle "total erase" */
-	if (Term->total_erase) {
-		int na = Term->attr_blank;
-		wchar_t nc = Term->char_blank;
+	if (t->total_erase) {
+		int na = t->attr_blank;
+		wchar_t nc = t->char_blank;
 
 		/* Physically erase the entire window */
 		Term_xtra(TERM_XTRA_CLEAR, 0);
@@ -1198,22 +1197,22 @@ errr Term_fresh(void)
 		}
 
 		/* Redraw every row */
-		Term->y1 = y1 = 0;
-		Term->y2 = y2 = h - 1;
+		t->y1 = y1 = 0;
+		t->y2 = y2 = h - 1;
 
 		/* Redraw every column */
 		for (y = 0; y < h; y++) {
-			Term->x1[y] = 0;
-			Term->x2[y] = w - 1;
+			t->x1[y] = 0;
+			t->x2[y] = w - 1;
 		}
 
 		/* Forget "total erase" */
-		Term->total_erase = false;
+		t->total_erase = false;
 	}
 
 
 	/* Cursor update -- Erase old Cursor */
-	if (Term->soft_cursor) {
+	if (t->soft_cursor) {
 		/* Cursor was visible */
 		if (!old->cu && old->cv) {
 			int tx = old->cx;
@@ -1232,14 +1231,14 @@ errr Term_fresh(void)
 			wchar_t stc = scr_tcc[tx];
 
 			/* Graphics, character (fallback or intended), or erase */
-			if (Term->always_pict)
-				(void)((*Term->pict_hook)(tx, ty, 1, &sa, &sc, &sta, &stc));
-			else if (Term->higher_pict && (sa & 0x80))
-				(void)((*Term->pict_hook)(tx, ty, 1, &sa, &sc, &sta, &stc));
-			else if (sa || Term->always_text)
-				(void)((*Term->text_hook)(tx, ty, 1, sa, &sc));
+			if (t->always_pict)
+				(void)((*t->pict_hook)(tx, ty, 1, &sa, &sc, &sta, &stc));
+			else if (t->higher_pict && (sa & 0x80))
+				(void)((*t->pict_hook)(tx, ty, 1, &sa, &sc, &sta, &stc));
+			else if (sa || t->always_text)
+				(void)((*t->text_hook)(tx, ty, 1, sa, &sc));
 			else
-				(void)((*Term->wipe_hook)(tx, ty, 1));
+				(void)((*t->wipe_hook)(tx, ty, 1));
 		}
 	} else {
 		/* Cursor will be invisible */
@@ -1251,65 +1250,64 @@ errr Term_fresh(void)
 	/* Something to update */
 	if (y1 <= y2) {
 		/* Handle "icky corner" */
-		if ((Term->icky_corner) && (y2 >= h - 1) && (Term->x2[h - 1] > w - 2))
-			Term->x2[h - 1] = w - 2;
+		if ((t->icky_corner) && (y2 >= h - 1) && (t->x2[h - 1] > w - 2))
+			t->x2[h - 1] = w - 2;
 
 
 		/* Scan the "modified" rows */
 		for (y = y1; y <= y2; ++y) {
-			int x1 = Term->x1[y];
-			int x2 = Term->x2[y];
+			int x1 = t->x1[y];
+			int x2 = t->x2[y];
 
 			/* Flush each "modified" row */
 			if (x1 <= x2) {
 				/* Use "Term_pict()" - always, sometimes or never */
-				if (Term->always_pict)
+				if (t->always_pict)
 					/* Flush the row */
-					Term_fresh_row_pict(y, x1, x2);
-				else if (Term->higher_pict)
+					Term_fresh_row_pict(t, y, x1, x2);
+				else if (t->higher_pict)
 					/* Flush the row */
-					Term_fresh_row_both(y, x1, x2);
+					Term_fresh_row_both(t, y, x1, x2);
 				else
 					/* Flush the row */
-					Term_fresh_row_text(y, x1, x2);
+					Term_fresh_row_text(t, y, x1, x2);
 
 				/* This row is all done */
-				Term->x1[y] = w;
-				Term->x2[y] = 0;
+				t->x1[y] = w;
+				t->x2[y] = 0;
 
 				/* Hack -- Flush that row (if allowed) */
-				if (!Term->never_frosh) Term_xtra(TERM_XTRA_FROSH, y);
+				if (!t->never_frosh) Term_xtra(TERM_XTRA_FROSH, y);
 			}
 		}
 
 		/* No rows are invalid */
-		Term->y1 = h;
-		Term->y2 = 0;
+		t->y1 = h;
+		t->y2 = 0;
 	}
 
-
 	/* Cursor update -- Show new Cursor */
-	if (Term->soft_cursor) {
+	if (t->soft_cursor) {
 		/* Draw the (large or small) cursor */
 		if (!scr->cu && scr->cv) {
 			if ((((tile_width > 1)||(tile_height > 1)) &&
-			     (!smlcurs) && (Term->saved == 0) && (scr->cy > 0))
+			     (!smlcurs) && (t->saved == 0) && (scr->cy > 0))
 			    || bigcurs)
-				(void)((*Term->bigcurs_hook)(scr->cx, scr->cy));
+				(void)((*t->bigcurs_hook)(scr->cx, scr->cy));
 			else
-				(void)((*Term->curs_hook)(scr->cx, scr->cy));
+				(void)((*t->curs_hook)(scr->cx, scr->cy));
 		}
 	} else {
 		/* The cursor is useless or invisible ignore it, otherwise display */
 		if (scr->cu) {
 			/* Paranoia -- Put the cursor NEAR where it belongs */
-			(void)((*Term->curs_hook)(w - 1, scr->cy));
+			(void)((*t->curs_hook)(w - 1, scr->cy));
 		} else if (!scr->cv) {
 			/* Paranoia -- Put the cursor where it belongs */
-			(void)((*Term->curs_hook)(scr->cx, scr->cy));
+			(void)((*t->curs_hook)(scr->cx, scr->cy));
 		} else {
 			/* Put the cursor where it belongs */
-			(void)((*Term->curs_hook)(scr->cx, scr->cy));
+			(void)((*t->curs_hook)(scr->cx, scr->cy));
 
 			/* Make the cursor visible */
 			Term_xtra(TERM_XTRA_SHAPE, 1);
@@ -1330,7 +1328,14 @@ errr Term_fresh(void)
 	return (0);
 }
 
+ errr Term_fresh(void)
+ {
+ 	if (Term == angband_term[0]) {
+ 		do_term_fresh(&cave_view_term);
+ 	}
 
+ 	return do_term_fresh(Term);
+ }
 
 /**
  * ------------------------------------------------------------------------

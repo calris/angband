@@ -123,6 +123,7 @@ struct x11_tileset tileset;
 
 #include "main.h"
 
+
 /*
  * Default fonts (when using X11).
  */
@@ -532,8 +533,6 @@ static errr term_data_init(struct term *t, int i)
 
 	struct x11_term_data *td = mem_zalloc(sizeof(struct x11_term_data));
 
-	t->data = (void *)td;
-
 	/* Get default font for this term */
 	font = get_default_font(i);
 
@@ -887,10 +886,9 @@ static errr term_data_init(struct term *t, int i)
 	/* Differentiate between BS/^h, Tab/^i, etc. */
 	t->complex_input = true;
 
-	x11_term_install_hooks(t);
+	x11_term_install_hooks(t, false);
 
-	/* Save the data */
-	t->data = td;
+	t->data = (void *)td;
 
 	/* Activate (important) */
 	Term_activate(t);
@@ -898,6 +896,41 @@ static errr term_data_init(struct term *t, int i)
 	/* Success */
 	return 0;
 }
+
+#define X11_TERM_0_DATA			((struct x11_term_data *)angband_term[0]->data)
+
+/**
+ * Initialize the special 'cave' term
+ */
+static void cave_view_term_init(void)
+{
+	int cols = 80;
+	int rows = 24;
+
+	struct x11_term_data *td = mem_zalloc(sizeof(struct x11_term_data));
+
+	/*
+	 * tile size needs to be set when we load a tileset - for now just
+	 * use the main term's tile size (i.e. the main term's font size)
+	 */
+	if (!X11_TERM_0_DATA) {
+		plog("X11_TERM_0_DATA is NULL");
+	}
+	td->tile_width = X11_TERM_0_DATA->tile_width;
+	td->tile_width2 = X11_TERM_0_DATA->tile_width2;
+	td->tile_height = X11_TERM_0_DATA->tile_height;
+
+	/* Initialize the term */
+	term_init(&cave_view_term, cols, rows, 1);
+
+	/* Erase with "white space" */
+	cave_view_term.attr_blank = COLOUR_WHITE;
+	cave_view_term.char_blank = ' ';
+	cave_view_term.data = (void *)td;
+
+	x11_term_install_hooks(&cave_view_term, true);
+}
+
 
 const char help_x11[] = "Basic X11, subopts -d<display> -n<windows> -x<file>";
 
@@ -1134,6 +1167,9 @@ errr init_x11(int argc, char **argv)
 		/* Initialize the term_data */
 		term_data_init(angband_term[i], i);
 	}
+
+	/* Initialise the cave view virtual terminal */
+	cave_view_term_init();
 
 	/* Raise the "Angband" window */
 	x11_window_raise(((struct x11_term_data *)angband_term[0]->data));
