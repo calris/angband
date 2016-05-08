@@ -78,6 +78,7 @@ WINMAINFILES = \
 		win/win-layout.o
 
 X11MAINFILES = main-x11.o \
+	x11-term.o \
 	x11-util.o \
 	x11-png.o
 

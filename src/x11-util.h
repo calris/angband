@@ -157,10 +157,10 @@ void x11_pixel_to_square(struct x11_term_data *td, int *x, int *y);
 int x11_draw_curs(struct x11_term_data *td, int x, int y);
 int x11_draw_bigcurs(struct x11_term_data *td, int x, int y);
 
-int x11_display_init(const char *name);
-int x11_display_nuke(void);
-int x11_display_update(int flush, int sync, int discard);
-int x11_display_do_beep(void);
+bool x11_display_init(const char *name);
+void x11_display_nuke(void);
+void x11_display_update(int flush, int sync, int discard);
+void x11_display_do_beep(void);
 bool x11_display_is_color(void);
 bool x11_display_mask_control(XKeyEvent *ev);
 bool x11_display_mask_shift(XKeyEvent *ev);
@@ -174,14 +174,14 @@ unsigned long x11_visual_red_mask(void);
 unsigned long x11_visual_green_mask(void);
 unsigned long x11_visual_blue_mask(void);
 
-int x11_window_init(struct x11_term_data *td,
-					int x,
-					int y,
-					int w,
-					int h,
-					int b);
-int x11_window_nuke(struct x11_term_data *td);
-int x11_window_set_border(struct x11_term_data *td, s16b ox, s16b oy);
+bool x11_window_init(struct x11_term_data *td,
+					 int x,
+					 int y,
+					 int w,
+					 int h,
+					 int b);
+void x11_window_nuke(struct x11_term_data *td);
+void x11_window_set_border(struct x11_term_data *td, s16b ox, s16b oy);
 int x11_window_set_name(struct x11_term_data *td, const char *name);
 int x11_window_set_mask(struct x11_term_data *td, long mask);
 int x11_window_map(struct x11_term_data *td);
@@ -192,32 +192,32 @@ int x11_window_move(struct x11_term_data *td, int x, int y);
 int x11_window_resize(struct x11_term_data *td, int w, int h);
 int x11_window_wipe(struct x11_term_data *td);
 
-int x11_color_init(struct x11_color *iclr,
-				   pixell fg,
-				   pixell bg,
-				   enum x11_function f,
-				   int stip);
-int x11_color_nuke(struct x11_color *iclr);
-int x11_color_change_fg(struct x11_color *iclr, pixell fg);
+bool x11_color_init(int i,
+					pixell fg,
+					pixell bg,
+					enum x11_function f,
+					int stip);
+void x11_color_nuke(int i);
+bool x11_color_change_fg(int i, pixell fg);
 bool x11_color_allocate(XColor *color);
 
-int x11_font_init(struct x11_font *ifnt, const char *name);
-int x11_font_nuke(struct x11_font *ifnt);
+bool x11_font_init(struct x11_font *ifnt, const char *name);
+void x11_font_nuke(struct x11_font *ifnt);
 
-int x11_font_text_std(struct x11_term_data *td,
-					  struct x11_color *fg_col,
-					  struct x11_color *bg_col,
-					  int x,
-					  int y,
-					  const wchar_t *str,
-					  int len);
+bool x11_font_text_std(struct x11_term_data *td,
+					   int fg_col,
+					   int bg_col,
+					   int x,
+					   int y,
+					   const wchar_t *str,
+					   int len);
 
-int x11_font_text_non(struct x11_term_data *td,
-					  struct x11_color *iclr,
-					  int x,
-					  int y,
-					  const wchar_t *str,
-					  int len);
+bool x11_font_text_non(struct x11_term_data *td,
+					   int iclr,
+					   int x,
+					   int y,
+					   const wchar_t *str,
+					   int len);
 
 int x11_event_get(XEvent *xev, bool wait, void (*idle_update)(void));
 
