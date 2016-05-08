@@ -1001,6 +1001,12 @@ bool x11_draw_tile(struct x11_term_data *td,
 				   unsigned int width,
 				   unsigned int height)
 {
+	/* Do not draw anything that will go out of window bounds */
+	if (((dest_x + width) > td->win->x) ||
+		((dest_y + height) > td->win->y)) {
+		return false;
+	}
+
 	XPutImage(x11_display.display,
 			  td->win->handle,
 			  td->win->gc,

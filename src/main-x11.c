@@ -179,7 +179,8 @@ static int term_windows_open;
 
 
 
-#define X11_TERM_DATA			  ((struct x11_term_data *)Term->data)
+#define X11_TERM_DATA			((struct x11_term_data *)Term->data)
+#define X11_TERM_0_DATA			((struct x11_term_data *)angband_term[0]->data)
 
 /**
  * Hack -- Convert an RGB value to an X11 Pixel, or die.
@@ -890,6 +891,18 @@ static errr x11_term_xtra_react(void)
 		} else {
 			use_graphics = arg_graphics;
 
+			/* TODO: Horrible hack */
+			if (!X11_TERM_0_DATA) {
+				plog("No Term 0 Data");
+			}
+
+			plog_fmt("");
+
+			X11_TERM_0_DATA->tile_height = tileset.tile_height;
+			X11_TERM_0_DATA->tile_width = tileset.tile_width;
+			X11_TERM_0_DATA->tile_width2 = tileset.tile_width;
+
+
 			/* Reset visuals */
 			reset_visuals(true);
 		}
@@ -947,19 +960,20 @@ static bool init_graphics(void)
 	/* Access the bitmap file */
 	path_build(buf, sizeof(buf), tileset.path, tileset.name);
 
+	png_image = x11_png_image_init();
+
+	if (!png_image) {
+		arg_graphics = 0;
+		use_graphics = 0;
+	}
+
 	/* Load the image or quit */
 	if (tileset.alphablend) {
 			char modname[1024];
 			my_strcpy(modname, buf,1024);
 
 			plog_fmt("Load alphablend tileset from: %s", buf);
-			/* TODO: Load PNG File */
-	} else {
-		plog_fmt("Load non-alphablend tileset from: %s", buf);
 
-		png_image = x11_png_image_init();
-
-		if (png_image) {
 			if (x11_png_image_load(png_image, buf)) {
 				plog_fmt("Successfuly loaded tileset");
 			}
@@ -969,7 +983,17 @@ static bool init_graphics(void)
 			if (tileset.ximage) {
 				plog_fmt("Successfuly converted tiles to ximage");
 			}
+	} else {
+		plog_fmt("Load non-alphablend tileset from: %s", buf);
 
+		if (x11_png_image_load(png_image, buf)) {
+			plog_fmt("Successfuly loaded tileset");
+		}
+
+		tileset.ximage = x11_png_create_ximage(png_image);
+
+		if (tileset.ximage) {
+			plog_fmt("Successfuly converted tiles to ximage");
 		}
 	}
 
